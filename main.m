@@ -227,8 +227,8 @@ if to_plot
         hold on
         for k = 1:size(filtered_evoked_sz{i}{evoked_sz_to_plot(j)},2)
         plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
-            filtered_evoked_sz{i}{evoked_sz_to_plot(j)}(1+(evoked_stim_length(evoked_sz_to_plot(j)))*fs_Neuronexus:...
-            (evoked_stim_length(evoked_sz_to_plot(j))+t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)+(k-1)*1,'Color','k')
+            filtered_evoked_sz{i}{evoked_sz_to_plot(j)}(1+(evoked_stim_length(evoked_sz_to_plot(j))-t_before_Neuronexus)*fs_Neuronexus:...
+            (evoked_stim_length(evoked_sz_to_plot(j))+plot_duration)*fs_Neuronexus,k)+(k-1)*1,'Color','k')
         end
         hold off
         ylim([-1,k])
@@ -557,3 +557,45 @@ for seizure = 1:length(norm_Area_evoked)
     indexed_k_means(seizure,3) = kmeans_tot - indexed_k_means(seizure,1) - indexed_k_means(seizure,2); 
 end
 indexed_k_means = round(indexed_k_means);
+
+%% Array of Experimental Parameter
+load('Experimental_Parameters.mat')
+
+if to_plot
+
+colormap('jet')
+% Red Epileptic Blue Non Epileptic
+scatter(table2array(ExperimentalParameterList(:,11)),...
+    table2array(ExperimentalParameterList(:,12)),[],table2array(ExperimentalParameterList(:,3)),'filled')
+xlabel('Laser Power')
+ylabel('Minimum Duration')
+
+% Red Ketamine Blue Isoflurane
+scatter(table2array(ExperimentalParameterList(:,11)),...
+    table2array(ExperimentalParameterList(:,12)),[],table2array(ExperimentalParameterList(:,8)),'filled')
+xlabel('Laser Power')
+ylabel('Minimum Duration')
+
+clear M_or_F 
+for count = 1:size(ExperimentalParameterList,1)
+    if table2array(ExperimentalParameterList(count,5))=='M'
+        M_or_F(count) = 0;
+    else
+        M_or_F(count) = 1;
+    end
+end
+
+% Red Female Blue Male
+scatter(table2array(ExperimentalParameterList(:,11)),...
+table2array(ExperimentalParameterList(:,12)),[],M_or_F,'filled')
+xlabel('Laser Power')
+ylabel('Minimum Duration')
+
+% Red Old Blue Young
+scatter(table2array(ExperimentalParameterList(:,11)),...
+    table2array(ExperimentalParameterList(:,12)),[],...
+    table2array(ExperimentalParameterList(:,4))./ max(table2array(ExperimentalParameterList(:,4))),'filled')
+xlabel('Laser Power')
+ylabel('Minimum Duration')
+
+end

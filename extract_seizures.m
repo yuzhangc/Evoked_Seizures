@@ -37,8 +37,8 @@ if type == 1
 % All Newly Collected Data
 elseif type == 2
     
-    filelist = dir(path_full);
-    for count = 3:length(filelist)
+    filelist = dir(strcat(path_full,'*.rhd'));
+    for count = 1:length(filelist)
         [board_adc_data,amplifier_data] = modded_read_Intan_RHD2000_file(filelist(count).name,path_full);
         clear amplifier_channels ans aux_input_channels board_adc_channels filename frequency_parameters
         clear notes path spike_triggers supply_voltage_channels supply_voltage_data t_amplifier t_aux_input
@@ -46,14 +46,14 @@ elseif type == 2
 
         % Finds Onset of Blue Light
         stim_start = find(board_adc_data(1,:) > 3,1) - t_before * fs;
-        output_data{count - 2} = amplifier_data(:,stim_start:stim_start+t_after*fs)';
+        output_data{count} = amplifier_data(:,stim_start:stim_start+t_before*fs+t_after*fs-1)';
     end
     
 % Data Collected From Early Trials
 elseif type == 3
     
-        filelist = dir(path_full);
-        for count = 3:length(filelist)
+        filelist = dir(strcat(path_full,'*.rhd'));
+        for count = 1:length(filelist)
             [board_adc_data,amplifier_data] = modded_read_Intan_RHD2000_file(filelist(count).name,path_full);
             clear amplifier_channels ans aux_input_channels board_adc_channels filename frequency_parameters
             clear notes path spike_triggers supply_voltage_channels supply_voltage_data t_amplifier t_aux_input
@@ -61,7 +61,7 @@ elseif type == 3
 
             % Finds Onset of Blue Light
             stim_start = find(board_adc_data(2,:) > 3,1) - t_before * fs;
-            output_data{count - 2} = amplifier_data(:,stim_start:stim_start+t_after*fs)';
+            output_data{count} = amplifier_data(:,stim_start:stim_start+t_before*fs+t_after*fs-1)';
         end
     
 end
