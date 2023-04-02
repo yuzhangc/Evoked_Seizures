@@ -3,9 +3,9 @@ clear all
 
 directory = 'D:\';
 % Do I need to extract data? If so first_run should equal 1
-first_run = 0;
+first_run = 1;
 % Is data filtered? If not (0), should filter.
-filtered = 1;
+filtered = 0;
 % Downsample should be always set to true, otherwise filtering takes eons.
 to_downsample = 1;
 % Filter Sets
@@ -130,10 +130,10 @@ if not(filtered)
     % comparison across different animals)
     
     % Normalizes Evoked Seizures to Max Amplitude
-    evoked_sz = normalize_to_max_amp(evoked_sz,[]);
+    evoked_sz = normalize_to_max_amp(evoked_sz,[],fs_Neuronexus);
     
     % Normalizes Spontaneous Seizures to Max Amplitude
-    spont_sz = normalize_to_max_amp(spont_sz,[]);
+    spont_sz = normalize_to_max_amp(spont_sz,[],fs_EEG);
         
     if to_plot
         for i = 1:length(evoked_sz)
