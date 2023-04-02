@@ -22,8 +22,11 @@ to_plot = 1;
 plot_duration = 55;
 % How many plots to plot
 num_to_plot = 2;
-% Seizures to Plot. If null, randomly chooses
+% Folders to Plot. Write Normal (Visually Seeable Folder, Not 3 for First
+% Folder)
 folders_to_plot = [1,2,5,7];
+% Seizures to Plot. If null, randomly chooses
+% Row (Folders to Plot by Num to Plot)
 evoked_sz_to_plot = [];
 
 % Subfolder Lists
@@ -37,6 +40,23 @@ subFolders = complete_list(dirFlags);
 
 % Frequency of EEG Files
 fs_EEG = 2000;
+
+% Spectrogram
+t_res = 0.5;
+freq_limits =[1 300];
+overlap_per = 50;
+% Colorbar Limits on Spectrogram
+colorbarlim_evoked = [-30,-0];
+
+% Spectral Density
+% How much after 'seizure start' do I want to move the beginning of the
+% window to?
+Nx_window_modifier = 0;
+% Window of Spectral Density (Sec)
+t_win = 5;
+% Window For Feature Calculation (Sec)
+winLen = t_res;
+winDisp = t_res*overlap_per/100;
 
 %% Data Extraction and Standardization
 
@@ -165,5 +185,159 @@ clear i j k folder_num
 %% Plot Normalized to 1 (Of the Z Score Plots)
 
 if isempty(evoked_sz_to_plot) 
-    evoked_sz_to_plot = randperm(length(filtered_evoked_sz{1}),num_to_plot);
+    generate_random = 1;
+else
+    generate_random = 0;
 end
+
+for folder_num = 1:length(folders_to_plot)
+    
+% Loads Files
+path_evoked = strcat(path_EEG,subFolders(folders_to_plot(folder_num)+2).name,'\');
+load([path_evoked,'Filtered Seizure Data.mat']);
+
+% Determine Which Seizures To Plot. If Null, Random
+if generate_random 
+    sz_to_plot = randperm(length(filtered_evoked_sz{1}),num_to_plot);
+    evoked_sz_to_plot(folder_num,:) = sz_to_plot;
+% Assume Plot Same Seizures For All
+elseif size(evoked_sz_to_plot,1) == 1
+    sz_to_plot = evoked_sz_to_plot;
+% Specific Seizures Per Plot
+else
+    sz_to_plot = evoked_sz_to_plot(folder_num,:);
+end
+
+if to_plot
+% Normalizes
+for j = 1:num_to_plot 
+    figure;
+    for i = 1:size(filter_set,1)
+        norm_factor = max(abs(evoked_sz{sz_to_plot(j)}));
+        for k = 1:size(filtered_evoked_sz{i}{sz_to_plot(j)},2)
+        subplot(size(filter_set,1),1,i)
+        hold on
+        plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+            filtered_evoked_sz{i}{sz_to_plot(j)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+            ./norm_factor(k)+(k-1)*1,'Color','k')
+        title([subFolders(folders_to_plot(folder_num)+2).name,' Seizure # ',num2str(sz_to_plot(j)),...
+            ' (', num2str(filter_set(i,1)),'Hz and ', num2str(filter_set(i,2)),'Hz bands)'])
+        end
+        hold off
+        ylim([-1,k])
+        xlabel('Time (sec)')
+    end
+end
+end
+
+end
+
+clear evoked_sz evoked_stim_length delay_length second_stim_length evoked_sz
+clear fs_Neuronexus fs_EEG t_after t_before_Neuronexus filter_set filtered_evoked_sz
+clear i j k folder_num norm_factor
+
+%% Spectrogram for All Channels for Selected Seizures
+
+if to_plot
+    
+    if isempty(evoked_sz_to_plot) 
+        generate_random = 1;
+    else
+        generate_random = 0;
+    end
+
+    for folder_num = 1:length(folders_to_plot)
+        % Loads Files
+        path_evoked = strcat(path_EEG,subFolders(folders_to_plot(folder_num)+2).name,'\');
+        load([path_evoked,'Filtered Seizure Data.mat']);
+
+        % Determine Which Seizures To Plot. If Null, Random
+        if generate_random 
+            sz_to_plot = randperm(length(filtered_evoked_sz{1}),num_to_plot);
+            evoked_sz_to_plot(folder_num,:) = sz_to_plot;
+        % Assume Plot Same Seizures For All
+        elseif size(evoked_sz_to_plot,1) == 1
+            sz_to_plot = evoked_sz_to_plot;
+        % Specific Seizures Per Plot
+        else
+            sz_to_plot = evoked_sz_to_plot(folder_num,:);
+        end
+        
+        for j = 1:num_to_plot
+        figure
+        hold on
+        for k = 1:size(evoked_sz{sz_to_plot(j)},2)
+        subplot(size(evoked_sz{sz_to_plot(j)},2),1,k)
+        pspectrum(evoked_sz{sz_to_plot(j)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        ylabel(['Ch ',num2str(k),' Hz']);
+        if k == 1
+            title([subFolders(folders_to_plot(folder_num)+2).name, ' Seizure #',num2str(sz_to_plot(j))])
+        else
+            title('')
+        end
+        if k == size(evoked_sz{sz_to_plot(j)},2)
+        else
+            xlabel('')
+        end
+        caxis(colorbarlim_evoked)
+        colorbar('hide')
+        end
+        end
+    end
+end
+
+clear evoked_sz evoked_stim_length delay_length second_stim_length evoked_sz
+clear fs_Neuronexus fs_EEG t_after t_before_Neuronexus filter_set filtered_evoked_sz
+clear i j k folder_num
+
+%% Welch Frequency Distribution for All Channels for Selected Seizures
+
+if to_plot
+    
+    if isempty(evoked_sz_to_plot) 
+        generate_random = 1;
+    else
+        generate_random = 0;
+    end
+
+    for folder_num = 1:length(folders_to_plot)
+        % Loads Files
+        path_evoked = strcat(path_EEG,subFolders(folders_to_plot(folder_num)+2).name,'\');
+        load([path_evoked,'Filtered Seizure Data.mat']);
+
+        % Determine Which Seizures To Plot. If Null, Random
+        if generate_random 
+            sz_to_plot = randperm(length(filtered_evoked_sz{1}),num_to_plot);
+            evoked_sz_to_plot(folder_num,:) = sz_to_plot;
+        % Assume Plot Same Seizures For All
+        elseif size(evoked_sz_to_plot,1) == 1
+            sz_to_plot = evoked_sz_to_plot;
+        % Specific Seizures Per Plot
+        else
+            sz_to_plot = evoked_sz_to_plot(folder_num,:);
+        end
+        
+        for j = 1:num_to_plot
+        figure
+        hold on
+        for k = 1:size(evoked_sz{sz_to_plot(j)},2)
+        [pxx,f] = pwelch(evoked_sz{sz_to_plot(j)}(1+(Nx_window_modifier+t_before_Neuronexus+evoked_stim_length(sz_to_plot(j)))*fs_Neuronexus:...
+        (evoked_stim_length(sz_to_plot(j))+Nx_window_modifier+t_before_Neuronexus+t_win)*fs_Neuronexus,k),500,300,500,fs_Neuronexus);
+        plot(f,10*log10(pxx),'LineWidth',2)
+        end
+        title([subFolders(folders_to_plot(folder_num)+2).name, ' Seizure #',num2str(sz_to_plot(j))])
+        xlim([0,300])
+        xlabel('Frequency Hz')
+        ylabel('Power/Frequency dB/Hz')
+        end
+     
+    end
+end
+
+clear evoked_sz evoked_stim_length delay_length second_stim_length evoked_sz
+clear fs_Neuronexus fs_EEG t_after t_before_Neuronexus filter_set filtered_evoked_sz
+clear i j k folder_num
+
+%%
+       
