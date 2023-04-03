@@ -16,7 +16,7 @@ filter_set = [1 30; 30 300;300 2000];
 normalized = 1;
 
 % Do I want to plot data?
-to_plot = 1;
+to_plot = 0;
 % Plot Duration for Raw and Filtered Data (not for verifying filtering but
 % for visualization)
 plot_duration = 55;
@@ -431,7 +431,7 @@ clear i j k folder_num temp_bp_calc norm_temp_bp_calc bp_calc_spont bp_calc_evok
 
 %% K Means Separation
 
-clear total_output_evoked
+clear total_output_evoked k_means_classes_optimal Kmeans_Mdl
 
 % Standardization
 rng(1)
@@ -455,8 +455,23 @@ for folder_num = 3:length(subFolders)
     
     total_output_evoked{folder_num-2} = Output_Array_evoked;
     
+    % K Means Model
     k_means_evoked(:,seizure) = kmeans(Output_Array_evoked{seizure},k_means_classes);
+    Kmeans_Mdl{folder_num-2}{seizure} = fitcknn(Output_Array_evoked{seizure},k_means_evoked(:,seizure));
     [pca_coeff_evoked{seizure},pca_scores_evoked{seizure}] = pca(Output_Array_evoked{seizure}');
+    
+    % GMM Models
+    AIC = zeros(1,k_means_classes);
+    GMModels = cell(1,4);
+
+    for k = 1:k_means_classes
+        GMModels{k} = fitgmdist(Output_Array_evoked{seizure},k,'CovarianceType','diagonal',...
+            'MaxIter',100,'RegularizationValue',0.1);
+        AIC(k)= GMModels{k}.AIC;
+    end
+
+    [minAIC,numComponents] = min(AIC);
+    k_means_classes_optimal(folder_num-2,seizure) = numComponents;
     
     if to_plot
         % PCA
@@ -473,9 +488,9 @@ for folder_num = 3:length(subFolders)
         % k = Each Channel
         hold on
         for k = 1:size(evoked_sz{seizure},2)
-        norm_factor = max(abs(evoked_sz{k}));
+        norm_factor = max(abs(evoked_sz{seizure}));
         plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
-            evoked_sz{seizure}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)./norm_factor+(k-1)*1,'Color','k')
+            evoked_sz{seizure}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)./norm_factor(k)+(k-1)*1,'Color','k')
         end
         xaxis = winDisp:winDisp:(plot_duration+t_before_Neuronexus);
         scatter(xaxis,ones(1,length(xaxis))*k,[],Colorset_plot(k_means_evoked(1:length(xaxis),seizure),:))
