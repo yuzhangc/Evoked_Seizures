@@ -58,6 +58,9 @@ t_win = 5;
 winLen = t_res;
 winDisp = t_res*overlap_per/100;
 
+% K Means
+k_means_classes = 4;
+
 %% Data Extraction and Standardization
 
 if first_run
@@ -426,4 +429,63 @@ clear evoked_sz evoked_stim_length delay_length second_stim_length evoked_sz
 clear fs_Neuronexus fs_EEG t_after t_before_Neuronexus filter_set filtered_evoked_sz
 clear i j k folder_num temp_bp_calc norm_temp_bp_calc bp_calc_spont bp_calc_evoked
 
-%%
+%% K Means Separation
+
+clear total_output_evoked
+
+% Standardization
+rng(1)
+Colorset_plot = cbrewer('qual','Set1',k_means_classes);
+Colorset_plot(Colorset_plot>1) = 1;
+Colorset_plot(Colorset_plot<0) = 0;
+
+for folder_num = 3:length(subFolders)
+        
+    path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
+    load([path_evoked,'Normalized Features.mat']);
+    load([path_evoked,'Filtered Seizure Data.mat']);
+    
+    Output_Array_evoked = [];
+    for seizure = 1:length(norm_Area_evoked)
+    Output_Array_evoked{seizure} = [norm_Area_evoked{seizure}, norm_Energy_evoked{seizure}, norm_LLFn_evoked{seizure},...
+        norm_Zero_Crossing_evoked{seizure}];
+    for bandpower_set = 1:length(norm_bp_calc_evoked)
+        Output_Array_evoked{seizure} = [Output_Array_evoked{seizure},norm_bp_calc_evoked{bandpower_set}{seizure}];
+    end
+    
+    total_output_evoked{folder_num-2} = Output_Array_evoked;
+    
+    k_means_evoked(:,seizure) = kmeans(Output_Array_evoked{seizure},k_means_classes);
+    [pca_coeff_evoked{seizure},pca_scores_evoked{seizure}] = pca(Output_Array_evoked{seizure}');
+    
+    if to_plot
+        % PCA
+        figure
+        scatter3(pca_coeff_evoked{seizure}(:,1),pca_coeff_evoked{seizure}(:,2),pca_coeff_evoked{seizure}(:,3),...
+            [],Colorset_plot(k_means_evoked(:,seizure),:),'filled')
+        xlabel('Principal Component 1')
+        ylabel('Principal Component 2')
+        zlabel('Principal Component 3')
+        title([subFolders(folder_num).name, ' Seizure ', num2str(seizure)]);
+
+        % K Means Over Time
+        figure;
+        % k = Each Channel
+        hold on
+        for k = 1:size(evoked_sz{seizure},2)
+        norm_factor = max(abs(evoked_sz{k}));
+        plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+            evoked_sz{seizure}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)./norm_factor+(k-1)*1,'Color','k')
+        end
+        xaxis = winDisp:winDisp:(plot_duration+t_before_Neuronexus);
+        scatter(xaxis,ones(1,length(xaxis))*k,[],Colorset_plot(k_means_evoked(1:length(xaxis),seizure),:))
+        ylim([-1,k+1])
+        hold off
+        title([subFolders(folder_num).name, ' Seizure ',num2str(seizure)])
+    end
+    end
+    
+    clear norm_LLFn_evoked norm_Area_evoked norm_Energy_evoked norm_Zero_Crossing_evoked norm_bp_calc_evoked
+    clear evoked_sz evoked_stim_length delay_length second_stim_length evoked_sz norm_factor
+    clear fs_Neuronexus fs_EEG t_after t_before_Neuronexus filter_set filtered_evoked_sz i j k
+end
