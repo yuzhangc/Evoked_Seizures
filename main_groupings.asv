@@ -509,7 +509,7 @@ end
 
 clear paired_output_evoked paired_Kmeans_Mdl k_means_evoked
 
-pairings = [5 8 6 9 7 2; 5 5 6 5 7 1; 1 5 2 4 2 2];
+pairings = [ 2 4 1 5 2 2];
 
 for row = 1:size(pairings,1)
 for folder_num = 1:size(pairings,2)/2
@@ -535,10 +535,10 @@ end
 
 for row = 1:size(pairings,1)
 
-k_means_sanity_check = predict(paired_Kmeans_Mdl{row,1},paired_output_evoked{row,1});
-sum(k_means_sanity_check == k_means_evoked{row,1})==length(k_means_sanity_check)
-k_means_pred_1 = predict(paired_Kmeans_Mdl{row,1},paired_output_evoked{row,2});
-k_means_pred_3 = predict(paired_Kmeans_Mdl{row,1},paired_output_evoked{row,3});
+k_means_sanity_check = predict(paired_Kmeans_Mdl{row,2},paired_output_evoked{row,2});
+sum(k_means_sanity_check == k_means_evoked{row,2})==length(k_means_sanity_check)
+k_means_pred_1 = predict(paired_Kmeans_Mdl{row,2},paired_output_evoked{row,1});
+k_means_pred_3 = predict(paired_Kmeans_Mdl{row,2},paired_output_evoked{row,3});
 
 if to_plot
     
@@ -547,15 +547,15 @@ hold on
 for k = 1:size(pairings,2)/2
 norm_factor = max(abs(plot_sz{row,k}));
 plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
-plot_sz{row,k}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)./norm_factor(k)+6-2*k,'Color','k')
+plot_sz{row,k}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)./norm_factor(k)+2*k,'Color','k')
 end
 xaxis = winDisp:winDisp:(plot_duration+t_before_Neuronexus);
-scatter(xaxis,ones(1,length(xaxis))*5,[],Colorset_plot(k_means_sanity_check(1:length(xaxis)),:),'filled')
-scatter(xaxis,ones(1,length(xaxis))*3,[],Colorset_plot(k_means_pred_1(1:length(xaxis)),:),'filled')
-scatter(xaxis,ones(1,length(xaxis))*1,[],Colorset_plot(k_means_pred_3(1:length(xaxis)),:),'filled')
+scatter(xaxis,ones(1,length(xaxis))*1,[],Colorset_plot(k_means_pred_1(1:length(xaxis)),:),'filled')
+scatter(xaxis,ones(1,length(xaxis))*3,[],Colorset_plot(k_means_sanity_check(1:length(xaxis)),:),'filled')
+scatter(xaxis,ones(1,length(xaxis))*5,[],Colorset_plot(k_means_pred_3(1:length(xaxis)),:),'filled')
 xlabel('Time (sec)')
 hold off
-title(subFolders(pairings(row,2)+2).name, ' Seizures')
+title(subFolders(pairings(row,1)+2).name, ' Seizures')
 end
 
 end
