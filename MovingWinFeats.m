@@ -1,4 +1,4 @@
-function featval = MovingWinFeats  (x, fs, winLen, winDisp, featFn)
+function featval = MovingWinFeats  (x, fs, winLen, winDisp, featFn, varargs)
 
 % MovingWinFeats - Calculates Features Across a Moving Window
 % Output
@@ -22,8 +22,14 @@ for ch = 1:size(x,2)
     winend = winLen * fs;
     for winnum = 1:NumWins
         window = x(winst:winend,ch);
+        if isempty(varargs)
         featval(winnum,ch) = featFn(window);
-
+        elseif length(varargs) == length(x)
+            window2 = varargs(winst:winend,ch);
+            featval(winnum,:) = featFn(window,window2);
+        else
+        featval(winnum,ch) = featFn(window,varargs);
+        end
         winst = winst + winDisp * fs;
         winend = winst - 1 + winLen * fs;
     end

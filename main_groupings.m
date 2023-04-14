@@ -41,6 +41,9 @@ subFolders = complete_list(dirFlags);
 % Frequency of EEG Files
 fs_EEG = 2000;
 
+% Coherence Channels
+ch_coher = [3 4];
+
 % Spectrogram
 t_res = 0.5;
 freq_limits =[1 300];
@@ -364,7 +367,7 @@ for folder_num = 3:length(subFolders)
     temp_bp_calc = [];
     norm_temp_bp_calc = [];
     for j = 1:length(evoked_sz)
-        temp_bp_calc{j}=MovingWinFeats(filtered_evoked_sz{i}{j}, fs_Neuronexus, winLen, winDisp, @bandpower);
+        temp_bp_calc{j}=MovingWinFeats(filtered_evoked_sz{i}{j}, fs_Neuronexus, winLen, winDisp, @bandpower,[]);
         norm_temp_bp_calc{j} = (temp_bp_calc{j} - mean(temp_bp_calc{j}))./std(temp_bp_calc{j});
     end
     bp_calc_evoked{i} = temp_bp_calc;
@@ -372,40 +375,112 @@ for folder_num = 3:length(subFolders)
     end
 
     for j = 1:length(evoked_sz)
+        % RMS Mean
+        RMS_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, @rms,[]);
+        norm_RMS_evoked{j} = (RMS_evoked{j} - mean(RMS_evoked{j}))./std(RMS_evoked{j});
+        % Skewness
+        Skew_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, @skewness,[]);
+        norm_Skew_evoked{j} = (Skew_evoked{j} - mean(Skew_evoked{j}))./std(Skew_evoked{j});
+        % Approximate Entropy
+        AEntropy_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, @approximateEntropy,[]);
+        norm_AEntropy_evoked{j} = (AEntropy_evoked{j} - mean(AEntropy_evoked{j}))./std(AEntropy_evoked{j});
         % Line Length
-        LLFn_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, LLFn);
+        LLFn_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, LLFn,[]);
         norm_LLFn_evoked{j} = (LLFn_evoked{j} - mean(LLFn_evoked{j}))./std(LLFn_evoked{j});
         % Area
-        Area_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, Area);
+        Area_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, Area,[]);
         norm_Area_evoked{j} = (Area_evoked{j} - mean(Area_evoked{j}))./std(Area_evoked{j});
         % Energy
-        Energy_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, Energy);
+        Energy_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, Energy,[]);
         norm_Energy_evoked{j} = (Energy_evoked{j} - mean(Energy_evoked{j}))./std(Energy_evoked{j});
         % Zero Crossing
-        Zero_Crossing_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, ZeroCrossing);
+        Zero_Crossing_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, ZeroCrossing,[]);
         norm_Zero_Crossing_evoked{j} = (Zero_Crossing_evoked{j} - mean(Zero_Crossing_evoked{j}))./std(Zero_Crossing_evoked{j});
+        % Lyapunov Exponent
+        LP_exp_evoked{j} = MovingWinFeats(evoked_sz{j}, fs_Neuronexus, winLen, winDisp, @lyapunovExponent,fs_Neuronexus);
+        norm_LP_exp_evoked{j} = (LP_exp_evoked{j} - mean(LP_exp_evoked{j}))./std(LP_exp_evoked{j});
         if to_plot
             figure;
-            subplot(4,1,1)
-            plot(winDisp:winDisp:floor(size(evoked_sz{j},1)/fs_Neuronexus/winDisp - (winLen-winDisp)/winDisp)*winDisp,norm_LLFn_evoked{j})
+            % X Axes Labels
+            xticklabel = winDisp:winDisp:floor(size(evoked_sz{j},1)/fs_Neuronexus/winDisp - (winLen-winDisp)/winDisp)*winDisp;
+            xticks = round(linspace(1, size(norm_LLFn_evoked{1}, 1), (t_after+t_before_Neuronexus)./5));
+            xticklabels = xticklabel(xticks);
+            
+            % Colormap
+            colormap('winter')
+            
+            plot1 = subplot(8,1,1);
+            imagesc(norm_LLFn_evoked{j}')
+            caxis([-1,1])
+            set(plot1, 'XTick', xticks, 'XTickLabel', xticklabels)
             xlabel('Seconds')
             ylabel('Line Length')
             title(['Line Length - ',subFolders(folder_num).name, ' Seizure #', num2str(j)]);
-            subplot(4,1,2)
-            plot(winDisp:winDisp:floor(size(evoked_sz{j},1)/fs_Neuronexus/winDisp - (winLen-winDisp)/winDisp)*winDisp,norm_Area_evoked{j})
+            colorbar
+            
+            plot2 = subplot(8,1,2);
+            % plot(winDisp:winDisp:floor(size(evoked_sz{j},1)/fs_Neuronexus/winDisp - (winLen-winDisp)/winDisp)*winDisp,norm_Area_evoked{j})
+            imagesc(norm_Area_evoked{j}')
+            set(plot2, 'XTick', xticks, 'XTickLabel', xticklabels)
+            caxis([-1,2.5])
             xlabel('Seconds')
             ylabel('Area')
-            title(['Area - ',subFolders(folder_num).name, ' Seizure #',num2str(j)]);
-            subplot(4,1,3)
-            plot(winDisp:winDisp:floor(size(evoked_sz{j},1)/fs_Neuronexus/winDisp - (winLen-winDisp)/winDisp)*winDisp,norm_Energy_evoked{j})
+            title(['Area - ',subFolders(folder_num).name, 'Seizure #',num2str(j)]);
+            colorbar
+            
+            plot3 = subplot(8,1,3);
+            imagesc(norm_Energy_evoked{j}')
+            set(plot3, 'XTick', xticks, 'XTickLabel', xticklabels)
+            caxis([-1,5])
             xlabel('Seconds')
             ylabel('Energy')
             title(['Energy - ',subFolders(folder_num).name, ' Seizure #',num2str(j)]);
-            subplot(4,1,4)
-            plot(winDisp:winDisp:floor(size(evoked_sz{j},1)/fs_Neuronexus/winDisp - (winLen-winDisp)/winDisp)*winDisp,norm_Zero_Crossing_evoked{j})
+            colorbar
+            
+            plot4 = subplot(8,1,4);
+            imagesc(norm_Zero_Crossing_evoked{j}')
+            set(plot4, 'XTick', xticks, 'XTickLabel', xticklabels)
+            caxis([-1,1])
             xlabel('Seconds')
             ylabel('Zero Crossing')
             title(['Zero Crossing - ',subFolders(folder_num).name, ' Seizure #',num2str(j)]);
+            colorbar
+            
+            plot5 = subplot(8,1,5);
+            imagesc(norm_RMS_evoked{j}')
+            set(plot5, 'XTick', xticks, 'XTickLabel', xticklabels)
+            caxis([-1,3])
+            xlabel('Seconds')
+            ylabel('RMS Amplitude')
+            title(['RMS Amplitude - ',subFolders(folder_num).name, ' Seizure #',num2str(j)]);
+            colorbar 
+            
+            plot6 = subplot(8,1,6);
+            imagesc(norm_Skew_evoked{j}')
+            set(plot6, 'XTick', xticks, 'XTickLabel', xticklabels)
+            caxis([-2,2])
+            xlabel('Seconds')
+            ylabel('Skew')
+            title(['Skew - ',subFolders(folder_num).name, ' Seizure #', num2str(j)]);
+            colorbar
+            
+            plot7 = subplot(8,1,7);
+            imagesc(norm_AEntropy_evoked{j}')
+            set(plot7, 'XTick', xticks, 'XTickLabel', xticklabels)
+            caxis([-2,2])
+            xlabel('Seconds')
+            ylabel('Entropy')
+            title(['Entropy - ',subFolders(folder_num).name, ' Seizure #', num2str(j)]);
+            colorbar
+            
+            plot8 = subplot(8,1,8);
+            imagesc(norm_LP_exp_evoked{j}')
+            set(plot8, 'XTick', xticks, 'XTickLabel', xticklabels)
+            caxis([-2,2])
+            xlabel('Seconds')
+            ylabel('Lyapunov Exponent')
+            title(['Lyapunov Exponent - ',subFolders(folder_num).name, ' Seizure #', num2str(j)]);
+            colorbar
             
             figure
             for i = 1:size(filter_set,1)
@@ -417,11 +492,14 @@ for folder_num = 3:length(subFolders)
             end
         end
     end
-    save([path_evoked,'Raw Features.mat'],'LLFn_evoked', 'Area_evoked', 'Energy_evoked', 'Zero_Crossing_evoked', 'bp_calc_evoked')
+    save([path_evoked,'Raw Features.mat'],'LLFn_evoked', 'Area_evoked', 'Energy_evoked', 'Zero_Crossing_evoked', 'bp_calc_evoked',...
+        'RMS_evoked', 'Skew_evoked', 'AEntropy_evoked', 'LP_exp_evoked')
     save([path_evoked,'Normalized Features.mat'],'norm_LLFn_evoked', 'norm_Area_evoked', 'norm_Energy_evoked', ...
-        'norm_Zero_Crossing_evoked', 'norm_bp_calc_evoked')
+        'norm_Zero_Crossing_evoked', 'norm_bp_calc_evoked','norm_RMS_evoked','norm_Skew_evoked','norm_LP_exp_evoked',...
+        'norm_AEntropy_evoked')
 
-    clear LLFn_evoked Area_evoked Energy_evoked Zero_Crossing_evoked 
+    clear LLFn_evoked Area_evoked Energy_evoked Zero_Crossing_evoked norm_LP_exp_evoked LP_exp_evoked
+    clear norm_AEntropy_evoked AEntropy_evoked RMS_evoked Skew_evoked norm_RMS_evoked norm_Skew_evoked
     clear norm_LLFn_evoked norm_Area_evoked norm_Energy_evoked norm_Zero_Crossing_evoked norm_bp_calc_evoked
 end
 
