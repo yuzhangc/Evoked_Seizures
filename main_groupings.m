@@ -3,7 +3,7 @@
 
 clear all
 
-directory = 'D:\';
+directory = 'E:\';
 % Do I need to extract data? If so first_run should equal 1
 first_run = 0;
 % Is data filtered? If not (0), should filter.
@@ -62,7 +62,10 @@ winLen = t_res;
 winDisp = t_res*overlap_per/100;
 
 % K Means
-k_means_classes = 4;
+k_means_classes = 2;
+
+% Pairings for Predictions
+pairings = [5 8 6 9 7 2; 5 5 6 5 7 1; 1 5 2 4 2 2];
 
 %% Data Extraction and Standardization
 
@@ -483,9 +486,14 @@ for folder_num = 3:length(subFolders)
             colorbar
             
             figure
+            % Colormap
+            colormap('winter')
             for i = 1:size(filter_set,1)
-            subplot(size(filter_set,1),1,i)
-            plot(winDisp:winDisp:floor(size(evoked_sz{j},1)/fs_Neuronexus/winDisp - (winLen-winDisp)/winDisp)*winDisp,norm_bp_calc_evoked{i}{j})
+            plots = subplot(size(filter_set,1),1,i)
+            imagesc(norm_bp_calc_evoked{i}{j}')
+            set(plots, 'XTick', xticks, 'XTickLabel', xticklabels)
+            caxis([0,4-i])
+            colorbar
             xlabel('Seconds')
             ylabel([num2str(filter_set(i,1)), ' - ' num2str(filter_set(i,2)), ' Hz'])
             title(['Bandpower - ',subFolders(folder_num).name, ' Seizure #',num2str(j)]);
@@ -526,7 +534,8 @@ for folder_num = 3:length(subFolders)
     Output_Array_evoked = [];
     for seizure = 1:length(norm_Area_evoked)
     Output_Array_evoked{seizure} = [norm_Area_evoked{seizure}, norm_Energy_evoked{seizure}, norm_LLFn_evoked{seizure},...
-        norm_Zero_Crossing_evoked{seizure}];
+        norm_Zero_Crossing_evoked{seizure}, norm_AEntropy_evoked{seizure}, norm_RMS_evoked{seizure}, norm_Skew_evoked{seizure},...
+        norm_LP_exp_evoked{seizure}];
     for bandpower_set = 1:length(norm_bp_calc_evoked)
         Output_Array_evoked{seizure} = [Output_Array_evoked{seizure},norm_bp_calc_evoked{bandpower_set}{seizure}];
     end
@@ -571,13 +580,15 @@ for folder_num = 3:length(subFolders)
             evoked_sz{seizure}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)./norm_factor(k)+(k-1)*1,'Color','k')
         end
         xaxis = winDisp:winDisp:(plot_duration+t_before_Neuronexus);
-        scatter(xaxis,ones(1,length(xaxis))*k,[],Colorset_plot(k_means_evoked(1:length(xaxis),seizure),:))
+        scatter(xaxis,ones(1,length(xaxis))*k,[],Colorset_plot(k_means_evoked(1:length(xaxis),seizure),:),'filled')
         ylim([-1,k+1])
         hold off
         title([subFolders(folder_num).name, ' Seizure ',num2str(seizure)])
     end
     end
-    
+ 
+    clear LLFn_evoked Area_evoked Energy_evoked Zero_Crossing_evoked norm_LP_exp_evoked LP_exp_evoked
+    clear norm_AEntropy_evoked AEntropy_evoked RMS_evoked Skew_evoked norm_RMS_evoked norm_Skew_evoked
     clear norm_LLFn_evoked norm_Area_evoked norm_Energy_evoked norm_Zero_Crossing_evoked norm_bp_calc_evoked
     clear evoked_sz evoked_stim_length delay_length second_stim_length evoked_sz norm_factor
     clear fs_Neuronexus fs_EEG t_after t_before_Neuronexus filter_set filtered_evoked_sz i j k
@@ -586,8 +597,6 @@ end
 %% Specific Predictions
 
 clear paired_output_evoked paired_Kmeans_Mdl k_means_evoked
-
-pairings = [5 8 6 9 7 2; 5 5 6 5 7 1; 1 5 2 4 2 2];
 
 for row = 1:size(pairings,1)
 for folder_num = 1:size(pairings,2)/2
@@ -599,7 +608,8 @@ for folder_num = 1:size(pairings,2)/2
     Output_Array_evoked = [];
     seizure = pairings(row,2*folder_num);
     Output_Array_evoked = [norm_Area_evoked{seizure}, norm_Energy_evoked{seizure}, norm_LLFn_evoked{seizure},...
-        norm_Zero_Crossing_evoked{seizure}];
+        norm_Zero_Crossing_evoked{seizure}, norm_AEntropy_evoked{seizure}, norm_RMS_evoked{seizure}, norm_Skew_evoked{seizure},...
+        norm_LP_exp_evoked{seizure}];
     for bandpower_set = 1:length(norm_bp_calc_evoked)
         Output_Array_evoked = [Output_Array_evoked,norm_bp_calc_evoked{bandpower_set}{seizure}];
     end
@@ -633,7 +643,189 @@ scatter(xaxis,ones(1,length(xaxis))*3,[],Colorset_plot(k_means_pred_1(1:length(x
 scatter(xaxis,ones(1,length(xaxis))*1,[],Colorset_plot(k_means_pred_3(1:length(xaxis)),:),'filled')
 xlabel('Time (sec)')
 hold off
-title(subFolders(pairings(row,2)+2).name, ' Seizures')
+title(subFolders(pairings(row,1)+2).name, ' Seizures')
 end
 
 end
+
+%% Seizure Duration and Split into Three Subsectiosn
+
+% Automated Seizure Detector Standardization
+rng(1)
+Colorset_plot = cbrewer('qual','Set1',k_means_classes);
+Colorset_plot(Colorset_plot>1) = 1;
+Colorset_plot(Colorset_plot<0) = 0;
+
+% Which Seizure To Get Model From
+folder_num = 3;
+seizure = 1;
+
+% Loads Seizure and Features
+path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
+load([path_evoked,'Normalized Features.mat']);
+load([path_evoked,'Filtered Seizure Data.mat']);
+
+% Concactenate Arrays
+Output_Array_evoked = [];
+Output_Array_evoked = [norm_Area_evoked{seizure}, norm_Energy_evoked{seizure}, norm_LLFn_evoked{seizure},...
+    norm_Zero_Crossing_evoked{seizure}, norm_AEntropy_evoked{seizure}, norm_RMS_evoked{seizure}, norm_Skew_evoked{seizure},...
+    norm_LP_exp_evoked{seizure}];
+for bandpower_set = 1:length(norm_bp_calc_evoked)
+    Output_Array_evoked = [Output_Array_evoked,norm_bp_calc_evoked{bandpower_set}{seizure}];
+end
+
+% Fits Model
+k_means_evoked_out = kmeans(Output_Array_evoked,2);  
+Kmeans_Mdl = fitcknn(Output_Array_evoked,k_means_evoked_out);
+
+% Plots All
+for folder_num = 3:length(subFolders)
+
+    clear k_means_pred k_means_sz_duration thirds_loc
+    % Loads Features and Seizure
+    path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
+    load([path_evoked,'Normalized Features.mat']);
+    load([path_evoked,'Filtered Seizure Data.mat']);
+    
+    % Concactenate Arrays
+    Output_Array_evoked = [];
+    for seizure = 1:length(norm_Area_evoked)
+    Output_Array_evoked{seizure} = [norm_Area_evoked{seizure}, norm_Energy_evoked{seizure}, norm_LLFn_evoked{seizure},...
+        norm_Zero_Crossing_evoked{seizure}, norm_AEntropy_evoked{seizure}, norm_RMS_evoked{seizure}, norm_Skew_evoked{seizure},...
+        norm_LP_exp_evoked{seizure}];
+    for bandpower_set = 1:length(norm_bp_calc_evoked)
+        Output_Array_evoked{seizure} = [Output_Array_evoked{seizure},norm_bp_calc_evoked{bandpower_set}{seizure}];
+    end
+    
+    % Predicts
+    k_means_pred{seizure} = predict(Kmeans_Mdl,Output_Array_evoked{seizure});
+    
+    % Use Stim Length and an Adjustment To Determine Seizure Duration
+    countdown = 0;
+    countdown_lim = 7/winDisp;
+    sz_start = (t_before_Neuronexus + evoked_stim_length(seizure))/winDisp;
+    sz_pos = sz_start;
+    sz_end = [];
+    while k_means_pred{seizure}(sz_pos) == 2 || countdown < countdown_lim
+        if k_means_pred{seizure}(sz_pos) == 2
+            countdown = 0;
+            sz_end = sz_pos;
+        else
+            countdown = countdown + 1;
+        end
+        sz_pos = sz_pos + 1;
+    end
+    
+    % Split Into Thirds & Takes Data From Contralateral Screw
+    thirds_loc(seizure,:) = [sz_start,sz_start+round((sz_end - sz_start)/3),sz_start+round(2*(sz_end - sz_start)/3),sz_end];
+    k_means_sz_duration(seizure) = (sz_end - sz_start).*winDisp;
+    output_measures{1} = Output_Array_evoked{seizure}(thirds_loc(seizure,1):thirds_loc(seizure,2),1:4:size(Output_Array_evoked{seizure},2));
+    output_measures{2} = Output_Array_evoked{seizure}(thirds_loc(seizure,2):thirds_loc(seizure,3),1:4:size(Output_Array_evoked{seizure},2));
+    output_measures{3} = Output_Array_evoked{seizure}(thirds_loc(seizure,3):thirds_loc(seizure,4),1:4:size(Output_Array_evoked{seizure},2));
+    final_output{seizure} = output_measures;
+    
+    % Plots Predictions
+    if to_plot    
+        figure
+        hold on
+        for k = 1:size(evoked_sz{seizure},2)
+        norm_factor = max(abs(evoked_sz{seizure}));
+        plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{seizure}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)./norm_factor(k)+6-2*k,'Color','k')
+        end
+        xaxis = winDisp:winDisp:(plot_duration+t_before_Neuronexus);
+        scatter(xaxis,ones(1,length(xaxis))*7,[],Colorset_plot(k_means_pred{seizure}(1:length(xaxis)),:),'filled')
+        xlabel('Time (sec)')
+        hold off
+        title([subFolders(folder_num).name, ' Seizure: ',num2str(seizure)])
+        xline(k_means_sz_duration(seizure) + t_before_Neuronexus + evoked_stim_length(seizure))        
+    end    
+    end
+    
+    % Saves    
+    save([path_evoked,'Split_Features.mat'],'final_output', 'k_means_sz_duration', 'Output_Array_evoked', 'k_means_pred',...
+        'Kmeans_Mdl', 'thirds_loc', 'k_means_pred')
+    
+    clear output_measures
+    clear LLFn_evoked Area_evoked Energy_evoked Zero_Crossing_evoked norm_LP_exp_evoked LP_exp_evoked
+    clear norm_AEntropy_evoked AEntropy_evoked RMS_evoked Skew_evoked norm_RMS_evoked norm_Skew_evoked
+    clear norm_LLFn_evoked norm_Area_evoked norm_Energy_evoked norm_Zero_Crossing_evoked norm_bp_calc_evoked
+    clear evoked_sz evoked_stim_length delay_length second_stim_length evoked_sz norm_factor
+    clear fs_Neuronexus fs_EEG t_after t_before_Neuronexus filter_set filtered_evoked_sz i j k
+    clear bandpower_set countdown countdown_lim sz_start sz_end sz_pos
+    
+end
+
+%% Plots Subsection Data
+
+% Compiles Means For All Features
+
+for folder_num = 3:length(subFolders)
+    % Loads Features and Seizure
+    path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
+    load([path_evoked,'Split_Features.mat']);
+    
+    for i = 1:length(final_output)
+        if folder_num == 3 & i == 1
+        to_visualize{1} = [mean(final_output{i}{1})];
+        to_visualize{2} = [mean(final_output{i}{2})];
+        to_visualize{3} = [mean(final_output{i}{3})];
+        else
+        to_visualize{1} = [to_visualize{1};mean(final_output{i}{1})];
+        to_visualize{2} = [to_visualize{2};mean(final_output{i}{2})];
+        to_visualize{3} = [to_visualize{3};mean(final_output{i}{3})];
+        end
+    end
+end
+
+for i = 1:size(to_visualize{1},2)
+    comparison_plot{i} = [to_visualize{1}(:,i),to_visualize{2}(:,i),to_visualize{3}(:,i)];
+end
+
+% 95% Confidence Interval With SEM
+if to_plot
+    figure
+    for i = 1:length(comparison_plot)
+    subplot(1,length(comparison_plot),i)
+    hold on
+    errorbar(mean(comparison_plot{i}),1.96*std(comparison_plot{i})./sqrt(size(comparison_plot{i},1)),'ko','LineWidth',2)
+    scatter(0.5 + rand(1,length(comparison_plot{i}(:,1))),comparison_plot{i}(:,1),2,'filled')
+    scatter(1.5 + rand(1,length(comparison_plot{i}(:,2))),comparison_plot{i}(:,2),2,'filled')
+    scatter(2.5 + rand(1,length(comparison_plot{i}(:,3))),comparison_plot{i}(:,3),2,'filled')
+    yline(0,'-k','LineWidth',1)
+    xticks(1:3)
+    xticklabels({'Beginning','Middle','End'})
+    xtickangle(45)
+    
+    if i == 1
+        title('Area')
+    elseif i == 2
+        title('Energy')
+    elseif i == 3
+        title('LineLen')
+    elseif i == 4
+        title('ZeroX')
+    elseif i == 5
+        title('Entropy')
+    elseif i == 6
+        title('RMSAmp')
+    elseif i == 7
+        title('Skew')
+    elseif i == 8
+        title('LP Exp')
+    elseif i == 9
+        title('BP sub30Hz')
+    elseif i == 10
+        title('BP 30-300Hz')
+    else
+        title('BP 300Hz+')
+    end
+    end
+    
+end
+
+% Seizure Initiation Spike Inversion During Optical Stimulation
+
+% Type of Seizure/Intensity Within a Day
+
+% Signature End of Seizure State - Pure Spiky Thing Vs Complex Spikes
