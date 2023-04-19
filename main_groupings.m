@@ -67,6 +67,9 @@ k_means_classes = 2;
 % Pairings for Predictions
 pairings = [5 8 6 9 7 2; 5 5 6 5 7 1; 1 5 2 4 2 2];
 
+% Which Channel to Use For Subsections
+channel_for_feature_split = 1;
+
 %% Data Extraction and Standardization
 
 if first_run
@@ -81,17 +84,19 @@ t_after = 180;
 for folder_num = 3:length(subFolders)
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
     times_sequence = readmatrix(strcat(path_evoked,'00_Times.csv'));
-    % First Row is Always Stim Duration, Second Row is Delay, 3rd is 2nd
+    % First Column is Always Animal ID, Second Column is Early/Middle/End
+    % of Experiment.
+    % Third Column is Stim Duration, Fourth Column is Delay, Fifth Column is 2nd
     % Stim Duration
     
-    evoked_stim_length = times_sequence(:,1)';
-    if size(times_sequence,2) >= 2
-        delay_length = times_sequence(:,2)';
+    evoked_stim_length = times_sequence(:,3)';
+    if size(times_sequence,2) >= 4
+        delay_length = times_sequence(:,4)';
     else
         delay_length = [];
     end
-    if size(times_sequence,2) >= 3
-        second_stim_length = times_sequence(:,3)';
+    if size(times_sequence,2) >= 5
+        second_stim_length = times_sequence(:,5)';
     else
         second_stim_length = [];
     end
@@ -717,11 +722,21 @@ for folder_num = 3:length(subFolders)
     end
     
     % Split Into Thirds & Takes Data From Contralateral Screw
-    thirds_loc(seizure,:) = [sz_start,sz_start+round((sz_end - sz_start)/3),sz_start+round(2*(sz_end - sz_start)/3),sz_end];
+    thirds_loc(seizure,:) = [1,t_before_Neuronexus/winDisp,sz_start,sz_start+round((sz_end - sz_start)/3),sz_start+round(2*(sz_end - sz_start)/3),sz_end,sz_end+30/winDisp];
     k_means_sz_duration(seizure) = (sz_end - sz_start).*winDisp;
-    output_measures{1} = Output_Array_evoked{seizure}(thirds_loc(seizure,1):thirds_loc(seizure,2),1:4:size(Output_Array_evoked{seizure},2));
-    output_measures{2} = Output_Array_evoked{seizure}(thirds_loc(seizure,2):thirds_loc(seizure,3),1:4:size(Output_Array_evoked{seizure},2));
-    output_measures{3} = Output_Array_evoked{seizure}(thirds_loc(seizure,3):thirds_loc(seizure,4),1:4:size(Output_Array_evoked{seizure},2));
+    % Before
+    output_measures{1} = Output_Array_evoked{seizure}(thirds_loc(seizure,1):thirds_loc(seizure,2),channel_for_feature_split:4:size(Output_Array_evoked{seizure},2));
+    % Stim
+    output_measures{2} = Output_Array_evoked{seizure}(thirds_loc(seizure,2):thirds_loc(seizure,3),channel_for_feature_split:4:size(Output_Array_evoked{seizure},2));
+    % Beginning
+    output_measures{3} = Output_Array_evoked{seizure}(thirds_loc(seizure,3):thirds_loc(seizure,4),channel_for_feature_split:4:size(Output_Array_evoked{seizure},2));
+    % Middle
+    output_measures{4} = Output_Array_evoked{seizure}(thirds_loc(seizure,4):thirds_loc(seizure,5),channel_for_feature_split:4:size(Output_Array_evoked{seizure},2));
+    % End
+    output_measures{5} = Output_Array_evoked{seizure}(thirds_loc(seizure,5):thirds_loc(seizure,6),channel_for_feature_split:4:size(Output_Array_evoked{seizure},2));
+    % After
+    output_measures{6} = Output_Array_evoked{seizure}(thirds_loc(seizure,6):thirds_loc(seizure,7),channel_for_feature_split:4:size(Output_Array_evoked{seizure},2));
+    
     final_output{seizure} = output_measures;
     
     % Plots Predictions
@@ -767,19 +782,26 @@ for folder_num = 3:length(subFolders)
     
     for i = 1:length(final_output)
         if folder_num == 3 & i == 1
-        to_visualize{1} = [mean(final_output{i}{1})];
-        to_visualize{2} = [mean(final_output{i}{2})];
-        to_visualize{3} = [mean(final_output{i}{3})];
+            % Sets Up First One
+            for j = 1:size(final_output{i},2)
+            to_visualize{j} = [mean(final_output{i}{j})];
+            end
         else
-        to_visualize{1} = [to_visualize{1};mean(final_output{i}{1})];
-        to_visualize{2} = [to_visualize{2};mean(final_output{i}{2})];
-        to_visualize{3} = [to_visualize{3};mean(final_output{i}{3})];
+            % Continues Filling It In
+            for j = 1:size(final_output{i},2)
+            to_visualize{j} = [to_visualize{j};mean(final_output{i}{j})];
+            end
         end
     end
 end
 
+% Rearranges to Visualization
 for i = 1:size(to_visualize{1},2)
-    comparison_plot{i} = [to_visualize{1}(:,i),to_visualize{2}(:,i),to_visualize{3}(:,i)];
+    temp_visualization = [];
+    for j = 1:length(to_visualize)
+        temp_visualization(:,j) = to_visualize{j}(:,i);
+    end
+    comparison_plot{i} = temp_visualization;
 end
 
 % 95% Confidence Interval With SEM
@@ -789,12 +811,12 @@ if to_plot
     subplot(1,length(comparison_plot),i)
     hold on
     errorbar(mean(comparison_plot{i}),1.96*std(comparison_plot{i})./sqrt(size(comparison_plot{i},1)),'ko','LineWidth',2)
-    scatter(0.5 + rand(1,length(comparison_plot{i}(:,1))),comparison_plot{i}(:,1),2,'filled')
-    scatter(1.5 + rand(1,length(comparison_plot{i}(:,2))),comparison_plot{i}(:,2),2,'filled')
-    scatter(2.5 + rand(1,length(comparison_plot{i}(:,3))),comparison_plot{i}(:,3),2,'filled')
+    for j = 1:length(to_visualize)
+    scatter(j - 0.5 + rand(1,length(comparison_plot{i}(:,j))),comparison_plot{i}(:,j),2,'filled')
+    end
     yline(0,'-k','LineWidth',1)
-    xticks(1:3)
-    xticklabels({'Beginning','Middle','End'})
+    xticks(1:length(to_visualize))
+    xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'})
     xtickangle(45)
     
     if i == 1
@@ -820,6 +842,43 @@ if to_plot
     else
         title('BP 300Hz+')
     end
+    end
+    
+end
+
+%% Segregation of Types
+
+% Seizure ID | Animal ID | Position in Experiment | Delay to Second Stim | Second Stim Duration
+
+sz_id = [];
+seizure_identifier = 1;
+
+for folder_num = 3:length(subFolders)
+    path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
+    filelist = dir(strcat(path_evoked,'*.rhd'));
+    times_sequence = readmatrix(strcat(path_evoked,'00_Times.csv'));
+    
+    sz_id(seizure_identifier:seizure_identifier+length(filelist)-1,2) = times_sequence(:,1);
+    sz_id(seizure_identifier:seizure_identifier+length(filelist)-1,3) = times_sequence(:,2);
+    sz_id(seizure_identifier:seizure_identifier+length(filelist)-1,4) = times_sequence(:,3);
+    
+    if size(times_sequence,2) >= 4
+        sz_id(seizure_identifier:seizure_identifier+length(filelist)-1,5) = times_sequence(:,4);
+    else
+        sz_id(seizure_identifier:seizure_identifier+length(filelist)-1,5) = NaN(length(filelist),1);
+    end
+    
+    if size(times_sequence,2) >= 5
+        sz_id(seizure_identifier:seizure_identifier+length(filelist)-1,6) = times_sequence(:,5);
+    else
+        sz_id(seizure_identifier:seizure_identifier+length(filelist)-1,6) = NaN(length(filelist),1);
+    end
+    
+    for j = 1:length(filelist)
+    % Seizure Number
+    sz_id(seizure_identifier,1) = seizure_identifier; 
+    % Increment Seizure Number at End
+    seizure_identifier = seizure_identifier + 1;
     end
     
 end
