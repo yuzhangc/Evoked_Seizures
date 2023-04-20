@@ -881,17 +881,18 @@ for folder_num = 3:length(subFolders)
     seizure_identifier = seizure_identifier + 1;
     end
     
-    save([path_evoked,'Seizure_Metadata.mat'],'sz_id')
-    
 end
 
+save([path_EEG,'Seizure_Metadata.mat'],'sz_id')
+
 %% Plot Segregated Data
+
+load([path_EEG,'Seizure_Metadata.mat']);
 
 for folder_num = 3:length(subFolders)
     % Loads Features and Seizure
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
     load([path_evoked,'Split_Features.mat']);
-    load([path_evoked,'Seizure_Metadata.mat']);
     
     for i = 1:length(final_output)
         if folder_num == 3 & i == 1
@@ -917,24 +918,41 @@ for i = 1:size(to_visualize{1},2)
     comparison_plot{i} = temp_visualization;
 end
 
+n = input('Enter a number: (1) - Additional Stimulation or Not');
+
 % 95% Confidence Interval With SEM
 if to_plot
     figure
     for i = 1:length(comparison_plot)
     subplot(1,length(comparison_plot),i)
-    subdiv_index_1 = find(isnan(sz_id(:,5)))
-    subdiv_index_2 = find(~isnan(sz_id(:,5)))
+    
+    switch n
+        case 1
+        subdiv_index{1} = find(isnan(sz_id(:,5)));
+        subdiv_index{2} = find(~isnan(sz_id(:,5)));
+        case 2
+        otherwise
+    end
+    
+    Colorset_plot = cbrewer('qual','Set1',length(subdiv_index));
+    Colorset_plot(Colorset_plot>1) = 1;
+    Colorset_plot(Colorset_plot<0) = 0;
+    
     hold on
-    errorbar(0.25:1:size(comparison_plot{i},2),mean(comparison_plot{i}(subdiv_index_1,:)),1.96*std(comparison_plot{i})./sqrt(size(comparison_plot{i},1)),'ko','LineWidth',2)
-    errorbar(0.75:1:size(comparison_plot{i},2),mean(comparison_plot{i}(subdiv_index_2,:)),1.96*std(comparison_plot{i})./sqrt(size(comparison_plot{i},1)),'bo','LineWidth',2)
+    for k = 1:length(subdiv_index)
+    errorbar(1/(length(subdiv_index)+2) + (1/(length(subdiv_index))*(k-1)):1:size(comparison_plot{i},2),mean(comparison_plot{i}(subdiv_index{k},:)),...
+        1.96*std(comparison_plot{i}(subdiv_index{k},:))./sqrt(length(subdiv_index{k})),'o',...
+        'Color',Colorset_plot(k,:),'LineWidth',2)
     for j = 1:length(to_visualize)
-    scatter(j - 0.75 + 0.5*rand(1,length(comparison_plot{i}(subdiv_index_1 ,j))),comparison_plot{i}(subdiv_index_1 ,j),6,'k','square','filled')
-    scatter(j - 0.25 + 0.5*rand(1,length(comparison_plot{i}(subdiv_index_2 ,j))),comparison_plot{i}(subdiv_index_2 ,j),6,'b','^','filled')
+    scatter(j - 1 + 1/(length(subdiv_index)+2) + (1/(length(subdiv_index))*(k-1)) + 1/length(subdiv_index)*rand(1,length(comparison_plot{i}(subdiv_index{k},j))),...
+        comparison_plot{i}(subdiv_index{k},j),6,'filled','MarkerFaceColor',Colorset_plot(k,:),...
+        'MarkerEdgeColor',Colorset_plot(k,:))
     end
     yline(0,'-k','LineWidth',1)
     xticks(1:length(to_visualize))
     xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'})
     xtickangle(45)
+    end
     
     if i == 1
         title('Area')
