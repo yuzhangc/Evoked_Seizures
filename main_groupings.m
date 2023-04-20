@@ -775,6 +775,8 @@ end
 
 % Compiles Means For All Features
 
+clear to_visualize comparison_plot
+
 for folder_num = 3:length(subFolders)
     % Loads Features and Seizure
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
@@ -889,6 +891,8 @@ save([path_EEG,'Seizure_Metadata.mat'],'sz_id')
 
 load([path_EEG,'Seizure_Metadata.mat']);
 
+clear subdiv_index to_visualize comparison_plot legend_text
+
 for folder_num = 3:length(subFolders)
     % Loads Features and Seizure
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
@@ -918,26 +922,56 @@ for i = 1:size(to_visualize{1},2)
     comparison_plot{i} = temp_visualization;
 end
 
-n = input('Enter a number: (1) - Additional Stimulation or Not');
+displays_text = ['Which Plot to Plot?: \n(1) - Additional Stimulation or Not \n',...
+    '(2) - Individual Animals \n(3) - Early/Middle/End of Experiment\nEnter a number: ']
+n = input(displays_text);
+legend_text = [];
+
+switch n
+        
+    % Splits By Additional Stimulus Or Not
+    case 1
+    % 1: No Stim 2: Stim
+    subdiv_index{1} = find(isnan(sz_id(:,5)));
+    subdiv_index{2} = find(~isnan(sz_id(:,5)));
+    legend_text = {'Control','Second Stim'};
+
+    % Split By Animals
+    case 2
+    % Early - Epileptic Later - Non-Epileptic
+    num_unique = unique(sz_id(:,2));
+    for unique_id = 1 :length(num_unique)
+        subdiv_index{unique_id} = find(sz_id(:,2) == num_unique(unique_id));
+        legend_text{unique_id} = num2str(num_unique(unique_id));
+    end
+
+    % Split By Early/Late/End of Experiment
+    case 3
+    num_unique = unique(sz_id(:,3));
+    for unique_id = 1 :length(num_unique)
+        subdiv_index{unique_id} = find(sz_id(:,2) == num_unique(unique_id));
+    end
+    legend_text = {'Early','Middle','End'};
+
+    otherwise
+    disp ('Invalid Choice')
+    to_plot = 0;
+    return
+end
 
 % 95% Confidence Interval With SEM
 if to_plot
+    
     figure
     for i = 1:length(comparison_plot)
     subplot(1,length(comparison_plot),i)
     
-    switch n
-        case 1
-        subdiv_index{1} = find(isnan(sz_id(:,5)));
-        subdiv_index{2} = find(~isnan(sz_id(:,5)));
-        case 2
-        otherwise
-    end
-    
+    % Generate Unique Colors
     Colorset_plot = cbrewer('qual','Set1',length(subdiv_index));
     Colorset_plot(Colorset_plot>1) = 1;
     Colorset_plot(Colorset_plot<0) = 0;
     
+    % Evenly Plots Across One Position
     hold on
     for k = 1:length(subdiv_index)
     errorbar(1/(length(subdiv_index)+2) + (1/(length(subdiv_index))*(k-1)):1:size(comparison_plot{i},2),mean(comparison_plot{i}(subdiv_index{k},:)),...
@@ -975,7 +1009,13 @@ if to_plot
     elseif i == 10
         title('BP 30-300Hz')
     else
+        % Adds Legend
+        h = zeros(length(legend_text), 1);
+        for counter_num = 1:length(legend_text)
+            h(counter_num) = scatter(0,0,'visible', 'off','MarkerFaceColor',Colorset_plot(counter_num,:),'MarkerEdgeColor',Colorset_plot(counter_num,:));
+        end
         title('BP 300Hz+')
+        legend(h,legend_text)
     end
     end
     
