@@ -686,7 +686,7 @@ Kmeans_Mdl = fitcknn(Output_Array_evoked,k_means_evoked_out);
 % Plots All
 for folder_num = 3:length(subFolders)
 
-    clear k_means_pred k_means_sz_duration thirds_loc
+    clear k_means_pred k_means_sz_duration thirds_loc final_output
     % Loads Features and Seizure
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
     load([path_evoked,'Normalized Features.mat']);
@@ -879,6 +879,86 @@ for folder_num = 3:length(subFolders)
     sz_id(seizure_identifier,1) = seizure_identifier; 
     % Increment Seizure Number at End
     seizure_identifier = seizure_identifier + 1;
+    end
+    
+    save([path_evoked,'Seizure_Metadata.mat'],'sz_id')
+    
+end
+
+%% Plot Segregated Data
+
+for folder_num = 3:length(subFolders)
+    % Loads Features and Seizure
+    path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
+    load([path_evoked,'Split_Features.mat']);
+    load([path_evoked,'Seizure_Metadata.mat']);
+    
+    for i = 1:length(final_output)
+        if folder_num == 3 & i == 1
+            % Sets Up First One
+            for j = 1:size(final_output{i},2)
+            to_visualize{j} = [mean(final_output{i}{j})];
+            end
+        else
+            % Continues Filling It In
+            for j = 1:size(final_output{i},2)
+            to_visualize{j} = [to_visualize{j};mean(final_output{i}{j})];
+            end
+        end
+    end
+end
+
+% Rearranges to Visualization
+for i = 1:size(to_visualize{1},2)
+    temp_visualization = [];
+    for j = 1:length(to_visualize)
+        temp_visualization(:,j) = to_visualize{j}(:,i);
+    end
+    comparison_plot{i} = temp_visualization;
+end
+
+% 95% Confidence Interval With SEM
+if to_plot
+    figure
+    for i = 1:length(comparison_plot)
+    subplot(1,length(comparison_plot),i)
+    subdiv_index_1 = find(isnan(sz_id(:,5)))
+    subdiv_index_2 = find(~isnan(sz_id(:,5)))
+    hold on
+    errorbar(0.25:1:size(comparison_plot{i},2),mean(comparison_plot{i}(subdiv_index_1,:)),1.96*std(comparison_plot{i})./sqrt(size(comparison_plot{i},1)),'ko','LineWidth',2)
+    errorbar(0.75:1:size(comparison_plot{i},2),mean(comparison_plot{i}(subdiv_index_2,:)),1.96*std(comparison_plot{i})./sqrt(size(comparison_plot{i},1)),'bo','LineWidth',2)
+    for j = 1:length(to_visualize)
+    scatter(j - 0.75 + 0.5*rand(1,length(comparison_plot{i}(subdiv_index_1 ,j))),comparison_plot{i}(subdiv_index_1 ,j),6,'k','square','filled')
+    scatter(j - 0.25 + 0.5*rand(1,length(comparison_plot{i}(subdiv_index_2 ,j))),comparison_plot{i}(subdiv_index_2 ,j),6,'b','^','filled')
+    end
+    yline(0,'-k','LineWidth',1)
+    xticks(1:length(to_visualize))
+    xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'})
+    xtickangle(45)
+    
+    if i == 1
+        title('Area')
+    elseif i == 2
+        title('Energy')
+    elseif i == 3
+        title('LineLen')
+    elseif i == 4
+        title('ZeroX')
+    elseif i == 5
+        title('Entropy')
+    elseif i == 6
+        title('RMSAmp')
+    elseif i == 7
+        title('Skew')
+    elseif i == 8
+        title('LP Exp')
+    elseif i == 9
+        title('BP sub30Hz')
+    elseif i == 10
+        title('BP 30-300Hz')
+    else
+        title('BP 300Hz+')
+    end
     end
     
 end
