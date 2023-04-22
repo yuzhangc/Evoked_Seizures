@@ -891,9 +891,12 @@ save([path_EEG,'Seizure_Metadata.mat'],'sz_id')
 
 load([path_EEG,'Seizure_Metadata.mat']);
 
-clear subdiv_index to_visualize comparison_plot legend_text
 
-for folder_num = 3:length(subFolders)
+sz_id = sz_id(1:63-7,:);
+
+clear subdiv_index to_visualize comparison_plot legend_text anova_col_ID
+
+for folder_num = 3:length(subFolders)-1
     % Loads Features and Seizure
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
     load([path_evoked,'Split_Features.mat']);
@@ -923,8 +926,12 @@ for i = 1:size(to_visualize{1},2)
 end
 
 displays_text = ['Which Plot to Plot?: \n(1) - Additional Stimulation or Not \n',...
-    '(2) - Individual Animals \n(3) - Early/Middle/End of Experiment\nEnter a number: ']
+    '(2) - Individual Animals \n(3) - Epileptic vs Naive', ...
+    '\n(4) - Early/Middle/End of Experiment\nEnter a number: '];
 n = input(displays_text);
+displays_text_2 = ['\nDo you want to plot individual data? \n(1) - Yes \n(0) - No', ...
+    '\nEnter a number: '];
+ind_data = input(displays_text_2);
 legend_text = [];
 
 switch n
@@ -932,24 +939,40 @@ switch n
     % Splits By Additional Stimulus Or Not
     case 1
     % 1: No Stim 2: Stim
-    subdiv_index{1} = find(isnan(sz_id(:,5)));
-    subdiv_index{2} = find(~isnan(sz_id(:,5)));
+    anova_col_ID = 5;
+    to_plot = 1;
+    subdiv_index{1} = find(isnan(sz_id(:,anova_col_ID)));
+    subdiv_index{2} = find(~isnan(sz_id(:,anova_col_ID)));
     legend_text = {'Control','Second Stim'};
 
-    % Split By Animals
+    % Split By Individual Animals
     case 2
     % Early - Epileptic Later - Non-Epileptic
-    num_unique = unique(sz_id(:,2));
+    anova_col_ID = 2;
+    to_plot = 1;
+    num_unique = unique(sz_id(:,anova_col_ID));
     for unique_id = 1 :length(num_unique)
-        subdiv_index{unique_id} = find(sz_id(:,2) == num_unique(unique_id));
+        subdiv_index{unique_id} = find(sz_id(:,anova_col_ID) == num_unique(unique_id));
         legend_text{unique_id} = num2str(num_unique(unique_id));
     end
+    
+    % Epileptic Or Not
+    case 3
+    % 1: Epileptic 2: Naive
+    anova_col_ID = 2;
+    to_plot = 1;
+    subdiv_index{1} = find(sz_id(:,anova_col_ID)<100);
+    subdiv_index{2} = find(sz_id(:,anova_col_ID)>=100);
+    legend_text = {'Epileptic','Naive'};
 
     % Split By Early/Late/End of Experiment
-    case 3
-    num_unique = unique(sz_id(:,3));
+    case 4
+    % 1: Early 2: Middle 3: Late
+    anova_col_ID = 3;
+    to_plot = 1;
+    num_unique = unique(sz_id(:,anova_col_ID));
     for unique_id = 1 :length(num_unique)
-        subdiv_index{unique_id} = find(sz_id(:,2) == num_unique(unique_id));
+        subdiv_index{unique_id} = find(sz_id(:,anova_col_ID) == num_unique(unique_id)); % If Epileptic Only: & sz_id(:,2)<100);
     end
     legend_text = {'Early','Middle','End'};
 
@@ -974,13 +997,21 @@ if to_plot
     % Evenly Plots Across One Position
     hold on
     for k = 1:length(subdiv_index)
+    if ind_data
     errorbar(1/(length(subdiv_index)+2) + (1/(length(subdiv_index))*(k-1)):1:size(comparison_plot{i},2),mean(comparison_plot{i}(subdiv_index{k},:)),...
         1.96*std(comparison_plot{i}(subdiv_index{k},:))./sqrt(length(subdiv_index{k})),'o',...
         'Color',Colorset_plot(k,:),'LineWidth',2)
+    else
+    errorbar(1:1:size(comparison_plot{i},2),mean(comparison_plot{i}(subdiv_index{k},:)),...
+        1.96*std(comparison_plot{i}(subdiv_index{k},:))./sqrt(length(subdiv_index{k})),':o',...
+        'Color',Colorset_plot(k,:),'LineWidth',2)
+    end
+    if ind_data
     for j = 1:length(to_visualize)
     scatter(j - 1 + 1/(length(subdiv_index)+2) + (1/(length(subdiv_index))*(k-1)) + 1/length(subdiv_index)*rand(1,length(comparison_plot{i}(subdiv_index{k},j))),...
         comparison_plot{i}(subdiv_index{k},j),6,'filled','MarkerFaceColor',Colorset_plot(k,:),...
         'MarkerEdgeColor',Colorset_plot(k,:))
+    end
     end
     yline(0,'-k','LineWidth',1)
     xticks(1:length(to_visualize))
@@ -1019,7 +1050,14 @@ if to_plot
     end
     end
     
+    disp('Influence of Features (X) on Animal Categorization (Y)');
+    fitglm(to_visualize{3},sz_id(:,anova_col_ID))
+    
+    disp('Influence of Animal Traits (X) on Seizure EEG Features (Y)');
+    fitglm(sz_id,to_visualize{3}(:,1))
 end
+
+
 
 % Seizure Initiation Spike Inversion During Optical Stimulation
 
