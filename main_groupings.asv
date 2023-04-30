@@ -1080,26 +1080,9 @@ end
 
 load([path_EEG,'Seizure_Metadata.mat']);
 
-clear subdiv_index to_visualize comparison_plot legend_text anova_col_ID temp_fit
+clear subdiv_index to_visualize comparison_plot legend_text anova_col_ID
 
-displays_text = ['Which Plot to Plot?: \n(1) - Additional Stimulation or Not \n',...
-    '(2) - Individual Animals \n(3) - Epileptic vs Naive', ...
-    '\n(4) - Early/Middle/End of Experiment \n(5) - Long or Short Seizures'...
-    '\n(6) Human Classification by Folder\n(7) Evoked or Not\nEnter a number: '];
-n = input(displays_text);
-displays_text_2 = ['\nDo you want to plot individual data? \n(1) - Yes \n(0) - No', ...
-    '\nEnter a number: '];
-ind_data = input(displays_text_2);
-legend_text = [];
-
-if n == 7 || n == 6
-max_val = length(subFolders);
-else
-max_val = length(subFolders) - 1;
-sz_id = sz_id(1:109,:);
-end
-
-for folder_num = 3:max_val
+for folder_num = 3:length(subFolders)
     % Loads Features and Seizure
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
     load([path_evoked,'Split_Features.mat']);
@@ -1136,6 +1119,16 @@ for i = 1:size(to_visualize{1},2)
     comparison_plot{i} = temp_visualization;
 end
 
+displays_text = ['Which Plot to Plot?: \n(1) - Additional Stimulation or Not \n',...
+    '(2) - Individual Animals \n(3) - Epileptic vs Naive', ...
+    '\n(4) - Early/Middle/End of Experiment \n(5) - Long or Short Seizures'...
+    '\n(6) Human Classification by Folder\n(7) Evoked or Not\nEnter a number: '];
+n = input(displays_text);
+displays_text_2 = ['\nDo you want to plot individual data? \n(1) - Yes \n(0) - No', ...
+    '\nEnter a number: '];
+ind_data = input(displays_text_2);
+legend_text = [];
+
 switch n
         
     % Splits By Additional Stimulus Or Not
@@ -1159,7 +1152,6 @@ switch n
         subdiv_index{unique_id} = find(sz_id(:,anova_col_ID) == num_unique(unique_id));
         legend_text{unique_id} = num2str(num_unique(unique_id));
     end
-    temp_fit = sz_id(:,anova_col_ID);
     
     % Epileptic Or Not
     case 3
@@ -1169,8 +1161,6 @@ switch n
     subdiv_index{1} = find(sz_id(:,anova_col_ID)<100);
     subdiv_index{2} = find(sz_id(:,anova_col_ID)>=100);
     legend_text = {'Epileptic','Naive'};
-    temp_fit(subdiv_index{1}) = 1;
-    temp_fit(subdiv_index{2}) = 0;
 
     % Split By Early/Late/End of Experiment
     case 4
@@ -1182,7 +1172,6 @@ switch n
         subdiv_index{unique_id} = find(sz_id(:,anova_col_ID) == num_unique(unique_id)); % If Epileptic Only: & sz_id(:,2)<100);
     end
     legend_text = {'Early','Middle','End'};
-    temp_fit = sz_id(:,anova_col_ID);
     
     case 5
     % Longer or Shorter than Mean
@@ -1191,11 +1180,8 @@ switch n
     subdiv_index{1} = find(sz_id(:,anova_col_ID)< mean(sz_id(:,anova_col_ID)));
     subdiv_index{2} = find(sz_id(:,anova_col_ID)>= mean(sz_id(:,anova_col_ID)));
     legend_text = {'Less than Average','More than Average'};
-    temp_fit(subdiv_index{1}) = 0;
-    temp_fit(subdiv_index{2}) = 1;
     
     case 6
-    % Which Folder
     anova_col_ID = 2;
     to_plot = 1;
     num_unique = unique(sz_id(:,anova_col_ID));
@@ -1203,17 +1189,13 @@ switch n
         subdiv_index{unique_id} = find(sz_id(:,anova_col_ID) == num_unique(unique_id)); % If Epileptic Only: & sz_id(:,2)<100);
         legend_text{unique_id} = num2str(num_unique(unique_id));
     end
-    temp_fit = sz_id(:,anova_col_ID);
     
     case 7
-    % Evoked Or Not
     anova_col_ID = 2;
     to_plot = 1;
     subdiv_index{1} = find(sz_id(:,anova_col_ID) == max(sz_id(:,anova_col_ID)));
     subdiv_index{2} = find(sz_id(:,anova_col_ID) ~= max(sz_id(:,anova_col_ID)));
     legend_text = {'Not Evoked','Evoked'};
-    temp_fit(subdiv_index{1}) = 0;
-    temp_fit(subdiv_index{2}) = 1;
     
     otherwise
     disp ('Invalid Choice')
