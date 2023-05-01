@@ -77,7 +77,7 @@ k_means_classes = 3;
 pairings = [5 8 6 9 7 2; 5 5 6 5 7 1; 1 5 2 4 2 2];
 
 % Which Channel to Use For Subsections
-channel_for_feature_split = 1;
+channel_for_feature_split = 2;
 
 %% Data Extraction and Standardization
 
@@ -204,6 +204,388 @@ end
 clear evoked_sz evoked_stim_length delay_length second_stim_length evoked_sz
 clear fs_Neuronexus fs_EEG t_after t_before_Neuronexus filter_set filtered_evoked_sz
 clear i j k folder_num
+
+%% Plot Raw Epileptic Data
+
+if to_plot
+    
+evoked_sz_to_plot = [7,1];
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
+load([path_evoked,'Standardized Seizure Data.mat']);
+
+plot_duration = 80;
+
+figure
+subplot(2,3,1:3)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(1,2))}));
+for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k)+(k-1)*1,'Color','k')
+    hold off
+    ylim([-1,k])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    xlabel('Time (sec)')
+end
+
+subplot(2,3,4)
+for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k)+(k-1)*1,'Color','k')
+    hold off
+    ylim([-1,k])
+    xlim([9,19])
+    xlabel('Time (sec)')
+end
+
+subplot(2,3,5)
+for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k)+(k-1)*1,'Color','k')
+    hold off
+    ylim([-1,k])
+    xlim([31,41])
+    xlabel('Time (sec)')
+end
+
+subplot(2,3,6)
+for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k)+(k-1)*1,'Color','k')
+    hold off
+    ylim([-1,k])
+    xlim([63,73])
+    xlabel('Time (sec)')
+end
+
+set(gcf,'Position', [294 671.5000 1583 307.5000])
+
+end
+
+%% Plot Raw Naive Data
+
+if to_plot
+    
+evoked_sz_to_plot = [1,6];
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
+load([path_evoked,'Standardized Seizure Data.mat']);
+
+plot_duration = 80;
+
+figure
+subplot(2,3,1:3)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(1,2))}));
+for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k)+(k-1)*1,'Color','k')
+    hold off
+    ylim([-1,k])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    xlabel('Time (sec)')
+end
+
+subplot(2,3,4)
+for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k)+(k-1)*1,'Color','k')
+    hold off
+    ylim([-1,k])
+    xlim([9,19])
+    xlabel('Time (sec)')
+end
+
+subplot(2,3,5)
+for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k)+(k-1)*1,'Color','k')
+    hold off
+    ylim([-1,k])
+    xlim([26,36])
+    xlabel('Time (sec)')
+end
+
+subplot(2,3,6)
+for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k)+(k-1)*1,'Color','k')
+    hold off
+    ylim([-1,k])
+    xlim([39,49])
+    xlabel('Time (sec)')
+end
+
+set(gcf,'Position', [294 671.5000 1583 307.5000])
+
+end
+
+%% Plot Spectrogram to Show Consistency
+
+if to_plot
+
+evoked_sz_to_plot = [8,8;8,15];
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
+load([path_evoked,'Standardized Seizure Data.mat']);
+
+plot_duration = 55;
+
+figure
+subplot(4,1,1)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(1,2))}));
+for k = 3
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k),'Color','k')
+    hold off
+    ylim([-1,1])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    % xlabel('Time (sec)')
+    title('Evoked Seizure @ 3:30 PM')
+end
+
+subplot(4,1,3)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(2,2))}));
+for k = 3
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(2,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k),'Color','k')
+    hold off
+    ylim([-1,1])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    % xlabel('Time (sec)')
+    title('9 Evoked Seizures Later @ 5:00 PM')
+end
+
+subplot(4,1,2)
+pspectrum(evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        
+colormap('winter')
+caxis([0,40])
+colorbar off
+title('')
+xlabel('')
+ylabel('')
+
+subplot(4,1,4)
+pspectrum(evoked_sz{evoked_sz_to_plot(2,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        
+colormap('winter')
+caxis([0,40])
+colorbar off
+title('')
+xlabel('Time (sec)')
+ylabel('')
+
+set(gcf,'Position', [81 434.5000 845.5000 544.5000])
+end
+
+%% Diazepam Plots
+
+if to_plot
+    
+evoked_sz_to_plot = [3,3];
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
+load([path_evoked,'Standardized Seizure Data.mat']);
+
+plot_duration = 55;
+
+figure
+subplot(4,1,1)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(1,2))}));
+for k = 3
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k),'Color','k')
+    hold off
+    ylim([-1,1])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    % xlabel('Time (sec)')
+end
+
+subplot(4,1,2)
+pspectrum(evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        
+colormap('winter')
+caxis([0,40])
+colorbar off
+title('')
+xlabel('')
+ylabel('')
+
+subplot(4,1,3)
+modded_read_Intan_RHD2000_file('26_DIAZ_25mins_230327_194615.rhd','E:\20230327 isofluor KA Thy1-ChR2\');
+x_temp = find(board_adc_data(1,:) > 3,1) - t_before_Neuronexus * fs_Neuronexus
+plot(0:1/fs_Neuronexus:t_before_Neuronexus+plot_duration,amplifier_data(3,x_temp:x_temp+fs_Neuronexus*(t_before_Neuronexus+plot_duration))./max(amplifier_data(3,x_temp:x_temp+fs_Neuronexus*(t_before_Neuronexus+plot_duration))),'Color',[0 0 0]);
+
+subplot(4,1,4)
+pspectrum(amplifier_data(3,x_temp:x_temp+fs_Neuronexus*(t_before_Neuronexus+plot_duration))...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        
+colormap('winter')
+caxis([0,40])
+colorbar off
+title('')
+xlabel('Time (sec)')
+ylabel('')
+
+set(gcf,'Position', [81 655 1.0295e+03 324])
+end
+
+%% Some Working Ones
+
+if to_plot
+
+evoked_sz_to_plot = [1,2;2,2];
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
+load([path_evoked,'Standardized Seizure Data.mat']);
+
+plot_duration = 55;
+
+figure
+subplot(4,1,1)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(1,2))}));
+for k = 1
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k),'Color','k')
+    hold off
+    ylim([-1,1])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    % xlabel('Time (sec)')
+end
+
+subplot(4,1,2)
+pspectrum(evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        
+colormap('winter')
+caxis([0,40])
+colorbar off
+title('')
+xlabel('')
+ylabel('')
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(2,1)+2).name,'\');
+load([path_evoked,'Standardized Seizure Data.mat']);
+
+subplot(4,1,3)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(2,2))}));
+for k = 1
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(2,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k),'Color','k')
+    hold off
+    ylim([-1,1])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    % xlabel('Time (sec)')
+end
+
+subplot(4,1,4)
+pspectrum(evoked_sz{evoked_sz_to_plot(2,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        
+colormap('winter')
+caxis([0,40])
+colorbar off
+title('')
+xlabel('Time (sec)')
+ylabel('')
+
+set(gcf,'Position', [81 655 1.0295e+03 324])
+end
+
+%% Some Worseners
+
+if to_plot
+
+evoked_sz_to_plot = [5,8;6,9];
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
+load([path_evoked,'Standardized Seizure Data.mat']);
+
+plot_duration = 55;
+
+figure
+subplot(4,1,1)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(1,2))}));
+for k = 1
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k),'Color','k')
+    hold off
+    ylim([-1,1])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    % xlabel('Time (sec)')
+end
+
+subplot(4,1,2)
+pspectrum(evoked_sz{evoked_sz_to_plot(1,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        
+colormap('winter')
+caxis([0,40])
+colorbar off
+title('')
+xlabel('')
+ylabel('')
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(2,1)+2).name,'\');
+load([path_evoked,'Standardized Seizure Data.mat']);
+
+subplot(4,1,3)
+norm_factor = max(abs(evoked_sz{(evoked_sz_to_plot(2,2))}));
+for k = 1
+    hold on
+    plot(1/fs_Neuronexus:1/fs_Neuronexus:plot_duration+t_before_Neuronexus,...
+        evoked_sz{evoked_sz_to_plot(2,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ./norm_factor(k),'Color','k')
+    hold off
+    ylim([-1,1])
+    xlim([0,t_before_Neuronexus+plot_duration])
+    % xlabel('Time (sec)')
+end
+
+subplot(4,1,4)
+pspectrum(evoked_sz{evoked_sz_to_plot(2,2)}(1:(t_before_Neuronexus+plot_duration)*fs_Neuronexus,k)...
+        ,fs_Neuronexus,'spectrogram', 'FrequencyLimits',freq_limits,'TimeResolution',t_res,'OverlapPercent',overlap_per)
+        
+colormap('winter')
+caxis([0,40])
+colorbar off
+title('')
+xlabel('Time (sec)')
+ylabel('')
+
+set(gcf,'Position', [81 655 1.0295e+03 324])
+end
 
 %% Plot Normalized to 1 (Of the Z Score Plots)
 
@@ -673,6 +1055,122 @@ if first_run
     end
 end
 
+%% Feature Plot
+
+if to_plot
+    
+filter_set = [1 30; 30 300;300 2000];
+    
+evoked_sz_to_plot = [8,15];
+j = 15;
+
+path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
+load([path_evoked,'Normalized Features.mat']);
+load([path_evoked,'Filtered Seizure Data.mat']);
+
+plot_duration = 55;
+
+figure;
+% X Axes Labels
+xticklabel = winDisp:winDisp:floor(size(evoked_sz{j},1)/fs_Neuronexus/winDisp - (winLen-winDisp)/winDisp)*winDisp;
+xticks = round(linspace(1, size(norm_LLFn_evoked{1}, 1), (t_after+t_before_Neuronexus)./5));
+xticklabels = xticklabel(xticks);
+
+% Colormap
+colormap('winter')
+
+plot1 = subplot(13,1,1);
+imagesc(norm_LLFn_evoked{j}')
+caxis([-1,1])
+set(plot1, 'XTick', xticks, 'XTickLabel', xticklabels)
+xlim([0.25 60/winDisp])
+% title(['Line Length']);
+colorbar
+
+plot2 = subplot(13,1,2);
+imagesc(norm_Area_evoked{j}')
+set(plot2, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-1,2.5])
+% title(['Area']);
+xlim([0.25 60/winDisp])
+colorbar
+
+plot3 = subplot(13,1,3);
+imagesc(norm_Energy_evoked{j}')
+set(plot3, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-1,5])
+% title(['Energy']);
+xlim([0.25 60/winDisp])
+colorbar
+
+plot4 = subplot(13,1,4);
+imagesc(norm_Zero_Crossing_evoked{j}')
+set(plot4, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-1,1])
+% title(['Zero Crossing']);
+xlim([0.25 60/winDisp])
+colorbar
+
+plot5 = subplot(13,1,5);
+imagesc(norm_RMS_evoked{j}')
+set(plot5, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-1,3])
+% title(['RMS Amplitude']);
+xlim([0.25 60/winDisp])
+colorbar 
+
+plot6 = subplot(13,1,6);
+imagesc(norm_Skew_evoked{j}')
+set(plot6, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-2,2])
+% title(['Skew ']);
+xlim([0.25 60/winDisp])
+colorbar
+
+plot7 = subplot(13,1,7);
+imagesc(norm_AEntropy_evoked{j}')
+set(plot7, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-2,2])
+% title(['Entropy']);
+xlim([0.25 60/winDisp])
+colorbar
+
+plot8 = subplot(13,1,8);
+imagesc(norm_LP_exp_evoked{j}')
+set(plot8, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-2,2])
+% title(['Lyapunov Exponent']);
+xlim([0.25 60/winDisp])
+colorbar
+
+plot8 = subplot(13,1,9);
+imagesc(norm_plhg_evoked{j}')
+set(plot8, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-2,2])
+% title(['Phase Locked High Gamma']);
+xlim([0.25 60/winDisp])
+colorbar
+
+plot8 = subplot(13,1,10);
+imagesc(norm_coher_evoked{j}')
+set(plot8, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([-1,1])
+% title(['Coherence']);
+xlim([0.25 60/winDisp])
+colorbar
+
+for i = 1:3
+plots = subplot(13,1,10+i);
+imagesc(norm_bp_calc_evoked{i}{j}')
+set(plots, 'XTick', xticks, 'XTickLabel', xticklabels)
+caxis([0,4-i])
+xlim([0.25 60/winDisp])
+colorbar
+% title(['Bandpower - ', num2str(filter_set(i,1)), ' - ',num2str(filter_set(i,2)), ' Hz']);
+end
+xlabel('Seconds')
+end
+
 %% K Means Separation
 
 clear total_output_evoked k_means_classes_optimal Kmeans_Mdl k_means_evoked
@@ -950,7 +1448,7 @@ clear to_visualize comparison_plot
 for folder_num = 3:length(subFolders)
     % Loads Features and Seizure
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
-    load([path_evoked,'Split_Features_RScrew.mat']);
+    load([path_evoked,'Split_Features.mat']);
     
     for i = 1:length(final_output)
         if folder_num == 3 & i == 1
@@ -1294,10 +1792,13 @@ if to_plot
     end
     
     disp('Influence of Features (X) on Animal Categorization (Y)');
-    fitglm(to_visualize{3},temp_fit)
+    fitglm([to_visualize{1},to_visualize{2},to_visualize{3},to_visualize{4},to_visualize{5},to_visualize{6}],temp_fit)
     
-    disp('Influence of Animal Traits (X) on Seizure EEG Features (Y)');
-    fitglm(sz_id,to_visualize{3}(:,1))
+    disp('Influence of Animal Traits (X) on Seizure EEG Features - Area (Y)');
+    fitglm(sz_id,to_visualize{1}(:,1))
+    
+    disp('Influence of Animal Traits (X) on Seizure EEG Features - Line Length (Y)');
+    fitglm(sz_id,to_visualize{1}(:,3))
 end
 
 %% Outputs Sz_Id For HAJI
