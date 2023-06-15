@@ -1448,7 +1448,7 @@ clear to_visualize comparison_plot
 for folder_num = 3:length(subFolders)
     % Loads Features and Seizure
     path_evoked = strcat(path_EEG,subFolders(folder_num).name,'\');
-    load([path_evoked,'Split_Features.mat']);
+    load([path_evoked,'Split_Features_LWire.mat']);
     
     for i = 1:length(final_output)
         if folder_num == 3 & i == 1
@@ -1492,6 +1492,7 @@ if to_plot
     for j = 1:length(to_visualize)
     scatter(j - 0.5 + rand(1,length(comparison_plot{i}(:,j))),comparison_plot{i}(:,j),2,'filled')
     end
+    
     yline(0,'-k','LineWidth',1)
     xticks(1:length(to_visualize))
     xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'})
@@ -1846,6 +1847,276 @@ end
 end
 
 % writematrix(sz_id)
+
+%% Filter & Save Spontaneous Seizures Data
+
+if first_run
+load([directory,'\EEG\Standardized Seizure Data.mat'],'spont_sz','t_before_EEG','fs_EEG','t_after')
+
+% Normalize Data
+if normalized
+    spont_sz = normalize_to_max_amp(spont_sz,t_before_EEG,fs_EEG);        
+end
+
+% Filter Data
+[filtered_spont_sz,spont_sz] = filter_all(spont_sz, filter_set,fs_EEG);
+
+ if to_plot
+        for i = 1:size(filter_set,1)
+            for j = 1:size(filtered_spont_sz{i},2)
+                figure
+                hold on
+                for k = 1:size(spont_sz{i},2)
+                plot(1/fs_EEG:1/fs_EEG:+t_before_EEG+t_after,filtered_spont_sz{i}{j}(1:end-1,k) + (k-1)*10)
+                end
+                xlim([0,t_after])
+                title(['Spontaneous Seizure # ',num2str(j),': Filters ',...
+                    num2str(filter_set(i,1)),'Hz and ',...
+                    num2str(filter_set(i,2)),'Hz bands']);
+                hold off
+            end
+        end
+end
+    
+save([directory,'\EEG\Filtered Spontaneous Seizure Data.mat'],'filtered_spont_sz','t_after','spont_sz','fs_EEG','t_before_EEG', 'filter_set')
+    
+end
+
+%% Feature Calculation for Spontaneous Seizures
+
+% Line Length
+LLFn = @(x) sum(abs(diff(x)));
+% Area
+Area = @(x) sum(abs(x));
+% Energy
+Energy = @(x)  sum(x.^2);
+% Zero Crossing Around Mean
+ZeroCrossing = @(x) sum((x(2:end) - mean(x) > 0 & x(1:end-1) - mean(x) < 0))...
+    + sum((x(2:end) - mean(x) < 0 & x(1:end-1) - mean(x) > 0));
+    
+load([directory,'\EEG\Filtered Spontaneous Seizure Data.mat']);
+
+% Bandpower
+for i = 1:size(filter_set,1)
+temp_bp_calc = [];
+norm_temp_bp_calc = [];
+for j = 1:length(spont_sz)
+    temp_bp_calc{j}=MovingWinFeats(filtered_spont_sz{i}{j}, fs_EEG, winLen, winDisp, @bandpower,[]);
+    norm_temp_bp_calc{j} = (temp_bp_calc{j} - mean(temp_bp_calc{j}))./std(temp_bp_calc{j});
+end
+bp_calc_spont{i} = temp_bp_calc;
+norm_bp_calc_spont{i} = norm_temp_bp_calc;
+end
+
+for j = 1:length(spont_sz)
+    ['Working on Seizure ', num2str(j)]
+    % RMS Mean
+    RMS_spont{j} = MovingWinFeats(spont_sz{j}, fs_EEG, winLen, winDisp, @rms,[]);
+    norm_RMS_spont{j} = (RMS_spont{j} - mean(RMS_spont{j}))./std(RMS_spont{j});
+    % Skewness
+    Skew_spont{j} = MovingWinFeats(spont_sz{j}, fs_EEG, winLen, winDisp, @skewness,[]);
+    norm_Skew_spont{j} = (Skew_spont{j} - mean(Skew_spont{j}))./std(Skew_spont{j});
+    % Approximate Entropy
+    ['Entropy']
+    AEntropy_spont{j} = MovingWinFeats(spont_sz{j}, fs_EEG, winLen, winDisp, @approximateEntropy,[]);
+    norm_AEntropy_spont{j} = (AEntropy_spont{j} - mean(AEntropy_spont{j}))./std(AEntropy_spont{j});
+    ['Done']
+    % Line Length
+    LLFn_spont{j} = MovingWinFeats(spont_sz{j}, fs_EEG, winLen, winDisp, LLFn,[]);
+    norm_LLFn_spont{j} = (LLFn_spont{j} - mean(LLFn_spont{j}))./std(LLFn_spont{j});
+    % Area
+    Area_spont{j} = MovingWinFeats(spont_sz{j}, fs_EEG, winLen, winDisp, Area,[]);
+    norm_Area_spont{j} = (Area_spont{j} - mean(Area_spont{j}))./std(Area_spont{j});
+    % Energy
+    Energy_spont{j} = MovingWinFeats(spont_sz{j}, fs_EEG, winLen, winDisp, Energy,[]);
+    norm_Energy_spont{j} = (Energy_spont{j} - mean(Energy_spont{j}))./std(Energy_spont{j});
+    % Zero Crossing
+    Zero_Crossing_spont{j} = MovingWinFeats(spont_sz{j}, fs_EEG, winLen, winDisp, ZeroCrossing,[]);
+    norm_Zero_Crossing_spont{j} = (Zero_Crossing_spont{j} - mean(Zero_Crossing_spont{j}))./std(Zero_Crossing_spont{j});
+    ['LP']
+    % Lyapunov Exponent
+    LP_exp_spont{j} = MovingWinFeats(spont_sz{j}, fs_EEG, winLen, winDisp, @lyapunovExponent,fs_EEG);
+    norm_LP_exp_spont{j} = (LP_exp_spont{j} - mean(LP_exp_spont{j}))./std(LP_exp_spont{j});
+
+    % Phase Locked High Gamma
+    % Filter to generate low (4-30 Hz) and high gamma (80-150 Hz) signals
+    % create LFP and HG filters
+    [low_num,low_denom] = butter(2,[4 30]/(2000/2),'bandpass');
+    [hg_num,hg_denom] = butter(2,[80 150]/(2000/2),'bandpass');
+
+    lowfreq{j} = filtfilt(low_num,low_denom,spont_sz{j});
+    highfreq{j} = filtfilt(hg_num,hg_denom,spont_sz{j});
+
+    % Calculate the LFP phase and the HG amplitude
+    ['Phase Locked High Gamma Spontaneous Seizure # ', num2str(j)]
+    tophase_low = hilbert(lowfreq{j});
+    IMAGS = imag(tophase_low);
+    REALS = real(tophase_low);
+    lowphase = atan2(IMAGS,REALS);
+    clear IMAGS REALS
+
+    tophase_high = hilbert(highfreq{j});
+    IMAGS = imag(tophase_high);
+    REALS = real(tophase_high);
+    % highphase = atan2(IMAGS,REALS);
+    highamp = sqrt(IMAGS.^2 + REALS.^2);    
+    clear IMAGS REALS
+
+    % Windows
+    NumWins = floor(size(spont_sz{j},1)/fs_EEG/winDisp - (winLen-winDisp)/winDisp);
+    plhg_temp = [];
+
+    % Defining Lengths
+    winst = 1;
+    winend = winLen * fs_EEG;
+
+    for winnum = 1:NumWins
+        plhg_temp(winnum,:) = abs(mean(abs(tophase_high(winst:winend,:)).*exp(i*(lowphase(winst:winend,:) ...
+            - highamp(winst:winend,:)))));
+        % Coherence Between Wires
+        coher_temp(winnum,1) = mean(mscohere(spont_sz{j}(winst:winend,1),spont_sz{j}(winst:winend,2),100,2,[],fs_EEG));
+        % Coherence Between Screws
+        coher_temp(winnum,2) = mean(mscohere(spont_sz{j}(winst:winend,3),spont_sz{j}(winst:winend,4),100,2,[],fs_EEG));
+        % Coherence Between Ipsilateral (Screw + Wire)
+        coher_temp(winnum,3) = mean(mscohere(spont_sz{j}(winst:winend,1),spont_sz{j}(winst:winend,3),100,2,[],fs_EEG));
+        % Coherence Between Contralateral (Screw + Wire)
+        coher_temp(winnum,4) = mean(mscohere(spont_sz{j}(winst:winend,2),spont_sz{j}(winst:winend,4),100,2,[],fs_EEG));
+        winst = winst + winDisp * fs_EEG;
+        winend = winst - 1 + winLen * fs_EEG;
+    end
+
+    plhg_spont{j} = plhg_temp;
+    coher_spont{j} = coher_temp;
+    norm_plhg_spont{j} = (plhg_spont{j} - mean(plhg_spont{j}))./std(plhg_spont{j});
+    norm_coher_spont{j} = (coher_spont{j} - mean(coher_spont{j}))./std(coher_spont{j});
+    
+    
+    % Plots Calculated Features
+    if to_plot
+        figure;
+        % X Axes Labels
+        xticklabel = winDisp:winDisp:floor(size(spont_sz{j},1)/fs_EEG/winDisp - (winLen-winDisp)/winDisp)*winDisp;
+        xticks = round(linspace(1, size(norm_LLFn_spont{1}, 1), (t_after+t_before_EEG)./5));
+        xticklabels = xticklabel(xticks);
+
+        % Colormap
+        colormap('winter')
+
+        plot1 = subplot(10,1,1);
+        imagesc(norm_LLFn_spont{j}')
+        caxis([-1,1])
+        set(plot1, 'XTick', xticks, 'XTickLabel', xticklabels)
+        xlabel('Seconds')
+        ylabel('Line Length')
+        title(['Line Length - Spontaneous Seizure #', num2str(j)]);
+        colorbar
+
+        plot2 = subplot(10,1,2);
+        % plot(winDisp:winDisp:floor(size(spont_sz{j},1)/fs_EEG/winDisp - (winLen-winDisp)/winDisp)*winDisp,norm_Area_spont{j})
+        imagesc(norm_Area_spont{j}')
+        set(plot2, 'XTick', xticks, 'XTickLabel', xticklabels)
+        caxis([-1,2.5])
+        xlabel('Seconds')
+        ylabel('Area')
+        title(['Area - SpontaneousSeizure #',num2str(j)]);
+        colorbar
+
+        plot3 = subplot(10,1,3);
+        imagesc(norm_Energy_spont{j}')
+        set(plot3, 'XTick', xticks, 'XTickLabel', xticklabels)
+        caxis([-1,5])
+        xlabel('Seconds')
+        ylabel('Energy')
+        title(['Energy - Spontaneous Seizure #',num2str(j)]);
+        colorbar
+
+        plot4 = subplot(10,1,4);
+        imagesc(norm_Zero_Crossing_spont{j}')
+        set(plot4, 'XTick', xticks, 'XTickLabel', xticklabels)
+        caxis([-1,1])
+        xlabel('Seconds')
+        ylabel('Zero Crossing')
+        title(['Zero Crossing - Spontaneous Seizure #',num2str(j)]);
+        colorbar
+
+        plot5 = subplot(10,1,5);
+        imagesc(norm_RMS_spont{j}')
+        set(plot5, 'XTick', xticks, 'XTickLabel', xticklabels)
+        caxis([-1,3])
+        xlabel('Seconds')
+        ylabel('RMS Amplitude')
+        title(['RMS Amplitude - Spontaneous Seizure #',num2str(j)]);
+        colorbar 
+
+        plot6 = subplot(10,1,6);
+        imagesc(norm_Skew_spont{j}')
+        set(plot6, 'XTick', xticks, 'XTickLabel', xticklabels)
+        caxis([-2,2])
+        xlabel('Seconds')
+        ylabel('Skew')
+        title(['Skew - Spontaneous Seizure #', num2str(j)]);
+        colorbar
+
+        plot7 = subplot(10,1,7);
+        imagesc(norm_AEntropy_spont{j}')
+        set(plot7, 'XTick', xticks, 'XTickLabel', xticklabels)
+        caxis([-2,2])
+        xlabel('Seconds')
+        ylabel('Entropy')
+        title(['Entropy - Spontaneous Seizure #', num2str(j)]);
+        colorbar
+
+        plot8 = subplot(10,1,8);
+        imagesc(norm_LP_exp_spont{j}')
+        set(plot8, 'XTick', xticks, 'XTickLabel', xticklabels)
+        caxis([-2,2])
+        xlabel('Seconds')
+        ylabel('Lyapunov Exponent')
+        title(['Lyapunov Exponent - Spontaneous Seizure #', num2str(j)]);
+        colorbar
+
+        plot9 = subplot(10,1,9);
+        imagesc(norm_plhg_spont{seizure}')
+        caxis([-1,1])
+        set(plot9, 'XTick', xticks, 'XTickLabel', xticklabels)
+        xlabel('Seconds')
+        ylabel('PLHG')
+        title(['Phase Locked High Gamma - Spontaneous Seizure #', num2str(seizure)]);
+        colorbar
+
+        plot10 = subplot(10,1,10);
+        imagesc(norm_coher_spont{seizure}')
+        caxis([-1,1])
+        set(plot10, 'XTick', xticks, 'XTickLabel', xticklabels)
+        xlabel('Seconds')
+        ylabel('Coherence')
+        title(['Coherence - Spontaneous Seizure #', num2str(seizure)]);
+        colorbar
+
+        figure
+        % Colormap
+        colormap('winter')
+        for i = 1:size(filter_set,1)
+        plots = subplot(size(filter_set,1),1,i);
+        imagesc(norm_bp_calc_spont{i}{j}')
+        set(plots, 'XTick', xticks, 'XTickLabel', xticklabels)
+        caxis([0,4-i])
+        colorbar
+        xlabel('Seconds')
+        ylabel([num2str(filter_set(i,1)), ' - ' num2str(filter_set(i,2)), ' Hz'])
+        title(['Bandpower - Spontaneous Seizure #',num2str(j)]);
+        end
+    end
+end
+
+save([directory,'\EEG\Spontaneous Raw Features.mat'],'LLFn_spont', 'Area_spont', 'Energy_spont', 'Zero_Crossing_spont', 'bp_calc_spont',...
+        'RMS_spont', 'Skew_spont', 'AEntropy_spont', 'LP_exp_spont')
+save([directory,'\EEG\Spontaneous Normalized Features.mat'],'norm_LLFn_spont', 'norm_Area_spont', 'norm_Energy_spont', ...
+        'norm_Zero_Crossing_spont', 'norm_bp_calc_spont','norm_RMS_spont','norm_Skew_spont','norm_LP_exp_spont',...
+        'norm_AEntropy_spont')
+
+%% Determine Thirds for  Spontaneous Seizures
+
 
 % Seizure Initiation Spike Inversion During Optical Stimulation
 
