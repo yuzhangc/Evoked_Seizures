@@ -1,9 +1,12 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'D:\';
+directory = 'E:\';
 % Generate subfolder list
-complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags); clear complete_list dirFlags;
+complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
+real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END')); 
+subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
+clear complete_list dirFlags real_folder_st real_folder_end;
 
 %% Parameters -------------------------------------------------------------
 
@@ -30,22 +33,13 @@ colorbarlim_evoked = [-30,-0];
 if extract_sz
     % Extraction variables
     t_before = 5; t_after = 180;
-    for folder_num = 3:length(subFolders)
+    for folder_num = 1:length(subFolders)
         path_extract = strcat(directory,subFolders(folder_num).name,'\');
-        extracted_sz = extract_seizures(path_extract,t_before,t_after,2);
-        % Notes to Self - Type Determines fs. Type 1 = EEG = 2000; Type 2 =
-        % Recent Recordings W Baseline = 20000 (Get From Neuronexus File)
-        % Keep in Mind Condition Where Laser 2 == Laser 1 & Laser 2 Delay <
-        % - 1. Need to add -fs * Delay to get true start
-        % Save Figure Plots of Extracted Data to Subfolder. Meaning During
-        % extraction ONLY focus on rhd files.
-        % Verify whether the blue channel is on 1 or 2 (it flipped during a
-        % trial at some point)
-        % Title should Contain All Info From Trials Spreadsheet
+        extract_seizures(path_extract,t_before,t_after);
     end
 end
 
-clear t_before t_after path_extract folder_num evoked_sz
+clear t_before t_after path_extract folder_num
 
 %% Downsamples and Filters Extracted Data ---------------------------------
 
