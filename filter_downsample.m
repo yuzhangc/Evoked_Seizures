@@ -63,8 +63,8 @@ end
 % Step 4: Z score normalization, using t_before to determine baseline
 % length
 for sz_cnt = 1:length(output_data)
-    baseline_mean = mean(output_data{sz_cnt}(1:target_fs*t_before,:));
-    baseline_std = std(output_data{sz_cnt}(1:target_fs*t_before,:));
+    baseline_mean = mean(output_data{sz_cnt}(1:fs*t_before,:));
+    baseline_std = std(output_data{sz_cnt}(1:fs*t_before,:));
     output_data{sz_cnt} = (output_data{sz_cnt}-baseline_mean)./baseline_std;
 end
 
