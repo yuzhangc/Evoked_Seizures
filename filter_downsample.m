@@ -1,8 +1,8 @@
-function [output_data_2] = downsample_filter(path_extract,downsamp_sz,target_fs)
+function [output_data] = filter_downsample(path_extract,downsamp_sz,target_fs)
 
-% Standardizes seizure data into fixed segment with t_before seconds before]
-% before the evocation stimulus and t_after seconds after evocation
-% stimulus.
+% Filters then downsamples data. Filters need to happen first to prevent
+% peak shifts. After downsampling, z scores data (to baseline) and then
+% plot 'check' figures. Checked with Folder 35.
 
 % Input Variables
 % path_extract - path for seizures.
@@ -36,7 +36,19 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 2: Downsamples data to target_fs
+% Step 2: Create 60 Hz notch filters (up to Nyquist frequency). Notch Filter Data
+max_filter = floor(fs/2/60);
+for filter_cnt = 1:max_filter
+    wo = 60/(filter_cnt * fs/2); bw = wo/35; [b,a] = iirnotch(wo,bw);
+    for sz_cnt = 1:length(output_data)
+        output_data{sz_cnt} = filtfilt(b,a,output_data{sz_cnt});
+    end
+    strcat("Filter #" , num2str(filter_cnt) , " Out Of " , num2str(max_filter) , " Complete")
+end
+
+% -------------------------------------------------------------------------
+
+% Step 3: Downsamples data to target_fs
 if target_fs ~= fs && target_fs < fs && downsamp_sz
     for sz_cnt = 1:length(output_data)
     output_data{sz_cnt} = downsample(output_data{sz_cnt}, round(fs/target_fs));
@@ -48,7 +60,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 3: Z score normalization, using t_before to determine baseline
+% Step 4: Z score normalization, using t_before to determine baseline
 % length
 for sz_cnt = 1:length(output_data)
     baseline_mean = mean(output_data{sz_cnt}(1:target_fs*t_before,:));
@@ -57,18 +69,6 @@ for sz_cnt = 1:length(output_data)
 end
 
 ["Z-scoring Complete"]
-
-% -------------------------------------------------------------------------
-
-% Step 4: Create 60 Hz notch filters (up to Nyquist frequency). Notch Filter Data
-max_filter = floor(target_fs/2/60);
-for filter_cnt = 1:max_filter
-    wo = 60/(filter_cnt * target_fs/2); bw = wo/35; [b,a] = iirnotch(wo,bw);
-    for sz_cnt = 1:length(output_data)
-        output_data{sz_cnt} = filtfilt(b,a,output_data{sz_cnt});
-    end
-    strcat("Filter #" , num2str(filter_cnt) , " Out Of " , num2str(max_filter) , " Complete")
-end
 
 % -------------------------------------------------------------------------
 
