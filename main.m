@@ -22,7 +22,7 @@ to_plot = 1; plot_duration = 95;
 
 % Global Variables
 % Target sampling rate
-fs_EEG = 2000;
+target_fs = 2000;
 % Feature window size (s). Window displacement (s). Spectrogram frequency limit. 
 winLen = 0.5; winDisp = 0.25; overlap_per = winDisp/winLen*100; freq_limits = [1 300];
 % Spectrogram plot colorbar limits
@@ -43,8 +43,9 @@ clear t_before t_after path_extract folder_num
 
 %% Downsamples and Filters Extracted Data ---------------------------------
 
-if downsamp_sz
-end
-
 if filter_sz
+    for folder_num = 1:length(subFolders)
+        path_extract = strcat(directory,subFolders(folder_num).name,'\');
+        downsample_filter(path_extract,downsamp_sz,target_fs);
+    end
 end

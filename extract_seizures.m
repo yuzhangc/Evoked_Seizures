@@ -25,9 +25,9 @@ strcat("Working on: ", path_extract)
 
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 if sz_parameters(1,1) <= 4
-    type = 3; stim_channel = 2; t_before = 1; fs = 20000;
+    type = 3; stim_channel = 2; t_before = 1; fs = 20000; second_channel = 1;
 elseif sz_parameters(1,1) < 100
-    type = 2; stim_channel = 1; fs = 20000;
+    type = 2; stim_channel = 1; fs = 20000; second_channel = 2;
 else
     type = 1; fs = 2000;
 end
@@ -46,18 +46,31 @@ else
 % Generate Filelist of Neuronexus Files
 filelist = dir(strcat(path_extract,'*.rhd'));
 
-mkdir(path_extract,'Figures')
+mkdir(path_extract,'Figures\Raw')
 
 for count = 1:length(filelist)
     
     % Step 1: Determine how much the stimulus start duration needs to be
-    % moved to account for pre-evocation blue light therapies
+    % moved to account for pre-evocation blue light therapies. 
     move_start = 0;
     % Determines if blue light was tested as a therapeutic
     if sz_parameters(count,8) == sz_parameters(count,10) && sz_parameters(count,13) < -1
         move_start = -1 * sz_parameters(count,13);
     end
-    
+    % Determine Plot Color For Second Stimulus. Only valid for type 2
+    % recordings.
+    second_plot_color = '';
+    if sz_parameters(count,10) ~= -1 && sz_parameters(count,10) ~= sz_parameters(count,8)
+        if sz_parameters(count,10) == 560 || sz_parameters(count,10) == 530
+            second_plot_color = 'g';
+        elseif sz_parameters(count,10) == 660
+            second_plot_color = 'r';
+        end
+    % If equal, then blue
+    elseif sz_parameters(count,10) == 473
+        second_plot_color = 'b';
+    end
+
     % Step 2: Reads files
     [board_adc_data,amplifier_data] = modded_read_Intan_RHD2000_file(filelist(count).name,path_extract);
     
@@ -79,15 +92,24 @@ for count = 1:length(filelist)
     plot(1/fs : 1/fs : t_before + t_after , board_adc_data(stim_channel,stim_start:stim_start + t_before * fs ...
         + t_after * fs - 1)./ max(board_adc_data(stim_channel,stim_start:stim_start + t_before * fs ...
         + t_after * fs - 1)) * 0.5 - 1.5,'b')
+    if sz_parameters(count,10) ~= -1 && sz_parameters(count,10) ~= sz_parameters(count,8)
+    plot(1/fs : 1/fs : t_before + t_after , board_adc_data(second_channel,stim_start:stim_start + t_before * fs ...
+        + t_after * fs - 1)./ max(board_adc_data(second_channel,stim_start:stim_start + t_before * fs ...
+        + t_after * fs - 1)) * 0.5 - 2,second_plot_color)
+    end
     
-    % Set Axes Limit. Draws Line Around Stimulation
-    ylim([-2,size(output_data{count},2) + 0.5]); xlim([0,t_before + t_after])
-    % Draws line around stimulation. Sets Figure Position
+    % Draws line around stimulation and second stimulus. Sets Figure Position
     xline(t_before,'-b','Evocation','LineWidth',2); xline(t_before + sz_parameters(count,12),'-b','LineWidth',2);
-    set(gcf, 'Position', [680.0000  229.5000  827.5000  748.5000])
+    if sz_parameters(count,10) ~= -1
+    xline(t_before + sz_parameters(count,13),strcat('-',second_plot_color),'Treatment','LineWidth',2); xline(t_before + sz_parameters(count,13) + sz_parameters(count,14),strcat('-',second_plot_color),'LineWidth',2);
+    end
+    
+    % Set Axes Limit. Draws Line Around Stimulation. Sets Figure Position
+    ylim([-2,size(output_data{count},2) + 0.5]); xlim([0,t_before + t_after])
+    set(gcf, 'Position', [10.0000  10.0000  827.5000  748.5000])    
     
     % Titling, Saving Figures
-    figure_title = strcat("Figures\M",num2str(sz_parameters(count,1)),"_T",num2str(sz_parameters(count,2)),...
+    figure_title = strcat("Figures\Raw\M",num2str(sz_parameters(count,1)),"_T",num2str(sz_parameters(count,2)),...
         "_",num2str(sz_parameters(count,8)),"STIM_POW",num2str(sz_parameters(count,9)),"mW_",num2str(sz_parameters(count,12)),...
         "sec");
     plot_title = strcat("Mouse: ",num2str(sz_parameters(count,1))," Trial: ",num2str(sz_parameters(count,2)),...
@@ -112,7 +134,7 @@ for count = 1:length(filelist)
             "sec_",condition_txt);
     end
     title(plot_title);
-    saveas(fig1,fullfile(path_extract,figure_title),'png');
+    saveas(fig1,fullfile(strcat(path_extract,figure_title,".png")),'png');
     hold off; close(fig1);
 
 end
