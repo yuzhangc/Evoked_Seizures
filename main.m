@@ -17,6 +17,8 @@ extract_sz = 1;
 downsamp_sz = 1;
 % Filters extracted data
 filter_sz = 1;
+% Calculate Features
+feat_calc = 1;
 % Plots figures and data
 to_plot = 1; plot_duration = 95;
 
@@ -27,6 +29,11 @@ target_fs = 2000;
 winLen = 0.5; winDisp = 0.25; overlap_per = winDisp/winLen*100; freq_limits = [1 300];
 % Spectrogram plot colorbar limits
 colorbarlim_evoked = [-30,-0];
+% Feature List - 1:12 include all features. Refer to calculate_features for
+% more information
+feature_list = [1:12];
+% Band Power Ranges
+bp_filters = [1, 30; 30, 300; 300, target_fs/2];
 
 %% Data Extraction and Standardization of Length --------------------------
 
@@ -47,5 +54,14 @@ if filter_sz
     for folder_num = 1:length(subFolders)
         path_extract = strcat(directory,subFolders(folder_num).name,'\');
         filter_downsample(path_extract,downsamp_sz,target_fs);
+    end
+end
+
+%% Feature Calculation
+
+if feat_calc == 1
+    for folder_num = 1:length(subFolders)
+        path_extract = strcat(directory,subFolders(folder_num).name,'\');
+        calculate_features(path_extract,filter_sz,feature_list,winLen, winDisp, bp_filters);
     end
 end
