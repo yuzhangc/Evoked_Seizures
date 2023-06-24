@@ -11,6 +11,8 @@ clear complete_list dirFlags real_folder_st real_folder_end;
 %% Parameters -------------------------------------------------------------
 
 % Booleans
+% First Run? If so, extract and filter from raw data
+first_run = 0;
 % Extracts seizures from raw data
 extract_sz = 1;
 % Downsamples extracted data
@@ -37,7 +39,7 @@ bp_filters = [1, 30; 30, 300; 300, target_fs/2];
 
 %% Data Extraction and Standardization of Length --------------------------
 
-if extract_sz
+if extract_sz && first_run
     % Extraction variables
     t_before = 5; t_after = 180;
     for folder_num = 1:length(subFolders)
@@ -50,7 +52,7 @@ clear t_before t_after path_extract folder_num
 
 %% Downsamples and Filters Extracted Data ---------------------------------
 
-if filter_sz
+if filter_sz && first_run
     for folder_num = 1:length(subFolders)
         path_extract = strcat(directory,subFolders(folder_num).name,'\');
         filter_downsample(path_extract,downsamp_sz,target_fs);

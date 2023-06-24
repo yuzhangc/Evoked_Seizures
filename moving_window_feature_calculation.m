@@ -44,7 +44,7 @@ for ch = 1:size(input_data,2)
         
         % Otherwise feed in arguments into function
         else
-        featval(winnum,ch) = featFn(window,varargs);
+        featval(winnum,ch) = featFn(window,varargs{:});
         end
         
         % ----------------------------------------------------------------

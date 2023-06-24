@@ -21,7 +21,7 @@ clear output_data
 % Type 2 - New Acutely Evoked Recordings. Neuronexus
 % Type 1 - EEG Recordings.
 
-strcat("Working on: ", path_extract)
+disp("Working on: " + path_extract)
 
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 if sz_parameters(1,1) <= 4

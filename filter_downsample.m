@@ -20,7 +20,7 @@ function [output_data] = filter_downsample(path_extract,downsamp_sz,target_fs)
 % Type 2 - New Acutely Evoked Recordings. Neuronexus
 % Type 1 - EEG Recordings.
 
-strcat("Working on: ", path_extract)
+disp("Working on: " + path_extract)
 mkdir(path_extract,'Figures\Filtered')
 
 load(strcat(path_extract,"Standardized Seizure Data.mat"))
@@ -43,7 +43,7 @@ for filter_cnt = 1:max_filter
     for sz_cnt = 1:length(output_data)
         output_data{sz_cnt} = filtfilt(b,a,output_data{sz_cnt});
     end
-    strcat("Filter #" , num2str(filter_cnt) , " Out Of " , num2str(max_filter) , " Complete")
+    disp("Progress: Filter #" + num2str(filter_cnt) + " Out Of " + num2str(max_filter) + " Complete")
 end
 
 % -------------------------------------------------------------------------
@@ -56,7 +56,7 @@ if target_fs ~= fs && target_fs < fs && downsamp_sz
     fs = target_fs;
 end
 
-["Downsampling Complete"]
+disp("Downsampling Complete")
 
 % -------------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ for sz_cnt = 1:length(output_data)
     output_data{sz_cnt} = (output_data{sz_cnt}-baseline_mean)./baseline_std;
 end
 
-["Z-scoring Complete"]
+disp("Z-scoring Complete")
 
 % -------------------------------------------------------------------------
 
