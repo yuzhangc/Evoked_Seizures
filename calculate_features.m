@@ -38,6 +38,42 @@ end
 
 % -------------------------------------------------------------------------
 
+% Due to Plotting Requirements. Band Power Goes First
+% Case 12: Band Power by bp_filters pairs
+if ismember(12, feature_list)
+    
+    disp("Working on Band Power. May Take a While.")
+    
+    % Main Output Variable
+    clear BP_output norm_BP_output
+    
+    % Loops Through bp_filter pairs
+    for bp_pair = 1:size(bp_filters,1)
+    disp("Filter #" + num2str(bp_pair) + " out of " + num2str(size(bp_filters,1)) + ...
+        ": " + num2str(bp_filters(bp_pair,1)) + "Hz to " + num2str(bp_filters(bp_pair,2)) + "Hz")
+    
+    % Loops Through All Seizures. Calculate feature and z score normalization.
+    for sz_cnt = 1:length(output_data)
+    BP_calc{sz_cnt} = moving_window_feature_calculation(output_data{sz_cnt}, fs, winLen, winDisp, @bandpower,{fs,[bp_filters(bp_pair,:)]});
+    norm_BP_calc{sz_cnt} = (BP_calc{sz_cnt} - mean(BP_calc{sz_cnt}))./std(BP_calc{sz_cnt});
+    end
+    
+    % Adds to BP_output
+    BP_output{bp_pair} = BP_calc;
+    norm_BP_output{bp_pair} = norm_BP_calc;
+    
+    end
+    
+    % Adds BP_output to Features.
+    features.Band_Power = BP_output;
+    norm_features.Band_Power = norm_BP_output;
+   
+    disp("Band Power Completed")
+    
+end
+
+% -------------------------------------------------------------------------
+
 % Case 1: Line Length
 
 if ismember(1, feature_list)
@@ -272,49 +308,10 @@ end
 
 % -------------------------------------------------------------------------
 
-% Case 12: Band Power by bp_filters pairs
-if ismember(12, feature_list)
-    
-    disp("Working on Band Power. May Take a While.")
-    
-    % Main Output Variable
-    clear BP_output norm_BP_output
-    
-    % Loops Through bp_filter pairs
-    for bp_pair = 1:size(bp_filters,1)
-    disp("Filter #" + num2str(bp_pair) + " out of " + num2str(size(bp_filters,1)) + ...
-        ": " + num2str(bp_filters(bp_pair,1)) + "Hz to " + num2str(bp_filters(bp_pair,2)) + "Hz")
-    
-    % Loops Through All Seizures. Calculate feature and z score normalization.
-    for sz_cnt = 1:length(output_data)
-    BP_calc{sz_cnt} = moving_window_feature_calculation(output_data{sz_cnt}, fs, winLen, winDisp, @bandpower,{fs,[bp_filters(bp_pair,:)]});
-    norm_BP_calc{sz_cnt} = (BP_calc{sz_cnt} - mean(BP_calc{sz_cnt}))./std(BP_calc{sz_cnt});
-    end
-    
-    % Adds to BP_output
-    BP_output{bp_pair} = BP_calc;
-    norm_BP_output{bp_pair} = norm_BP_calc;
-    
-    end
-    
-    % Adds BP_output to Features. 0 is for indexing purposes only, puts
-    % Bandpower at top if exists.
-    features.0_Band_Power = BP_output;
-    norm_features.0_Band_Power = norm_BP_output;
-   
-    disp("Band Power Completed")
-    
-end
-
-% -------------------------------------------------------------------------
-
 % Plots Normalized Features Only
 
 % Creates Directory
 mkdir(path_extract,'Figures\Normalized Features')
-
-% Chooses colormap for plot
-colormap('winter')
 
 % Loops Through All Seizures
 for sz_cnt = 1:length(output_data)
@@ -322,11 +319,14 @@ for sz_cnt = 1:length(output_data)
     fig1 = figure(1);
     fig1.WindowState = 'maximized';
     
+    % Chooses colormap for plot
+    colormap('winter')
+    
     % If exist band power, adjusts start by how many band power plots we
     % have to plot
     
     if ismember(12, feature_list)
-        adjustment_val = size(bp_filters,1) - 1;
+        adjustment_val = size(bp_filters,1);
         start_value = 2;
         
         % Generate Subplot For Bandpower (Specifically)
@@ -334,8 +334,8 @@ for sz_cnt = 1:length(output_data)
         for bp_plot_count = 1:size(bp_filters,1)
             
             % Plots Each Segment Separately
-            plot1 = subplot(length(feature_list) + adjustment_val,1,bp_plot_count);
-            imagesc(norm_features.0_Band_Power{bp_plot_count}{sz_cnt}');
+            plot1 = subplot(length(feature_list) + adjustment_val,1,bp_plot_count + 1);
+            imagesc(norm_features.Band_Power{bp_plot_count}{sz_cnt}');
             colorbar
             
             % Sets Color Axis. Higher Frequencies Have Lower Increases
@@ -348,7 +348,7 @@ for sz_cnt = 1:length(output_data)
             
             % Generate Tick Labels For Plots
             xticklabel = winDisp:winDisp:floor(size(output_data{sz_cnt},1)/fs/winDisp - (winLen-winDisp)/winDisp)*winDisp;
-            xticks = round(linspace(1, size(norm_features.(feature_names{plot_count}){sz_cnt}, 1), (t_after+t_before)./5));
+            xticks = round(linspace(1, size(norm_features.Band_Power{bp_plot_count}{sz_cnt}, 1), (t_after+t_before)./5));
             xticklabels = xticklabel(xticks);
 
             % Set X Ticks For Plots
@@ -359,14 +359,26 @@ for sz_cnt = 1:length(output_data)
             
         end
      
-    % Otherwise, no adjustment needed
+    % Otherwise, no adjustment needed outside of for first plot
     
     else
        
-        adjustment_val = 0;
+        adjustment_val = 1;
         start_value = 1;
         
     end
+    
+    % First Plot is Raw Channel. Choose Wire For Most
+    plot1 = subplot(length(feature_list) + adjustment_val,1,1);
+    if size(output_data{sz_cnt}) > 2
+        channel = 3;
+    else
+        channel = 1;
+    end
+    plot(1/fs:1/fs:t_before + t_after, output_data{sz_cnt}(:,channel)./ max(output_data{sz_cnt}(:,channel))...
+            * 0.5 + size(output_data{sz_cnt},2) - channel,'k');
+    xlim([0.25 60]);
+    colorbar;
     
     % Generate Subplot For All Other Features
     for plot_count = start_value:length(feature_list)

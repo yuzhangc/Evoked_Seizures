@@ -24,6 +24,7 @@ winend = winLen * fs;
 % Loops through all windows
 for winnum = 1:NumWins
     
+    if size(input_data,2) == 4
     % Coherence Between Screws
     coher_temp(winnum,1) = mean(mscohere(input_data(winst:winend,1),input_data(winst:winend,2),100,2,[],fs));
     % Coherence Between Wires
@@ -32,6 +33,20 @@ for winnum = 1:NumWins
     coher_temp(winnum,3) = mean(mscohere(input_data(winst:winend,1),input_data(winst:winend,3),100,2,[],fs));
     % Coherence Between Contralateral (Screw + Wire)
     coher_temp(winnum,4) = mean(mscohere(input_data(winst:winend,1),input_data(winst:winend,4),100,2,[],fs));
+    
+    elseif size(input_data,2) == 3
+    % Coherence Between Ch 1 and 2
+    coher_temp(winnum,1) = mean(mscohere(input_data(winst:winend,1),input_data(winst:winend,2),100,2,[],fs));
+    % Coherence Between Ch 1 and 3
+    coher_temp(winnum,2) = mean(mscohere(input_data(winst:winend,1),input_data(winst:winend,3),100,2,[],fs));
+    % Coherence Between Ch 2 and 3
+    coher_temp(winnum,3) = mean(mscohere(input_data(winst:winend,2),input_data(winst:winend,3),100,2,[],fs));
+    
+    elseif size(input_data,2) == 1    
+    % Coherence Between Screws Ch 1 and Ch 2
+    coher_temp(winnum,1) = mean(mscohere(input_data(winst:winend,1),input_data(winst:winend,2),100,2,[],fs));
+    
+    end
     
     % Move window forward by winDisp
     winst = winst + winDisp * fs;
