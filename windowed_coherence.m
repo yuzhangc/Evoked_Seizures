@@ -42,7 +42,7 @@ for winnum = 1:NumWins
     % Coherence Between Ch 2 and 3
     coher_temp(winnum,3) = mean(mscohere(input_data(winst:winend,2),input_data(winst:winend,3),100,2,[],fs));
     
-    elseif size(input_data,2) == 1    
+    elseif size(input_data,2) == 2    
     % Coherence Between Screws Ch 1 and Ch 2
     coher_temp(winnum,1) = mean(mscohere(input_data(winst:winend,1),input_data(winst:winend,2),100,2,[],fs));
     
