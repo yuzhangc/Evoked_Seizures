@@ -297,9 +297,10 @@ if ismember(12, feature_list)
     
     end
     
-    % Adds BP_output to Features
-    features.Band_Power = BP_output;
-    norm_features.Band_Power = norm_BP_output;
+    % Adds BP_output to Features. 0 is for indexing purposes only, puts
+    % Bandpower at top if exists.
+    features.0_Band_Power = BP_output;
+    norm_features.0_Band_Power = norm_BP_output;
    
     disp("Band Power Completed")
     
@@ -309,23 +310,79 @@ end
 
 % Plots Normalized Features Only
 
+% Creates Directory
+mkdir(path_extract,'Figures\Normalized Features')
+
+% Chooses colormap for plot
+colormap('winter')
+
+% Loops Through All Seizures
 for sz_cnt = 1:length(output_data)
 
     fig1 = figure(1);
+    fig1.WindowState = 'maximized';
     
-    for plot_count = 1:length(feature_list)
-        subplot(length(feature_list),1,plot_count)
-        fieldnames(norm_features)
-        a.(ans{plot_count})
+    % If exist band power, adjusts start by how many band power plots
+    if ismember(12, feature_list)
+        adjustment_val = size(bp_filters,1) - 1;
+        start_value = 2;
+        
+        % Generate Subplot For Bandpower (Specifically)
+        
+    else
+        adjustment_val = 0;
+        start_value = 1;
     end
+    
+    % Generate Subplot For All Other Features
+    for plot_count = start_value:length(feature_list)
+        
+        % Generate Subplot
+        plot1 = subplot(length(feature_list) + adjustment_val,1,plot_count + adjustment_val);
+        % Extracts Feature Names
+        feature_names = fieldnames(norm_features);
+        
+        % Plots with colorbar
+        imagesc(norm_features.(feature_names{plot_count}){sz_cnt}');
+        colorbar
+        
+        % Generate Tick Labels For Plots
+        xticklabel = winDisp:winDisp:floor(size(output_data{sz_cnt},1)/fs/winDisp - (winLen-winDisp)/winDisp)*winDisp;
+        xticks = round(linspace(1, size(norm_features.(feature_names{plot_count}){sz_cnt}, 1), (t_after+t_before)./5));
+        xticklabels = xticklabel(xticks);
+        
+        % Set X Ticks For Plots
+        set(plot1, 'XTick', xticks, 'XTickLabel', xticklabels)
+        xlim([0.25 60/winDisp]);
+        
+        if strcmp(feature_names{plot_count}, "Line_Length") || strcmp(feature_names{plot_count}, "Zero_Crossing") || strcmp(feature_names{plot_count}, "Coherence")
+            caxis([-1,1])
+        elseif strcmp(feature_names{plot_count}, "Area") || strcmp(feature_names{plot_count}, "RMS")
+            caxis([-1,2.5])
+        elseif strcmp(feature_names{plot_count}, "Energy")
+            caxis([-1,5])
+        else
+            caxis([-2,2])
+        end
+        
+        % Uses Feature Name as Title, Removing Underscores and Replacing
+        % With Spaces
+        plot_title = strrep(feature_names{plot_count},"_"," ");
+        title(plot_title)
+        
+    end
+    
+    % Saves Figures
+    saveas(fig1,fullfile(strcat(path_extract,"Figures\Normalized Features\Seizure ",num2str(sz_cnt),".png")),'png');    
+    close(fig1)
     
 end
 
 % -------------------------------------------------------------------------
 
-% % Saves Features
-% 
-% save(strcat(path_extract,'Raw Features.mat'),'t_after','t_before','sz_parameters','winLen','winDisp','features','filter_sz','bp_filters','fs',"-v7.3");
-% save(strcat(path_extract,'Normalized Features.mat'),'t_after','t_before','sz_parameters','winLen','winDisp','norm_features','filter_sz','bp_filters','fs',"-v7.3");
+% Saves Features
+
+save(strcat(path_extract,'Raw Features.mat'),'t_after','t_before','sz_parameters','winLen','winDisp','features','filter_sz','bp_filters','fs',"-v7.3");
+save(strcat(path_extract,'Normalized Features.mat'),'t_after','t_before','sz_parameters','winLen','winDisp','norm_features','filter_sz','bp_filters','fs',"-v7.3");
 
 end

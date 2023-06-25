@@ -1,5 +1,18 @@
 function [output_val] = windowed_coherence(input_data, fs, winLen, winDisp)
 
+% Calculate average coherence across all frequency space
+
+% Input Variables
+% input_data - data for calculation.
+% fs - sampling rate
+% winLen - window length
+% winDisp - window Displacement
+
+% Output Variables
+% output_val - calculated mean coherence across all frequencies
+
+% -------------------------------------------------------------------------
+
 % Determine number of windows
 NumWins = floor(size(input_data,1)/fs/winDisp - (winLen-winDisp)/winDisp);
     

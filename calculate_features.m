@@ -297,9 +297,10 @@ if ismember(12, feature_list)
     
     end
     
-    % Adds BP_output to Features
-    features.Band_Power = BP_output;
-    norm_features.Band_Power = norm_BP_output;
+    % Adds BP_output to Features. 0 is for indexing purposes only, puts
+    % Bandpower at top if exists.
+    features.0_Band_Power = BP_output;
+    norm_features.0_Band_Power = norm_BP_output;
    
     disp("Band Power Completed")
     
@@ -321,11 +322,57 @@ for sz_cnt = 1:length(output_data)
     fig1 = figure(1);
     fig1.WindowState = 'maximized';
     
-    % Generate Subplot For Features
-    for plot_count = 1:length(feature_list)
+    % If exist band power, adjusts start by how many band power plots we
+    % have to plot
+    
+    if ismember(12, feature_list)
+        adjustment_val = size(bp_filters,1) - 1;
+        start_value = 2;
+        
+        % Generate Subplot For Bandpower (Specifically)
+        
+        for bp_plot_count = 1:size(bp_filters,1)
+            
+            % Plots Each Segment Separately
+            plot1 = subplot(length(feature_list) + adjustment_val,1,bp_plot_count);
+            imagesc(norm_features.0_Band_Power{bp_plot_count}{sz_cnt}');
+            colorbar
+            
+            % Sets Color Axis. Higher Frequencies Have Lower Increases
+            caxis([0,size(bp_filters,1) + 1 - bp_plot_count])
+            
+            % Sets Title
+            title(strcat("Band Power: ", num2str(bp_filters(bp_plot_count,1))," Hz to ", num2str(bp_filters(bp_plot_count,2)), " Hz"));
+            
+            % This Part Copied From Below ---------------------------------
+            
+            % Generate Tick Labels For Plots
+            xticklabel = winDisp:winDisp:floor(size(output_data{sz_cnt},1)/fs/winDisp - (winLen-winDisp)/winDisp)*winDisp;
+            xticks = round(linspace(1, size(norm_features.(feature_names{plot_count}){sz_cnt}, 1), (t_after+t_before)./5));
+            xticklabels = xticklabel(xticks);
+
+            % Set X Ticks For Plots
+            set(plot1, 'XTick', xticks, 'XTickLabel', xticklabels)
+            xlim([0.25 60/winDisp]);
+            
+            % End Copied Portion ------------------------------------------
+            
+        end
+     
+    % Otherwise, no adjustment needed
+    
+    else
+       
+        adjustment_val = 0;
+        start_value = 1;
+        
+    end
+    
+    % Generate Subplot For All Other Features
+    for plot_count = start_value:length(feature_list)
         
         % Generate Subplot
-        plot1 = subplot(length(feature_list),1,plot_count);
+        plot1 = subplot(length(feature_list) + adjustment_val,1,plot_count + adjustment_val);
         % Extracts Feature Names
         feature_names = fieldnames(norm_features);
         
@@ -342,7 +389,7 @@ for sz_cnt = 1:length(output_data)
         set(plot1, 'XTick', xticks, 'XTickLabel', xticklabels)
         xlim([0.25 60/winDisp]);
         
-        if strcmp(feature_names{plot_count}, "Line_Length") || strcmp(feature_names{plot_count}, "Zero_Crossing") || strcmp(feature_names{plot_count}, "Coherenceg")
+        if strcmp(feature_names{plot_count}, "Line_Length") || strcmp(feature_names{plot_count}, "Zero_Crossing") || strcmp(feature_names{plot_count}, "Coherence")
             caxis([-1,1])
         elseif strcmp(feature_names{plot_count}, "Area") || strcmp(feature_names{plot_count}, "RMS")
             caxis([-1,2.5])
