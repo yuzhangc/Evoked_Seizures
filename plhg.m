@@ -22,21 +22,27 @@ function [output_val] = plhg(input_data, fs)
 lowfreq = filtfilt(low_num,low_denom,input_data);
 highfreq = filtfilt(hg_num,hg_denom,input_data);
 
-% Step 3: Calculate the LFP phase and the high gamma amplitude
+% Step 3: Calculate the LFP phase and the high gamma amplitude phase
 
+% LFP Phase
 tophase_low = hilbert(lowfreq);
 IMAGS = imag(tophase_low);
 REALS = real(tophase_low);
 lowphase = atan2(IMAGS,REALS);
 clear IMAGS REALS
 
+% High Gamma Amplitude
 tophase_high = hilbert(highfreq);
-IMAGS = imag(tophase_high);
-REALS = real(tophase_high);
-highamp = sqrt(IMAGS.^2 + REALS.^2);    
+highamp = abs(tophase_high); 
+
+% High Gamma Amplitude Phase
+tophase_highamp = hilbert(highamp);
+IMAGS = imag(tophase_highamp);
+REALS = real(tophase_highamp);
+highampphase = atan2(IMAGS,REALS);
 clear IMAGS REALS
 
 % Step 4: Calculates Phase Locked High Gamma
-output_val = abs(mean(abs(tophase_high) .* exp(1i *(lowphase - highamp))));
+output_val = abs(mean(highamp.* exp(1i *(lowphase - highampphase))));
 
 end
