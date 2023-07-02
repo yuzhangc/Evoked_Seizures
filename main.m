@@ -73,8 +73,14 @@ end
 % Sets Up Output Variables
 avg_evoked_duration = zeros(length(subFolders),1); list_of_power = zeros(length(subFolders),1); list_of_duration = zeros(length(subFolders),1);
 
+% Loads Seizure Model
+% This particular seizure model was trained on 2023.06.24 (Animal 37)
+% Seizure 16 - 16_473nm_pow7pt2_7pt2mW_7sec_10Hz_230624_211359.rhd
+load('seizure_model.mat')
+
 for folder_num = 1:length(subFolders)
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
-    [seizure_duration,min_thresh] = predict_seizure_duration(path_extract,[]);
+    [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model);
+    avg_evoked_duration(folder_num) = mean(seizure_duration(min_thresh.seizures));
     list_of_power(folder_num) = min_thresh.power; list_of_duration(folder_num) = min_thresh.duration;
 end
