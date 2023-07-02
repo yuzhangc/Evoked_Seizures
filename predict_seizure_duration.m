@@ -31,7 +31,6 @@ disp("Working on: " + path_extract)
 load(strcat(path_extract,'Filtered Seizure Data.mat'))
 load(strcat(path_extract,'Normalized Features.mat'))
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
-mkdir(path_extract,'Figures\Seizure Duration')
 
 % Step 2: Generate Seizure Duration Matrix. Initiate all to Zeros. Extract
 % feature names
@@ -82,10 +81,10 @@ for sz_cnt = 1:size(sz_parameters,1)
         % Step 3D: Using a Countup/Cooldown Timer to Determine True Seizure
         % Length and Ignore Brief Aberrations ----------------------------
         
-        % Sets Initial Countdown to Be Equal to 7 Seconds. Usually 7
+        % Sets Initial Countdown to Be Equal to a Few Seconds. Usually a few
         % seconds break is good enough indicator of true termination
         countdown = 0;
-        countdown_lim = 7/winDisp;
+        countdown_lim = 5/winDisp;
         
         % Uses Stimulation Duration to Set Seizure Start As Immediately After
         sz_start = (t_before + sz_parameters(sz_cnt,12))/winDisp;
@@ -106,8 +105,12 @@ for sz_cnt = 1:size(sz_parameters,1)
                 countdown = countdown + 1;
             end
             
-            % Moves Up One Window
+            % Moves Up One Window, Unless at End
+            if sz_pos == size(norm_features.(feature_names{end}){sz_cnt},1)
+            countdown = countdown_lim;
+            else
             sz_pos = sz_pos + 1;
+            end
             
         end
         
@@ -118,6 +121,10 @@ for sz_cnt = 1:size(sz_parameters,1)
         % End Step 3D ----------------------------------------------------
         
         % Step 3E: Plots Figures With K Means Predictions
+        if not(isfolder(strcat(path_extract,'Figures\Seizure Duration')))
+        mkdir(path_extract,'Figures\Seizure Duration')
+        end
+        
         fig1 = figure(1);
         fig1.WindowState = 'maximized';
         hold on
@@ -141,7 +148,7 @@ for sz_cnt = 1:size(sz_parameters,1)
         xlabel('Time (sec)')
         
         % Saves Figure
-        saveas(fig1,fullfile(strcat(path_extract,"Figures\Seizure Duration\Seizure ",num2str(sz_cnt),".png")),'png');
+        saveas(fig1,fullfile(strcat(path_extract,"Figures\Seizure Duration\Seizure ",num2str(sz_parameters(sz_cnt,2)),".png")),'png');
         
         hold off
         close(fig1)

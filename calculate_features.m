@@ -36,6 +36,8 @@ else
 load(strcat(path_extract,"Standardized Seizure Data.mat"))
 end
 
+sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
+
 % -------------------------------------------------------------------------
 
 % Due to Plotting Requirements. Band Power Goes First
@@ -419,7 +421,7 @@ for sz_cnt = 1:length(output_data)
     end
     
     % Saves Figures
-    saveas(fig1,fullfile(strcat(path_extract,"Figures\Normalized Features\Seizure ",num2str(sz_cnt),".png")),'png');    
+    saveas(fig1,fullfile(strcat(path_extract,"Figures\Normalized Features\Seizure ",num2str(sz_parameters(sz_cnt,2)),".png")),'png');    
     close(fig1)
     
 end
