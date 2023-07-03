@@ -1,4 +1,4 @@
-function [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model)
+function [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart)
 
 % Uses a pre-defined seizure model to identify seizure length.
 % Concactenates features
@@ -7,6 +7,8 @@ function [seizure_duration,min_thresh,output_array] = predict_seizure_duration(p
 % path_extract - path for normalized seizure features and seizure
 % parameters
 % sz_model - input seizure model for detection
+% countdown_sec - how many seconds before not counted as seizure
+% to_fix_chart - table with seizures durations that should be manually fixed
 % 
 % Output Variables
 % 1) seizure_duration - calculated seizure_duration
@@ -84,7 +86,7 @@ for sz_cnt = 1:size(sz_parameters,1)
         % Sets Initial Countdown to Be Equal to a Few Seconds. Usually a few
         % seconds break is good enough indicator of true termination
         countdown = 0;
-        countdown_lim = 5/winDisp;
+        countdown_lim = countdown_sec/winDisp;
         
         % Uses Stimulation Duration to Set Seizure Start As Immediately After
         sz_start = (t_before + sz_parameters(sz_cnt,12))/winDisp;
@@ -144,8 +146,25 @@ for sz_cnt = 1:size(sz_parameters,1)
         % Draws Line at Computationally Detected Seizure Termination Point and Sets Window Boundaries
         xlim([0, sz_end * winDisp + 15])
         ylim([-1,channel])
-        xline(sz_end*winDisp,'-r',{'Termination',strcat(num2str(seizure_duration(sz_cnt))," sec")},'LineWidth',2)
+        xline(sz_end*winDisp,'-r',{'Termination',strcat(num2str(seizure_duration(sz_cnt))," sec")},'LineWidth',2);
         xlabel('Time (sec)')
+        
+        % If In To-Fix Chart, Draw To Fix Line & Change Seizure Duration
+        if ismember([sz_parameters(sz_cnt,1),sz_parameters(sz_cnt,2)],to_fix_chart(:,1:2),'rows')
+            
+            % Find the column where the row matches in entirety
+            [logical_val, fixed_duration_row] = ismember([sz_parameters(sz_cnt,1),sz_parameters(sz_cnt,2)],to_fix_chart(:,1:2),'rows');
+            % Fixes output for seizure duration
+            seizure_duration(sz_cnt) = to_fix_chart(fixed_duration_row,3);
+            % Moves Seizure End to New Ending, Adjust Window if Necessary
+            sz_end_new = sz_start + seizure_duration(sz_cnt)./winDisp;
+            if sz_end_new > sz_end
+                xlim([0, sz_end_new * winDisp + 15])
+            end
+            % Draw Fixed Seizure Line
+            xline(sz_end_new*winDisp,'-g',{'Manual Fixed',strcat(num2str(seizure_duration(sz_cnt))," sec")},'LineWidth',2);
+            
+        end
         
         % Titling
         if sz_parameters(sz_cnt,5) == 0

@@ -23,6 +23,8 @@ filter_sz = 1;
 feat_calc = 1;
 % Plots figures and data
 to_plot = 1; plot_duration = 95;
+% Fixes Certain Duration Calculations
+to_fix = 1;
 
 % Global Variables
 % Target sampling rate
@@ -36,6 +38,8 @@ colorbarlim_evoked = [-30,-0];
 feature_list = [1:12];
 % Band Power Ranges
 bp_filters = [1, 30; 30, 300; 300, target_fs/2];
+% Seizure Countdown/Cooldown Period
+countdown_sec = 5;
 
 %% Data Extraction and Standardization of Length --------------------------
 
@@ -78,9 +82,16 @@ avg_evoked_duration = zeros(length(subFolders),1); list_of_power = zeros(length(
 % Seizure 16 - 16_473nm_pow7pt2_7pt2mW_7sec_10Hz_230624_211359.rhd
 load('seizure_model.mat')
 
+% Loads 'To Fix' File For Manual Seizure Duration Fix (~15% of Trials)
+if to_fix
+to_fix_chart = readmatrix(strcat(directory,"To Fix.csv"));
+else
+to_fix_chart = [-1 -1 -1];
+end
+
 for folder_num = 1:length(subFolders)
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
-    [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model);
+    [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart);
     avg_evoked_duration(folder_num) = mean(seizure_duration(min_thresh.seizures));
     list_of_power(folder_num) = min_thresh.power; list_of_duration(folder_num) = min_thresh.duration;
 end
