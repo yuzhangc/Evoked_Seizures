@@ -72,7 +72,7 @@ for sz_cnt = 1:size(sz_parameters,1)
     output_array{sz_cnt} = temp_output_array;
 
     % Skip Seizures If Visual Inspection Shows 0 OR Channel Incongruency
-    if sz_parameters(sz_cnt,5) == 0 || channel_incongruency
+    if channel_incongruency
     else
         
         % Step 3C: Use Model to Classify Seizure or Not
@@ -147,8 +147,15 @@ for sz_cnt = 1:size(sz_parameters,1)
         xline(sz_end*winDisp,'-r',{'Termination',strcat(num2str(seizure_duration(sz_cnt))," sec")},'LineWidth',2)
         xlabel('Time (sec)')
         
+        % Titling
+        if sz_parameters(sz_cnt,5) == 0
+        title('No Seizure')
+        else
+        title('Seizure')
+        end
+        
         % Saves Figure
-        saveas(fig1,fullfile(strcat(path_extract,"Figures\Seizure Duration\Seizure ",num2str(sz_parameters(sz_cnt,2)),".png")),'png');
+        saveas(fig1,fullfile(strcat(path_extract,"Figures\Seizure Duration\Trial ",num2str(sz_parameters(sz_cnt,2)),".png")),'png');
         
         hold off
         close(fig1)
