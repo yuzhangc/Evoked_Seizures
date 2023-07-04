@@ -1,4 +1,4 @@
-function [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart)
+function [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot)
 
 % Uses a pre-defined seizure model to identify seizure length.
 % Concactenates features
@@ -9,6 +9,7 @@ function [seizure_duration,min_thresh,output_array] = predict_seizure_duration(p
 % sz_model - input seizure model for detection
 % countdown_sec - how many seconds before not counted as seizure
 % to_fix_chart - table with seizures durations that should be manually fixed
+% to_plot - show plots or not
 % 
 % Output Variables
 % 1) seizure_duration - calculated seizure_duration
@@ -127,6 +128,8 @@ for sz_cnt = 1:size(sz_parameters,1)
         mkdir(path_extract,'Figures\Seizure Duration')
         end
         
+        if to_plot
+        
         fig1 = figure(1);
         fig1.WindowState = 'maximized';
         hold on
@@ -178,6 +181,8 @@ for sz_cnt = 1:size(sz_parameters,1)
         
         hold off
         close(fig1)
+        
+        end
         
     end
     

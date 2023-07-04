@@ -91,7 +91,24 @@ end
 
 for folder_num = 1:length(subFolders)
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
-    [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart);
+    [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot);
     avg_evoked_duration(folder_num) = mean(seizure_duration(min_thresh.seizures));
     list_of_power(folder_num) = min_thresh.power; list_of_duration(folder_num) = min_thresh.duration;
+    min_thresh_list(folder_num) = min_thresh;
 end
+
+% Generate the following
+% FIX FOLDER 32
+% Distribution of Threshold Power, Distribution of Threshold Duration,
+% Threshold Power VS Threshold Duration (ignoring all -1)
+% Average success rate for above threshold trials vs diazepam trials
+% (match animals)
+% Split data according to animal 22+ (this year's data) and epileptic or
+% not epileptic
+% Plot general trends of features in long seizures vs short seizures
+% (further split by epileptic or non epileptic)
+% Plot general trends of features in epileptic vs nonepileptic
+% Plot summed trends in long vs short seizures and epileptic vs
+% nonepileptic
+% Further split into responder and nonresponder
+% Calculate feature coherence within animals over time
