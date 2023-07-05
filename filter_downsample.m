@@ -9,7 +9,7 @@ function [output_data] = filter_downsample(path_extract,downsamp_sz,target_fs,pl
 % downsamp_sz - variable for downsampling
 % target_fs - original sampling rate OR target sampling rate for
 % downsampling
-% plot_duration - plot output duration
+% plot_duration - duration to plot
 
 % Output Variables
 % output_data = output of function
@@ -83,9 +83,8 @@ for channel = 1:size(output_data{sz_cnt},2)
         * 0.5 + size(output_data{sz_cnt},2) - channel,'k')
 end
 
-% Set Axes Limit. Draws Line Around Stimulation. Sets Figure Position
+% Set Axes Limit. Draws Line Around Stimulation.
 ylim([-1,size(output_data{sz_cnt},2)+1]); xlim([0,t_before + t_after])
-set(gcf, 'Position', [10.0000  10.0000  827.5000  748.5000])
 xlabel('Time (sec)')
 xlim([0, plot_duration])
 

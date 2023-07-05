@@ -1,4 +1,4 @@
-function [output_data] = extract_seizures(path_extract,t_before,t_after)
+function [output_data] = extract_seizures(path_extract,t_before,t_after,plot_duration)
 
 clear output_data
 
@@ -10,6 +10,7 @@ clear output_data
 % path_extract - path for seizures.
 % t_before - time before seizures to extract in seconds
 % t_after - time after seizures to extract in seconds
+% plot_duration - duration to plot
 
 % Output Variables
 % output_data = output of function
@@ -83,6 +84,7 @@ for count = 1:length(filelist)
     
     % Step 5: Generates Confirmatory Plot
     fig1 = figure(1); hold on;
+    fig1.WindowState = 'maximized';
     % Channel 1 is on TOP. Channel 4 is on Bottom.
     for channel = 1:size(output_data{count},2)
         plot(1/fs : 1/fs : t_before + t_after , output_data{count}(:,channel)./ max(output_data{count}(:,channel))...
@@ -104,9 +106,9 @@ for count = 1:length(filelist)
     xline(t_before + sz_parameters(count,13),strcat('-',second_plot_color),'Treatment','LineWidth',2); xline(t_before + sz_parameters(count,13) + sz_parameters(count,14),strcat('-',second_plot_color),'LineWidth',2);
     end
     
-    % Set Axes Limit. Draws Line Around Stimulation. Sets Figure Position
+    % Set Axes Limit. Draws Line Around Stimulation.
     ylim([-2,size(output_data{count},2) + 0.5]); xlim([0,t_before + t_after])
-    set(gcf, 'Position', [10.0000  10.0000  827.5000  748.5000])    
+    xlim([0, plot_duration]) 
     
     % Titling, Saving Figures
     figure_title = strcat("Figures\Raw\M",num2str(sz_parameters(count,1)),"_T",num2str(sz_parameters(count,2)),...

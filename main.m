@@ -48,7 +48,7 @@ if extract_sz && first_run
     t_before = 5; t_after = 180;
     for folder_num = 1:length(subFolders)
         path_extract = strcat(directory,subFolders(folder_num).name,'\');
-        extract_seizures(path_extract,t_before,t_after);
+        extract_seizures(path_extract,t_before,t_after,plot_duration);
     end
 end
 
