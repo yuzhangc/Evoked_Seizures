@@ -103,7 +103,7 @@ end
 
 % Perform Plots
 
-threshold_and_success_rate_plot_func(directory,min_thresh_list)
+threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list)
 
 clear min_thresh seizure_duration to_fix_chart output_array
 

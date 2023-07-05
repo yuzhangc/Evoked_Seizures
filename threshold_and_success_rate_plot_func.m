@@ -1,12 +1,13 @@
-function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list)
+function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list)
 
 % Makes a few basic plots about evocation threshold in epileptic vs naive
 % animals and successful evocation ratios
 
 % Input Variables
-% directory - main directory, which should contain a 'Animal Master.csv'
+% 1) directory - main directory, which should contain a 'Animal Master.csv'
 % file containing information about each animal subject
-% min_thresh_list - a group of min_thresh outputs from predict_seizure_duration
+% 
+% 2) min_thresh_list - a group of min_thresh outputs from predict_seizure_duration
 % function, which has below components
 % power - power at which 2/3 of time reliably induce seizures
 % duration - duration at which 2/3 of time reliably induce seizures
@@ -16,6 +17,8 @@ function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list)
 %       for ALL if threshold was not found (excluding diazepam)
 % diaz_seizures - trial # for diazepam seizures above threshold
 % diaz_success - success rate for evocation with diazepam
+% 
+% 3) seizure_duration_list - list of predicted seizure durations
 
 % No Output Variables. Outputs Four Figures
 
@@ -210,5 +213,77 @@ xlim([0 4])
 xticklabels({'Epileptic','Naive'})
 xline(2,'--k');
 ylabel('Success Rate (%)')
+
+% -------------------------------------------------------------------------
+
+% Step 8: Plot 5 - Average Above Threshold Duration
+
+% Sets up output variables
+
+avg_above_thresh_epileptic = [];
+avg_above_thresh_naive = [];
+
+% Sets up counters
+
+cnt_epileptic = 1;
+cnt_naive = 1;
+
+for detected_threshold = 1:length(indx_to_plot)
+    
+    % Threshold & Epileptic
+    
+    if indx_to_plot(detected_threshold) == 1 && animal_info(detected_threshold,5) == 1
+        
+        seizures = seizure_duration_list{detected_threshold};
+        above_thresh = min_thresh_list(detected_threshold).seizures;
+        avg_above_thresh_epileptic(cnt_epileptic) = mean(seizures(above_thresh));
+        cnt_epileptic = cnt_epileptic + 1;
+    
+    % Threshold & Naive
+    
+    elseif indx_to_plot(detected_threshold) == 1 && animal_info(detected_threshold,5) == 0
+        
+        seizures = seizure_duration_list{detected_threshold};
+        above_thresh = min_thresh_list(detected_threshold).seizures;
+        avg_above_thresh_naive(cnt_naive) = mean(seizures(above_thresh));
+        cnt_naive = cnt_naive + 1;
+        
+    else
+    end
+end
+
+% Temporary Fix to Remove Zeros (No Detected Duration Due to Invalid Model or Channel Incongruency)
+
+avg_above_thresh_epileptic = avg_above_thresh_epileptic(avg_above_thresh_epileptic ~= 0);
+avg_above_thresh_naive = avg_above_thresh_naive(avg_above_thresh_naive ~= 0);
+
+figure;
+
+% Define X Axes to Include Small Amount of Randomness
+
+xaxis1 = ones(length(avg_above_thresh_epileptic),1) - 0.1 + 0.2*rand(length(avg_above_thresh_epileptic),1);
+xaxis2 = ones(length(avg_above_thresh_naive),1) .* 3 - 0.1 + 0.2*rand(length(avg_above_thresh_naive),1);
+
+% Scatter Plot
+
+hold on
+scatter(xaxis1, avg_above_thresh_epileptic, 'filled',"MarkerFaceColor", [0 0.4470 0.7410]);
+scatter(xaxis2, avg_above_thresh_naive, 'filled',"MarkerFaceColor", [0.8500 0.3250 0.0980]);
+
+% Errorbar
+
+x_errorbar = [1,3];
+errorbar(x_errorbar,[mean(avg_above_thresh_epileptic),mean(avg_above_thresh_naive)],...
+    [std(avg_above_thresh_epileptic),std(avg_above_thresh_naive)],'ko','LineWidth',2);
+
+hold off
+
+legend('Epileptic','Naive')
+xticks([1, 3])
+xlim([0 4])
+xticklabels({'Epileptic','Naive'})
+xline(2,'--k');
+ylabel('Success Rate (%)')
+
 
 end
