@@ -76,6 +76,7 @@ disp("Z-scoring Complete")
 for sz_cnt = 1:length(output_data)
 % Step 5: Plots filtered data and saves figures
 fig1 = figure(1); hold on;
+fig1.WindowState = 'maximized';
 % Channel 1 is on TOP. Channel 4 is on Bottom.
 for channel = 1:size(output_data{sz_cnt},2)
     plot(1/fs : 1/fs : t_before + t_after , output_data{sz_cnt}(:,channel)./ max(output_data{sz_cnt}(:,channel))...
