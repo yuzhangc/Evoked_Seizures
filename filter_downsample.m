@@ -1,4 +1,4 @@
-function [output_data] = filter_downsample(path_extract,downsamp_sz,target_fs)
+function [output_data] = filter_downsample(path_extract,downsamp_sz,target_fs,plot_duration)
 
 % Filters then downsamples data. Filters need to happen first to prevent
 % peak shifts. After downsampling, z scores data (to baseline) and then
@@ -9,6 +9,7 @@ function [output_data] = filter_downsample(path_extract,downsamp_sz,target_fs)
 % downsamp_sz - variable for downsampling
 % target_fs - original sampling rate OR target sampling rate for
 % downsampling
+% plot_duration - plot output duration
 
 % Output Variables
 % output_data = output of function
@@ -37,9 +38,9 @@ end
 % -------------------------------------------------------------------------
 
 % Step 2: Create 60 Hz notch filters (up to Nyquist frequency). Notch Filter Data
-max_filter = floor(fs/2/60);
+max_filter = 10;
 for filter_cnt = 1:max_filter
-    wo = 60/(filter_cnt * fs/2); bw = wo/35; [b,a] = iirnotch(wo,bw);
+    wo = filter_cnt * 60/(fs/2); bw = wo/35; [b,a] = iirnotch(wo,bw);
     for sz_cnt = 1:length(output_data)
         output_data{sz_cnt} = filtfilt(b,a,output_data{sz_cnt});
     end
@@ -85,6 +86,7 @@ end
 ylim([-1,size(output_data{sz_cnt},2)+1]); xlim([0,t_before + t_after])
 set(gcf, 'Position', [10.0000  10.0000  827.5000  748.5000])
 xlabel('Time (sec)')
+xlim([0, plot_duration])
 
 % Box For Evocation
 rectangle('Position',[t_before size(output_data{sz_cnt},2) sz_parameters(sz_cnt,12) 0.25], 'FaceColor',[0 0 1])

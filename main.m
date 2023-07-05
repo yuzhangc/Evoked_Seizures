@@ -59,7 +59,7 @@ clear t_before t_after path_extract folder_num
 if filter_sz && first_run
     for folder_num = 1:length(subFolders)
         path_extract = strcat(directory,subFolders(folder_num).name,'\');
-        filter_downsample(path_extract,downsamp_sz,target_fs);
+        filter_downsample(path_extract,downsamp_sz,target_fs,plot_duration);
     end
 end
 
