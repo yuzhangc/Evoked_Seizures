@@ -97,11 +97,11 @@ for sz_cnt = 1:size(sz_parameters,1)
         sz_end = sz_start;
         
         % If countdown hasn't reached termination limit OR if seizure is
-        % still ongoing (class 2), continue
-        while k_means_pred(sz_pos) == 2 || countdown < countdown_lim
+        % still ongoing (class 2 or 1), continue
+        while (k_means_pred(sz_pos) == 2 || k_means_pred(sz_pos) == 1) || countdown < countdown_lim
             
             % Keeps on Moving Forward if Still Seizing
-            if k_means_pred(sz_pos) == 2
+            if k_means_pred(sz_pos) ~= 3
                 countdown = 0;
                 sz_end = sz_pos;
                 
@@ -144,7 +144,7 @@ for sz_cnt = 1:size(sz_parameters,1)
         end
         
         % Plots Scatterplot of K Means Predictions on Top of Channel 1
-        Colorset_plot = [0 1 0; 1 0 0];
+        Colorset_plot = [1 0 0; 1 0 0; 0 1 0];
         scatter( winDisp : winDisp : t_after + t_before - winDisp, ones(length(k_means_pred),1) + channel - 1,...
             [], Colorset_plot(k_means_pred,:) , 'filled');
         

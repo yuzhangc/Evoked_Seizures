@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'D:\';
+directory = 'F:\Clone of ORG_YZ 20230629\';
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
 real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END')); 
@@ -77,6 +77,8 @@ end
 % Loads Seizure Model
 % This particular seizure model was trained on 2023.06.24 (Animal 37)
 % Seizure 16 - 16_473nm_pow7pt2_7pt2mW_7sec_10Hz_230624_211359.rhd
+% Training Function - fitcknn(X,Y) where X is merged temp_output_array and
+% Y is kmeans(X,3)
 
 load('seizure_model.mat')
 
