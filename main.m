@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'E:\';
+directory = 'D:\';
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
 real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END')); 
@@ -90,12 +90,19 @@ end
 
 % -------------------------------------------------------------------------
 
+% Merged sz_parameters and output_array
+
+merged_output_array = [];
+merged_sz_parameters = [];
+
 % Performs seizure calculation
 
 for folder_num = 1:length(subFolders)
     
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
-    [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot);
+    [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot);
+    merged_output_array = [merged_output_array, output_array];
+    merged_sz_parameters = [merged_sz_parameters; sz_parameters];
     seizure_duration_list(folder_num) = {seizure_duration};
     min_thresh_list(folder_num) = min_thresh;
 
@@ -105,9 +112,15 @@ end
 
 threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list)
 
-clear min_thresh seizure_duration to_fix_chart output_array
+clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
-%%
+%% Plots By Category
+
+% Loads Animal Information
+
+animal_info = readmatrix(strcat('D:\','Animal Master.csv'));
+
+categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,animal_info);
 
 % Split data according to animal 22+ (this year's data) and epileptic or
 % not epileptic

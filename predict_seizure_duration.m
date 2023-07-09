@@ -1,4 +1,4 @@
-function [seizure_duration,min_thresh,output_array] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot)
+function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot)
 
 % Uses a pre-defined seizure model to identify seizure length.
 % Concactenates features
@@ -25,6 +25,8 @@ function [seizure_duration,min_thresh,output_array] = predict_seizure_duration(p
 % diaz_success - success rate for evocation with diazepam
 %
 % 3) output_array - concactenated features, indexed by seizure
+%
+% 4) sz_parameters - seizure parameters
 
 % -------------------------------------------------------------------------
 
