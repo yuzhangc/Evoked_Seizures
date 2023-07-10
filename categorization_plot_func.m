@@ -184,7 +184,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 7: Exclude Early Recordings (All < Animal 20)
+% Step 7: Exclude Early Recordings (All < Animal 22)
 
 if no_to_early
 end
