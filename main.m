@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'D:\';
+directory = 'E:\';
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
 real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END')); 
@@ -120,7 +120,7 @@ clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
 % Loads Animal Information
 
-animal_info = readmatrix(strcat('D:\','Animal Master.csv'));
+animal_info = readmatrix(strcat(directory,'Animal Master.csv'));
 
 categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,animal_info);
 
