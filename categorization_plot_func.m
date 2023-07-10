@@ -20,6 +20,8 @@ function [anova_results] = categorization_plot_func(merged_output_array,merged_s
 % 2) ind_data - plot individual dots or not
 % 3) naive_ep - splits naive or epileptic
 % 4) excl_short - exclude <15 sec events
+% 5) excl_addl - exclude additional stimulation trials
+% 6) no_to_early - exclude early recordings
 
 displays_text = ['Which Plot to Plot?:', ...
     '\n(1) - Epileptic Vs Naive Animals', ...
@@ -58,6 +60,20 @@ displays_text_4 = ['\n Do you want to exclude short events (less than 15 seconds
     '\nEnter a number: '];
 
 excl_short = input(displays_text_4);
+
+displays_text_5 = ['\n Do you want to exclude events with additional stimulation?', ...
+    '\n(1) - Yes', ...
+    '\n(0) - No', ...
+    '\nEnter a number: '];
+
+excl_addl = input(displays_text_5);
+
+displays_text_6 = ['\n Do you want to include early (before 01/2023) recordings?', ...
+    '\n(1) - Yes', ...
+    '\n(0) - No', ...
+    '\nEnter a number: '];
+
+no_to_early = input(displays_text_6);
 
 % -------------------------------------------------------------------------
 
@@ -131,6 +147,8 @@ switch main_division
         
     case 4 % Additional Stimulation or Not
         
+        excl_addl = 0;
+        
     % INCOMPLETE
         
 end
@@ -155,6 +173,20 @@ end
 % Step 5: Shorten Indices Based on Seizure Duration
 
 if excl_short 
+end
+
+% -------------------------------------------------------------------------
+
+% Step 6: Exclude Indices With Additional Stimulation
+
+if excl_addl
+end
+
+% -------------------------------------------------------------------------
+
+% Step 7: Exclude Early Recordings (All < Animal 20)
+
+if no_to_early
 end
 
 end
