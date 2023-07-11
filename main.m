@@ -40,17 +40,19 @@ feature_list = [1:12];
 bp_filters = [1, 30; 30, 300; 300, target_fs/2];
 % Seizure Countdown/Cooldown Period
 countdown_sec = 5;
-% Extraction variables
-t_before = 5; t_after = 180;
 
 %% Data Extraction and Standardization of Length --------------------------
 
 if extract_sz && first_run
+    % Extraction variables
+    t_before = 5; t_after = 180;
     for folder_num = 1:length(subFolders)
         path_extract = strcat(directory,subFolders(folder_num).name,'\');
         extract_seizures(path_extract,t_before,t_after,plot_duration);
     end
 end
+
+clear t_before t_after folder_num
 
 %% Downsamples and Filters Extracted Data ---------------------------------
 
@@ -100,7 +102,7 @@ merged_sz_parameters = [];
 for folder_num = 1:length(subFolders)
     
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
-    [seizure_duration,min_thresh,output_array,sz_parameters,feature_names] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot);
+    [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot);
     merged_output_array = [merged_output_array, output_array];
     merged_sz_parameters = [merged_sz_parameters; sz_parameters];
     seizure_duration_list(folder_num) = {seizure_duration};
@@ -116,11 +118,7 @@ clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
 %% Plots By Category
 
-% Loads Animal Information
-
-animal_info = readmatrix(strcat(directory,'Animal Master.csv'));
-
-categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,animal_info,t_before,t_after,feature_names,winDisp);
+categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory);
 
 % Split data according to animal 22+ (this year's data) and epileptic or
 % not epileptic

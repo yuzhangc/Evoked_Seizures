@@ -1,4 +1,4 @@
-function [subdiv_index, anova_results] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,animal_info,t_before,t_after,feature_names,winDisp)
+function [final_feature_output, subdiv_index, anova_results] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory)
 
 % Use Integrated Feature Information Across All Channels, Then Separates Them
 % According to User Input and Categorization.
@@ -7,20 +7,31 @@ function [subdiv_index, anova_results] = categorization_plot_func(merged_output_
 % merged_output_array - merged feature list
 % merged_sz_parameters - complete seizure information list
 % seizure_duration_list - list of seizure duration, organized by folder
-% animal_info - structure with information about animals
-% t_before - time before recording start (treat as baseline)
-% t_after - time after recording start (treat as post stim)
-% feature_names - names of features
-% winDisp - windows displacement
+% directory - directory to extract feature info from
 
 % Output Variables
+% final_feature_output - features segregated by class, channels, then
+% individual features across all divisions
 % subdiv_index - divisions
 % anova_results - using anova_col_val to guide ANOVA calculations
 
 % -------------------------------------------------------------------------
 
-% Step 0: Basic Variables
+% Step 0: Set up Variables
 anova_excluded_indices = [];
+
+% Loads Animal Information
+
+animal_info = readmatrix(strcat(directory,'Animal Master.csv'));
+
+% Extract Features Information and Names From Last Folder in Directory
+
+complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
+real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END')); 
+subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
+path_extract = strcat(directory,subFolders(length(subFolders)).name,'\');
+load(strcat(path_extract,'Normalized Features.mat'))
+feature_names = fieldnames(norm_features);
 
 % -------------------------------------------------------------------------
 
@@ -376,6 +387,21 @@ end
 
 % Structure of Final Feature Output is divide by 1) class 2) channel 3)
 % feature.
+
+% Each Plot Needs to Split Into Channel, then Plot Both Classes on Each
+% Feature, Separated by Color
+
+% First Split Plots by Channel
+
+for ch = 1:4
+    
+    figure;
+    
+    % Subplots By Features
+    
+    %
+    
+end
 
 
 end
