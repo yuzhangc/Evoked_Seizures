@@ -283,7 +283,7 @@ xticks([1, 3])
 xlim([0 4])
 xticklabels({'Epileptic','Naive'})
 xline(2,'--k');
-ylabel('Success Rate (%)')
+ylabel('Average Duration (sec)')
 
 
 end
