@@ -1,4 +1,4 @@
-function [subdiv_index, anova_results] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,animal_info)
+function [subdiv_index, anova_results] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,animal_info,t_before,t_after,feature_names,winDisp)
 
 % Use Integrated Feature Information Across All Channels, Then Separates Them
 % According to User Input and Categorization.
@@ -8,6 +8,10 @@ function [subdiv_index, anova_results] = categorization_plot_func(merged_output_
 % merged_sz_parameters - complete seizure information list
 % seizure_duration_list - list of seizure duration, organized by folder
 % animal_info - structure with information about animals
+% t_before - time before recording start (treat as baseline)
+% t_after - time after recording start (treat as post stim)
+% feature_names - names of features
+% winDisp - windows displacement
 
 % Output Variables
 % subdiv_index - divisions
@@ -283,12 +287,95 @@ end
 
 % Step 9: Uses Seizure Duration to Calculate Thirds of Merged Features
 
+% Loop Through Different Divisions
 for cnt = 1:length(subdiv_index)
+    
+    feature_output_for_plot = [];
+    
+    % Loops Through Trials
+    for seizure_idx = 1:length(subdiv_index{cnt})
+        
+        if seizure_idx == 1
+            first_run = 1;
+        else
+            first_run = 0;
+        end
+        
+        % Extracts Specific Data For Seizure
+        indv_data = merged_output_array{subdiv_index{cnt}(seizure_idx)};
+        
+        % Extracts Seizure Duration and Stim Duration. Calculate Seizure
+        % Start
+        indv_duration = merged_sz_duration(subdiv_index{cnt}(seizure_idx));
+        indv_stim_duration = merged_sz_parameters(subdiv_index{cnt}(seizure_idx),12);
+        
+        % Create Indices For Thirds
+        sz_start = (t_before + indv_stim_duration)/winDisp;
+        sz_end = sz_start + indv_duration/winDisp;
+        indices = [1 , t_before/winDisp , sz_start , sz_start+round((sz_end-sz_start)/3), ...
+            sz_start+round(2*(sz_end-sz_start)/3) , sz_end , sz_end+30/winDisp];
+        
+        % Prepare For Edge Case Where Seizures Doesnt Stop
+        if sz_end <= (t_after + t_before)/winDisp
+            indices(6) = (t_after + t_before)/winDisp - 1;
+            indices(7) = indices(6);
+        end
+        
+        % Calculate Means In Indices
+        mean_pre_stim = mean(indv_data(indices(1):indices(2),:));
+        mean_during_stim = mean(indv_data(indices(2):indices(3),:));
+        mean_first_third = mean(indv_data(indices(3):indices(4),:));
+        mean_second_third = mean(indv_data(indices(4):indices(5),:));
+        mean_final_third = mean(indv_data(indices(5):indices(6),:));
+        if indices(6) ~= indices (7)
+        mean_post_ictal = mean(indv_data(indices(6):indices(7),:));
+        else
+        mean_post_ictal = mean_pre_stim;
+        end
+        
+        final_divided = [mean_pre_stim; mean_during_stim; mean_first_third; ...
+            mean_second_third; mean_final_third; mean_post_ictal];
+        
+        % Segregates According to Channels
+        if rem(length(mean_pre_stim),4) ~= 0
+            display('Error!')
+        else
+            
+            % Split by Channels First
+            
+            for ch = 1:4
+                
+                feature_per_channel = final_divided(:,ch:4:end);
+            
+                % Split by Features
+                for feature = 1:length(mean_pre_stim)/4
+                    
+                    % Create Array if Empty
+                    if first_run
+                    feature_output_for_plot{ch}{feature} = feature_per_channel(:,feature)';
+                    % Otherwise Append Feature List
+                    else
+                    feature_output_for_plot{ch}{feature} = [feature_output_for_plot{ch}{feature};feature_per_channel(:,feature)'];
+                    end
+                    
+                end
+                
+            end
+            
+        end
+            
+    end
+    
+    final_feature_output{cnt} = feature_output_for_plot;
     
 end
 
 % -------------------------------------------------------------------------
 
 % Step 10: Make Divided Plots
+
+% Structure of Final Feature Output is divide by 1) class 2) channel 3)
+% feature.
+
 
 end
