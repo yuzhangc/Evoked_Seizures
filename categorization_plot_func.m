@@ -42,7 +42,7 @@ feature_names = fieldnames(norm_features);
 % 3) naive_ep - splits naive or epileptic
 % 4) excl_short - exclude events shorter than short_duration (conditional input)
 % 5) excl_addl - exclude additional stimulation trials
-% 6) no_to_early - exclude early recordings
+% 6) no_to_early - exclude early recordings (animals smaller than an_excl)
 % 7) excl_diaz - exclude diazepam trials
 
 displays_text = ['\nWhich Plot to Plot?:', ...
@@ -94,12 +94,16 @@ displays_text_5 = ['\nDo you want to exclude events with additional stimulation?
 
 excl_addl = input(displays_text_5);
 
-displays_text_6 = ['\nDo you want to EXCLUDE early (before 01/2023) recordings?', ...
+displays_text_6 = ['\nDo you want to EXCLUDE early recordings?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
 
 no_to_early = input(displays_text_6);
+
+if no_to_early == 1
+    an_excl = input('\nType in Animal Number Below Which To Exclude (e.g. 12 = 2022/11/07, 22 = 2023/01/16): ');
+end
 
 displays_text_7 = ['\nDo you want to exclude DIAZEPAM recordings?', ...
     '\n(1) - Yes', ...
@@ -184,6 +188,25 @@ switch main_division
         subdiv_index{1} = find(merged_sz_parameters(:,5) == 1);
         subdiv_index{2} = find(merged_sz_parameters(:,5) == 0);
         anova_col_val = merged_sz_parameters(:,5);
+        
+        % Manually Exclude Animals With Different Feature Length
+        excl_short = 0;
+        
+        excluded_indices = [];
+        
+        % Finds Animals With Invalid Feature List
+        for animal = 1:length(seizure_duration_list)
+            if sum(seizure_duration_list{animal} == 0)
+            excluded_indices = [excluded_indices;find(merged_sz_parameters(:,1) == animal)];
+            end
+        end
+        
+        % Exclude Animals With Invalid Feature List
+        for cnt = 1:length(subdiv_index)
+        subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
+        end
+        
+        clear excluded_indices
         
     case 4 % Additional Stimulation or Not
         
@@ -270,7 +293,7 @@ end
 
 if no_to_early
     
-    excluded_indices = find(merged_sz_parameters(:,1) < 22);
+    excluded_indices = find(merged_sz_parameters(:,1) < an_excl);
     for cnt = 1:length(subdiv_index)
         subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
     end
@@ -395,9 +418,11 @@ question = input(['\nDo you want to plot all features? '...
 if question == 1
     
     if ismember('Band_Power',feature_names)
-        features_to_plot = 1:(length(feature_list) + size(bp_filters,1) - 1);
+        features_to_plot = 1:(length(feature_names) + size(bp_filters,1) - 1);
+        bp_index = find(strcmp(feature_names,'Band_Power') == 1);
     else
-        features_to_plot = 1:length(feature_list);
+        features_to_plot = 1:length(feature_names);
+        bp_index = -1;
     end
 
 else
@@ -425,7 +450,7 @@ for feature = 1:length(feature_names)
         features_to_plot = [features_to_plot, act_feature_index];
         end
     end
-    
+
 end
 
 end
@@ -442,6 +467,13 @@ end
 
 % First Split Plots by Channel
 
+% Sets Up Standard Deviation Amounts For Errorbar Plot
+
+question = strcat("\nHow many standard error of the mean (SEM) to plot for errorbars?",...
+    "\nEnter a number: ");
+std_cnt = input(question);
+
+
 for ch = 1:4
     
     figure;
@@ -453,31 +485,78 @@ for ch = 1:4
         subplot(1,length(features_to_plot),feature)
         idx_feature = features_to_plot(feature);
         
-        % Sets Colors
-        % INCOMPLETE
+        % Sets Colors and Shapes. Replicates Colors For Naive/Epileptic
+        
+        Colorset_plot = cbrewer('qual','Set1',size(final_feature_output,2) + 3);
+        Colorset_plot(Colorset_plot>1) = 1;
+        Colorset_plot(Colorset_plot<0) = 0;
+        
+        if naive_ep && main_division ~= 1
+            positioning(1:size(final_feature_output,2)/2) = '*';
+            positioning(size(final_feature_output,2)/2 + 1:size(final_feature_output,2)) = '^';
+            Colorset_plot = Colorset_plot(4:end,:);
+            Colorset_plot(size(final_feature_output,2)/2 + 1:size(final_feature_output,2),:) = Colorset_plot(1:size(final_feature_output,2)/2,:);
+        elseif main_division == 1
+            positioning(1:size(final_feature_output,2)/2) = '*';
+            positioning(size(final_feature_output,2)/2 + 1:size(final_feature_output,2)) = '^';
+            Colorset_plot = Colorset_plot(1:2,:);
+        else
+            positioning(1:size(final_feature_output,2)) = 'o';
+            Colorset_plot = Colorset_plot(4:end,:);
+        end
         
         hold on
         
-        % Evenly Plots Groups
-        % INCOMPLETE
+        % Plots All Classes
         for class_split = 1:size(final_feature_output,2)
             
+            % Extracts Relevant Data
             indv_data = final_feature_output{class_split}{ch}{idx_feature};
-            errorbar(mean(indv_data),1.96*std(indv_data)./sqrt(size(indv_data,1)),'o','LineWidth',2)
+            
+            % Define X Axes
+            xaxis = [1:length(mean(indv_data))];
+            xaxis = xaxis - 1/size(final_feature_output,2)*(size(final_feature_output,2)-1) + class_split/size(final_feature_output,2);
+            
+            % Plots Individual Data
+            if ind_data
+                plot_info = positioning(class_split);
+                
+                for row_cnt = 1:size(indv_data,1)
+                    scatter(xaxis,indv_data(row_cnt,:),"MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:));
+                end
+                
+            else
+                plot_info = strcat(":",positioning(class_split));     
+            end
+            
+            % Plots Group Data
+            
+            errorbar(xaxis,mean(indv_data),std_cnt.*std(indv_data)./sqrt(size(indv_data,1)),plot_info,...
+                "MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:),...
+                'Color',Colorset_plot(class_split,:),'LineWidth',2)
+            
             
         end
         
         hold off
         
         % Draws 0 Point and Labels X Axes
-        yline(0,'-k','LineWidth',1)
-        xticks(1:size(indv_data,2))
-        xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'})
-        xtickangle(45)
+        yline(0,'-k','LineWidth',1);
+        xticks(1:size(indv_data,2));
+        xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'});
+        xtickangle(45);
+        
+        % Titling
+        if idx_feature >= bp_index && idx_feature <= bp_index + size(bp_filters,1) - 1
+        title([strrep(feature_names{bp_index},"_"," ")," ",bp_filters(idx_feature - bp_index + 1,1),...
+            "Hz to ", bp_filters(idx_feature - bp_index + 1,2), "Hz"]);
+        elseif idx_feature > bp_index + size(bp_filters,1) - 1
+        title(strrep(feature_names{idx_feature - (size(bp_filters,1) - 1)},"_"," "))
+        elseif idx_feature < bp_index
+        title(strrep(feature_names{idx_feature},"_"," "));
+        end
         
     end
-    
-    %
     
 end
 
