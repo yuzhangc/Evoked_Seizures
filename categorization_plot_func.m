@@ -449,17 +449,31 @@ for ch = 1:4
     % Subplots By Features
     for feature = 1:length(features_to_plot)
         
+        % Identifies Features
         subplot(1,length(features_to_plot),feature)
         idx_feature = features_to_plot(feature);
         
-        % If Split Between Naive and Epileptic, Treat Each Half As Separate
-        if naive_ep
+        % Sets Colors
+        % INCOMPLETE
+        
+        hold on
+        
+        % Evenly Plots Groups
+        % INCOMPLETE
+        for class_split = 1:size(final_feature_output,2)
             
+            indv_data = final_feature_output{class_split}{ch}{idx_feature};
+            errorbar(mean(indv_data),1.96*std(indv_data)./sqrt(size(indv_data,1)),'o','LineWidth',2)
             
-            
-        else
-        % Otherwise Proceed As Usual, Each Item is Individual
         end
+        
+        hold off
+        
+        % Draws 0 Point and Labels X Axes
+        yline(0,'-k','LineWidth',1)
+        xticks(1:size(indv_data,2))
+        xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'})
+        xtickangle(45)
         
     end
     
