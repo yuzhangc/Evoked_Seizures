@@ -45,7 +45,7 @@ feature_names = fieldnames(norm_features);
 % 6) no_to_early - exclude early recordings
 % 7) excl_diaz - exclude diazepam trials
 
-displays_text = ['Which Plot to Plot?:', ...
+displays_text = ['\nWhich Plot to Plot?:', ...
     '\n(1) - Epileptic Vs Naive Animals', ...
     '\n(2) - Long Vs Short Seizures', ...
     '\n(3) - Successfully Evocations Vs Failed Evocations', ...
@@ -54,7 +54,7 @@ displays_text = ['Which Plot to Plot?:', ...
 
 main_division = input(displays_text);
 
-displays_text_2 = ['\n Do you want to plot individual data?', ...
+displays_text_2 = ['\nDo you want to plot individual data?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
@@ -63,7 +63,7 @@ ind_data = input(displays_text_2);
 
 if main_division ~= 1
 
-displays_text_3 = ['\n Do you want to split naive and epileptic data?', ...
+displays_text_3 = ['\nDo you want to split naive and epileptic data?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
@@ -76,7 +76,7 @@ naive_ep = 1;
 
 end
 
-displays_text_4 = ['\n Do you want to exclude short events?', ...
+displays_text_4 = ['\nDo you want to exclude short events?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
@@ -87,21 +87,21 @@ if excl_short == 1
     short_duration = input('\nHow many seconds is considered a short event? Type in a number (e.g. 15): ');
 end
 
-displays_text_5 = ['\n Do you want to exclude events with additional stimulation?', ...
+displays_text_5 = ['\nDo you want to exclude events with additional stimulation?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
 
 excl_addl = input(displays_text_5);
 
-displays_text_6 = ['\n Do you want to EXCLUDE early (before 01/2023) recordings?', ...
+displays_text_6 = ['\nDo you want to EXCLUDE early (before 01/2023) recordings?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
 
 no_to_early = input(displays_text_6);
 
-displays_text_7 = ['\n Do you want to exclude DIAZEPAM recordings?', ...
+displays_text_7 = ['\nDo you want to exclude DIAZEPAM recordings?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
@@ -349,7 +349,7 @@ for cnt = 1:length(subdiv_index)
         
         % Segregates According to Channels
         if rem(length(mean_pre_stim),4) ~= 0
-            display('Error!')
+            disp('\nError!');
         else
             
             % Split by Channels First
@@ -383,7 +383,56 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 10: Make Divided Plots
+% Step 10: Determine Which Features to Plot
+
+features_to_plot = [];
+
+question = input(['\nDo you want to plot all features? '...
+    '\n(1) - Yes', ...
+    '\n(0) - No', ...
+    '\nEnter a number: ']);
+
+if question == 1
+    
+    if ismember('Band_Power',feature_names)
+        features_to_plot = 1:(length(feature_list) + size(bp_filters,1) - 1);
+    else
+        features_to_plot = 1:length(feature_list);
+    end
+
+else
+
+for feature = 1:length(feature_names)
+    
+    % Determine Actual Index, Since BP Increases Everything By BP_Filters - 1
+    act_feature_index = feature;
+    bp_index = find(strcmp(feature_names,'Band_Power') == 1);
+    
+    if feature > bp_index
+        act_feature_index = act_feature_index + size(bp_filters,1) - 1;
+    end
+    
+    question = strcat("\nDo you want to plot feature: ", feature_names{feature},...
+        '\n(1) - Yes', ...
+        '\n(0) - No', ...
+        "\nEnter a number: ");
+    yes_or_no = input(question);
+    
+    if yes_or_no == 1
+        if feature == bp_index
+        features_to_plot = [features_to_plot, act_feature_index : (act_feature_index+size(bp_filters,1) - 1)];
+        else
+        features_to_plot = [features_to_plot, act_feature_index];
+        end
+    end
+    
+end
+
+end
+
+% -------------------------------------------------------------------------
+
+% Step 11: Make Divided Plots
 
 % Structure of Final Feature Output is divide by 1) class 2) channel 3)
 % feature.
@@ -398,6 +447,21 @@ for ch = 1:4
     figure;
     
     % Subplots By Features
+    for feature = 1:length(features_to_plot)
+        
+        subplot(1,length(features_to_plot),feature)
+        idx_feature = features_to_plot(feature);
+        
+        % If Split Between Naive and Epileptic, Treat Each Half As Separate
+        if naive_ep
+            
+            
+            
+        else
+        % Otherwise Proceed As Usual, Each Item is Individual
+        end
+        
+    end
     
     %
     

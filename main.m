@@ -120,12 +120,5 @@ clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
 categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory);
 
-% Split data according to animal 22+ (this year's data) and epileptic or
-% not epileptic
-% Plot general trends of features in long seizures vs short seizures
-% (further split by epileptic or non epileptic)
-% Plot general trends of features in epileptic vs nonepileptic
-% Plot summed trends in long vs short seizures and epileptic vs
-% nonepileptic
 % Further split into responder and nonresponder
 % Calculate feature coherence within animals over time

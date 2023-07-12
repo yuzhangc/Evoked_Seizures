@@ -58,8 +58,8 @@ und_thresh_naive = find (indx_to_plot' == 0 & animal_info(:,5) == 0);
 figure;
 
 hold on
-scatter(list_of_power(indx_to_plot_epileptic),list_of_duration(indx_to_plot_epileptic),'filled',"MarkerFaceColor", [0 0.4470 0.7410]);
-scatter(list_of_power(indx_to_plot_naive),list_of_duration(indx_to_plot_naive),'filled',"MarkerFaceColor", [0.8500 0.3250 0.0980]);
+scatter(list_of_power(indx_to_plot_epileptic),list_of_duration(indx_to_plot_epileptic),'filled',"MarkerFaceColor", [1 0 0]);
+scatter(list_of_power(indx_to_plot_naive),list_of_duration(indx_to_plot_naive),'filled',"MarkerFaceColor", [0 0 1]);
 hold off
 
 xlabel('Threshold Power (mW)')
@@ -76,9 +76,9 @@ legend('Epileptic', 'Naive')
 figure;
 
 hold on
-h1 = histogram(list_of_power(list_of_power' ~= -1 & animal_info(:,5) == 1));
+h1 = histogram(list_of_power(list_of_power' ~= -1 & animal_info(:,5) == 1),'FaceColor',[1 0 0]);
 h1.BinWidth = 5;
-h2 = histogram(list_of_power(list_of_power' ~= -1 & animal_info(:,5) == 0));
+h2 = histogram(list_of_power(list_of_power' ~= -1 & animal_info(:,5) == 0),'FaceColor',[0 0 1]);
 h2.BinWidth = 5;
 hold off
 
@@ -100,9 +100,9 @@ xlim([5,25])
 figure;
 
 hold on
-h1 = histogram(list_of_duration(list_of_duration' ~= -1 & animal_info(:,5) == 1));
+h1 = histogram(list_of_duration(list_of_duration' ~= -1 & animal_info(:,5) == 1),'FaceColor',[1 0 0]);
 h1.BinWidth = 2;
-h2 = histogram(list_of_duration(list_of_duration' ~= -1 & animal_info(:,5) == 0));
+h2 = histogram(list_of_duration(list_of_duration' ~= -1 & animal_info(:,5) == 0),'FaceColor',[0 0 1]);
 h2.BinWidth = 2;
 hold off
 
@@ -199,8 +199,8 @@ end
 % Perform scatterplot
 
 hold on
-scatter(xaxis1, yaxis1, 'filled',"MarkerFaceColor", [0 0.4470 0.7410])
-scatter(xaxis2, yaxis2, 'filled',"MarkerFaceColor", [0.8500 0.3250 0.0980])
+scatter(xaxis1, yaxis1, 'filled',"MarkerFaceColor", [1 0 0])
+scatter(xaxis2, yaxis2, 'filled',"MarkerFaceColor", [0 0 1])
 scatter(xaxis3, yaxis3, 'filled',"MarkerFaceColor",[0.9290 0.6940 0.1250])
 scatter(xaxis4, yaxis4,'filled',"MarkerFaceColor",[0.9290 0.6940 0.1250])
 hold off
@@ -267,8 +267,8 @@ xaxis2 = ones(length(avg_above_thresh_naive),1) .* 3 - 0.1 + 0.2*rand(length(avg
 % Scatter Plot
 
 hold on
-scatter(xaxis1, avg_above_thresh_epileptic, 'filled',"MarkerFaceColor", [0 0.4470 0.7410]);
-scatter(xaxis2, avg_above_thresh_naive, 'filled',"MarkerFaceColor", [0.8500 0.3250 0.0980]);
+scatter(xaxis1, avg_above_thresh_epileptic, 'filled',"MarkerFaceColor", [1 0 0]);
+scatter(xaxis2, avg_above_thresh_naive, 'filled',"MarkerFaceColor", [0 0 1]);
 
 % Errorbar
 
