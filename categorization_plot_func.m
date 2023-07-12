@@ -467,12 +467,16 @@ end
 
 % First Split Plots by Channel
 
-% Sets Up Standard Deviation Amounts For Errorbar Plot
+% Sets Up Standard Deviation Amounts For Errorbar Plot And How Many Rows To
+% Divide Features Into
 
 question = strcat("\nHow many standard error of the mean (SEM) to plot for errorbars?",...
     "\nEnter a number: ");
 std_cnt = input(question);
 
+question = strcat("\nHow many rows should the information be plotted in?",...
+    "\nEnter a number: ");
+rows_subplot = input(question);
 
 for ch = 1:4
     
@@ -482,7 +486,7 @@ for ch = 1:4
     for feature = 1:length(features_to_plot)
         
         % Identifies Features
-        subplot(1,length(features_to_plot),feature)
+        subplot(rows_subplot,ceil(length(features_to_plot)/rows_subplot),feature)
         idx_feature = features_to_plot(feature);
         
         % Sets Colors and Shapes. Replicates Colors For Naive/Epileptic
@@ -490,6 +494,8 @@ for ch = 1:4
         Colorset_plot = cbrewer('qual','Set1',size(final_feature_output,2) + 3);
         Colorset_plot(Colorset_plot>1) = 1;
         Colorset_plot(Colorset_plot<0) = 0;
+        
+        % Removes Color 3 (Green)
         
         if naive_ep && main_division ~= 1
             positioning(1:size(final_feature_output,2)/2) = '*';
