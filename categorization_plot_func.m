@@ -76,6 +76,8 @@ naive_ep = 1;
 
 end
 
+if main_division ~= 3
+    
 displays_text_4 = ['\nDo you want to exclude short events?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
@@ -83,16 +85,28 @@ displays_text_4 = ['\nDo you want to exclude short events?', ...
 
 excl_short = input(displays_text_4);
 
-if excl_short == 1
-    short_duration = input('\nHow many seconds is considered a short event? Type in a number (e.g. 15): ');
+else
+excl_short = 1;
 end
 
+if excl_short == 1
+    short_duration = input('\nHow many seconds is considered a short/non-evoked event? Type in a number (e.g. 15): ');
+end
+
+if main_division ~= 4
+    
 displays_text_5 = ['\nDo you want to exclude events with additional stimulation?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
 
 excl_addl = input(displays_text_5);
+
+else
+    
+excl_addl = 0;
+
+end
 
 displays_text_6 = ['\nDo you want to EXCLUDE early recordings?', ...
     '\n(1) - Yes', ...
@@ -187,10 +201,10 @@ switch main_division
         disp(strcat("Short Event Averagen Length: ", num2str(mean(merged_sz_duration(subdiv_index{1}))), " sec"));
         disp(strcat("Long Event Average Length: ",num2str(mean(merged_sz_duration(subdiv_index{2}))), " sec"));
         
-    case 3 % Successfully Evocations Vs Failed Evocations
+    case 3 % Successfully Evocations Vs Failed Evocations (Shorter than exclusion)
         
-        subdiv_index{1} = find(merged_sz_parameters(:,5) == 1);
-        subdiv_index{2} = find(merged_sz_parameters(:,5) == 0);
+        subdiv_index{1} = find(merged_sz_parameters(:,5) == 1 & merged_sz_duration > short_duration);
+        subdiv_index{2} = find(merged_sz_parameters(:,5) == 0 | merged_sz_duration <= short_duration);
         anova_col_val = merged_sz_parameters(:,5);
         
         % Manually Exclude Animals With Different Feature Length
@@ -217,9 +231,14 @@ switch main_division
         % Can Add More To Differentiate Into Unique
         
         excl_addl = 0;
-        addl_stim_paramters = merged_sz_parameters(:,[10,13]);
+        disp("Colors")
+        addl_stim_parameters = unique(merged_sz_parameters(:,[10]))
         
-        % INCOMPLETE
+        % INCOMPLETE - ONLY FOR COLOR RN
+        
+        for cnt = 1:length(addl_stim_parameters)
+            subdiv_index{cnt} = find(merged_sz_parameters(:,10) == addl_stim_parameters(cnt));
+        end
         
 end
 
@@ -526,6 +545,8 @@ for ch = 1:4
         % Plots All Classes
         for class_split = 1:size(final_feature_output,2)
             
+            % Case For No Items in Class
+            if not(isempty(final_feature_output{class_split}))
             % Extracts Relevant Data
             indv_data = final_feature_output{class_split}{ch}{idx_feature};
             
@@ -555,6 +576,10 @@ for ch = 1:4
             errorbar(xaxis,mean(indv_data),std_cnt.*std(indv_data)./sqrt(size(indv_data,1)),plot_info,...
                 "MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:),...
                 'Color',Colorset_plot(class_split,:),'LineWidth',2)
+            
+            else
+                scatter(0,0)
+            end
             
             
         end
