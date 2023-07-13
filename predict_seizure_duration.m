@@ -183,6 +183,15 @@ for sz_cnt = 1:size(sz_parameters,1)
         
         hold off
         close(fig1)
+             
+%        % PCA Plot
+%         fig1 = figure(1);
+%         pca_coef = pca(output_array{sz_cnt}');
+%         scatter3(pca_coef(:,1),pca_coef(:,2),pca_coef(:,3),[],Colorset_plot(k_means_pred,:) , 'filled');
+%         xlabel('PCA Component 1')
+%         ylabel('PCA Component 2')
+%         zlabel('PCA Component 3')
+%         close(fig1)
         
         end
         
