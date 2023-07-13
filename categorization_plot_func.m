@@ -1,7 +1,7 @@
 function [final_feature_output, subdiv_index, anova_results] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory)
 
 % Use Integrated Feature Information Across All Channels, Then Separates Them
-% According to User Input and Categorization.
+% According to User Input and Categorization. Makes Plots Too
 
 % Input Variables
 % merged_output_array - merged feature list
@@ -182,6 +182,10 @@ switch main_division
         subdiv_index{1} = find(merged_sz_duration < mean_sz_dur);
         subdiv_index{2} = find(merged_sz_duration >= mean_sz_dur);
         anova_col_val = merged_sz_duration >= mean_sz_dur;
+        
+        disp(strcat("Mean Event Length: ", num2str(mean_sz_dur), " sec"));
+        disp(strcat("Short Event Averagen Length: ", num2str(mean(merged_sz_duration(subdiv_index{1}))), " sec"));
+        disp(strcat("Long Event Average Length: ",num2str(mean(merged_sz_duration(subdiv_index{2}))), " sec"));
         
     case 3 % Successfully Evocations Vs Failed Evocations
         
@@ -372,7 +376,7 @@ for cnt = 1:length(subdiv_index)
         
         % Segregates According to Channels
         if rem(length(mean_pre_stim),4) ~= 0
-            disp('\nError!');
+            disp('Error!');
         else
             
             % Split by Channels First
@@ -478,6 +482,12 @@ question = strcat("\nHow many rows should the information be plotted in?",...
     "\nEnter a number: ");
 rows_subplot = input(question);
 
+question = strcat("\nShould different classes be offset for clarity? ",...
+    '\n(1) - Yes', ...
+    '\n(0) - No', ...
+    "\nEnter a number: ");
+offset = input(question);
+
 for ch = 1:4
     
     figure;
@@ -519,9 +529,14 @@ for ch = 1:4
             % Extracts Relevant Data
             indv_data = final_feature_output{class_split}{ch}{idx_feature};
             
-            % Define X Axes
+            % Define X Axes and Appropriate Offset
             xaxis = [1:length(mean(indv_data))];
-            xaxis = xaxis - 1/size(final_feature_output,2)*(size(final_feature_output,2)-1) + class_split/size(final_feature_output,2);
+            if offset
+                offsetval = - 1/size(final_feature_output,2)*(size(final_feature_output,2)-1) + class_split/size(final_feature_output,2);
+            else
+                offsetval = 0;
+            end
+            xaxis = xaxis + offsetval;
             
             % Plots Individual Data
             if ind_data
@@ -554,8 +569,8 @@ for ch = 1:4
         
         % Titling
         if idx_feature >= bp_index && idx_feature <= bp_index + size(bp_filters,1) - 1
-        title([strrep(feature_names{bp_index},"_"," ")," ",bp_filters(idx_feature - bp_index + 1,1),...
-            "Hz to ", bp_filters(idx_feature - bp_index + 1,2), "Hz"]);
+        title(strcat(strrep(feature_names{bp_index},"_"," ")," ",num2str(bp_filters(idx_feature - bp_index + 1,1)),...
+            "Hz to ", num2str(bp_filters(idx_feature - bp_index + 1,2)), "Hz"));
         elseif idx_feature > bp_index + size(bp_filters,1) - 1
         title(strrep(feature_names{idx_feature - (size(bp_filters,1) - 1)},"_"," "))
         elseif idx_feature < bp_index
@@ -566,5 +581,16 @@ for ch = 1:4
     
 end
 
+% -------------------------------------------------------------------------
+
+% Step 12: Outputs Number of Unique Animals Per Class
+
+for class_split = 1:length(subdiv_index)
+% Following Line Is Used to Display Animals In Each Class
+unique(merged_sz_parameters(subdiv_index{class_split},1))'
+num_in_class = length(unique(merged_sz_parameters(subdiv_index{class_split},1)));
+disp(strcat("Class ", num2str(class_split), ": ", num2str(length(subdiv_index{class_split})),...
+    " Seizures in ", num2str(num_in_class), " Animals"));
+end
 
 end
