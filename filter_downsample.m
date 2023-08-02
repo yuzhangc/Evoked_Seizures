@@ -74,6 +74,7 @@ disp("Z-scoring Complete")
 % -------------------------------------------------------------------------
 
 for sz_cnt = 1:length(output_data)
+    
 % Step 5: Plots filtered data and saves figures
 fig1 = figure(1); hold on;
 fig1.WindowState = 'maximized';
@@ -89,12 +90,21 @@ xlabel('Time (sec)')
 xlim([0, plot_duration])
 
 % Box For Evocation
-rectangle('Position',[t_before size(output_data{sz_cnt},2) sz_parameters(sz_cnt,12) 0.25], 'FaceColor',[0 0 1])
+if sz_parameters(sz_cnt,8) ~= -1
+    if sz_parameters(sz_cnt,8) == 473
+        color_first = [0 0 1];
+    elseif sz_parameters(sz_cnt,8) == 488
+        color_first = [0 1 1];
+    end
+    rectangle('Position',[t_before size(output_data{sz_cnt},2) sz_parameters(sz_cnt,12) 0.25], 'FaceColor',color_first)
+end
 
 % Box For Second Stimulation
 if sz_parameters(sz_cnt,10) ~= -1
     if sz_parameters(sz_cnt,10) == 473
         color_second = [0 1 1];
+    elseif sz_parameters(sz_cnt,10) == 488
+        color_second = [0 0 1];
     elseif sz_parameters(sz_cnt,10) == 660
         color_second = [1 0 0];
     elseif sz_parameters(sz_cnt,10) == 560 || sz_parameters(sz_cnt,10) == 530
