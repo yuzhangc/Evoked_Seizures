@@ -62,7 +62,10 @@ disp("Downsampling Complete")
 % -------------------------------------------------------------------------
 
 % Step 4: Z score normalization, using t_before to determine baseline
-% length
+% length for evoked seizures only
+
+if type ~= 1
+    
 for sz_cnt = 1:length(output_data)
     baseline_mean = mean(output_data{sz_cnt}(1:fs*t_before,:));
     baseline_std = std(output_data{sz_cnt}(1:fs*t_before,:));
@@ -70,6 +73,12 @@ for sz_cnt = 1:length(output_data)
 end
 
 disp("Z-scoring Complete")
+
+else
+    
+disp("Z-scoring Skipped For Chronic Recordings")
+
+end
 
 % -------------------------------------------------------------------------
 
