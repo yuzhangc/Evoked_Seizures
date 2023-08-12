@@ -61,8 +61,9 @@ disp("Downsampling Complete")
 
 % -------------------------------------------------------------------------
 
-% Step 4: Z score normalization, using t_before to determine baseline
-% length for evoked seizures only
+% Step 4: Evoked: Z score normalization, using t_before to determine baseline
+% length for evoked seizures only.
+% Spontaneous: 4 Hz Highpass Filter
 
 if type ~= 1
     
@@ -76,7 +77,14 @@ disp("Z-scoring Complete")
 
 else
     
-disp("Z-scoring Skipped For Chronic Recordings")
+% Design 6th order Butterworth Highpass Filter To Retain Signals Above 4 Hz
+[b,a] = butter(6 ,4/(fs/2) ,'high');
+for sz_cnt = 1:length(output_data)
+    output_data{sz_cnt} = filtfilt(b,a,output_data{sz_cnt});
+    disp("High Pass Progress: Seizure #" + num2str(sz_cnt) + " Out Of " + num2str(length(output_data)) + " Complete")
+end
+    
+disp("High Pass Filtering Complete. Z Scoring Skipped.")
 
 end
 
