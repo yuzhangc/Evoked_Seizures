@@ -4,7 +4,7 @@ clear all; close all; clc;
 directory = 'E:\';
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
-real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END')); 
+real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'20230806_38_KA_THY')); 
 subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
 clear complete_list dirFlags real_folder_st real_folder_end;
 
@@ -116,12 +116,18 @@ threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_
 
 clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
-%% Plots By Category
+%% Evoked Seizures Processing
+
+% Plots By Category
 
 categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory);
 
 % Further split into responder and nonresponder
 
-%% Cross Correlation Across Seizures 
+%% Spontaneous Seizure Processing
+
+% Cross Correlation Across Seizures 
 
 [sz_corr, sz_lag, sz_grp] = calculate_seizure_corr(path_extract, [1:4], to_plot);
+
+% Plots Feature Space For Spontaneous Vs Evoked

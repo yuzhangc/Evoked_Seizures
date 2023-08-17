@@ -24,7 +24,7 @@ spont_look_like = spont_all(sz_start - t_before_EEG * fs_EEG:end,:);
 
 figure
 subplot(2,3,1:3)
-norm_factor = max(abs(spont_all));
+norm_factor = max(abs(spont_look_like));
 for k = 1:size(spont_look_like,2)
     hold on
     plot(1/fs_EEG:1/fs_EEG:plot_duration+t_before_EEG,...
