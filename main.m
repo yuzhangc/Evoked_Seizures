@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'E:\';
+directory = 'G:\Clone of ORG_YZ 20230710\';
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
 real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'20230806_38_KA_THY')); 
@@ -111,6 +111,9 @@ for folder_num = 1:length(subFolders)
 end
 
 % Perform Plots
+
+% The number of animals in 'Animal Master.csv' has to equal the number of
+% animals that were processed.
 
 threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list)
 

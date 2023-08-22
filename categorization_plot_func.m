@@ -510,12 +510,13 @@ offset = input(question);
 for ch = 1:4
     
     figure;
+    t = tiledlayout(rows_subplot,ceil(length(features_to_plot)/rows_subplot));
     
     % Subplots By Features
     for feature = 1:length(features_to_plot)
         
         % Identifies Features
-        subplot(rows_subplot,ceil(length(features_to_plot)/rows_subplot),feature)
+        nexttile;
         idx_feature = features_to_plot(feature);
         
         % Sets Colors and Shapes. Replicates Colors For Naive/Epileptic
@@ -573,9 +574,11 @@ for ch = 1:4
             
             % Plots Group Data
             
-            errorbar(xaxis,mean(indv_data),std_cnt.*std(indv_data)./sqrt(size(indv_data,1)),plot_info,...
-                "MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:),...
-                'Color',Colorset_plot(class_split,:),'LineWidth',2)
+            boxplot(indv_data,'Positions',xaxis,'Widths',0.5/size(final_feature_output,2),'Colors',Colorset_plot(class_split,:))
+            
+            % errorbar(xaxis,mean(indv_data),std_cnt.*std(indv_data)./sqrt(size(indv_data,1)),plot_info,...
+            %     "MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:),...
+            %     'Color',Colorset_plot(class_split,:),'LineWidth',2)
             
             else
                 scatter(0,0)
