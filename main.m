@@ -123,7 +123,7 @@ clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
 % Plots By Category
 
-categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory);
+[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory);
 
 % Further split into responder and nonresponder
 

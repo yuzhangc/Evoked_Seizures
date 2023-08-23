@@ -1,4 +1,4 @@
-function [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory)
+function [final_feature_output, subdiv_index, anova_results] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory)
 
 % Use Integrated Feature Information Across All Channels, Then Separates Them
 % According to User Input and Categorization. Makes Plots Too
@@ -13,7 +13,7 @@ function [final_feature_output, subdiv_index, merged_sz_duration] = categorizati
 % final_feature_output - features segregated by class, channels, then
 % individual features across all divisions
 % subdiv_index - divisions
-% merged_sz_duration - Merged Seizure Durations
+% anova_results - using anova_col_val to guide ANOVA calculations
 
 % -------------------------------------------------------------------------
 
@@ -191,8 +191,6 @@ switch main_division
         subdiv_index{1} = ep_trials;
         subdiv_index{2} = naive_trials;
         anova_col_val(ep_trials) = 1; anova_col_val(naive_trials) = 0;
-
-        duration_labels = {'Epileptic', 'Naive'};
         
     case 2 % Long Vs Short Seizures, Excluding < 5 Sec Events
         
@@ -211,8 +209,6 @@ switch main_division
         disp(strcat("Mean Event Length: ", num2str(mean_sz_dur), " sec"));
         disp(strcat("Short Event Averagen Length: ", num2str(mean(merged_sz_duration(subdiv_index{1}))), " sec"));
         disp(strcat("Long Event Average Length: ",num2str(mean(merged_sz_duration(subdiv_index{2}))), " sec"));
-
-        duration_labels = {'Short Seizures', 'Long Seizures'};
         
     case 3 % Successfully Evocations Vs Failed Evocations (Shorter than exclusion)
         
@@ -238,8 +234,6 @@ switch main_division
         end
         
         clear excluded_indices
-
-        duration_labels = {'Successful Evocations', 'Shorter than Exclusion Criteria'};
         
     case 4 % Levetiracetam vs Phenytoin vs Diazepam
 
@@ -260,8 +254,6 @@ switch main_division
 
         % In Combination
         subdiv_index{5} = find(merged_sz_parameters(:,17) > 0 & merged_sz_parameters(:,18) > 0);
-
-        duration_labels = {'No Drug', 'Levetiracetam', 'Phenytoin', 'Diazepam', 'Levetiracetam & Phenytoin'};
         
     case 5 % Additional Stimulation
 
@@ -313,14 +305,6 @@ if naive_ep
             subdiv_index{length_subdiv + cnt} = intersect(subdiv_index{cnt},naive_trials);
             subdiv_index{cnt} = intersect(subdiv_index{cnt},ep_trials);
         end 
-
-        % Extends Duration Labelling
-        for dur_text = 1:length(duration_labels)
-        addl_duration_labels{dur_text} = strcat(duration_labels{dur_text}," Naive");
-        duration_labels{dur_text} = strcat(duration_labels{dur_text}," Epileptic");
-        end
-
-        duration_labels = [duration_labels,addl_duration_labels];
         
     end
 end
@@ -677,22 +661,10 @@ end
 
 figure
 
-hold on
-
 % Loop Through Different Divisions
 for class_split = 1:length(subdiv_index)
-    scatter(ones(length(merged_sz_duration(subdiv_index{class_split})),1) .* class_split , ...
-        merged_sz_duration(subdiv_index{class_split}),"MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:))
+    merged_sz_duration
 end
-
-hold off
-
-% Draws 0 Point and Labels X Axes
-yline(0,'-k','LineWidth',1);
-xticks(1:length(subdiv_index));
-xlim([0,length(subdiv_index) + 1]);
-xticklabels(duration_labels);
-xtickangle(45);
 
 % -------------------------------------------------------------------------
 
