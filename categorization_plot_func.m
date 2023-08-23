@@ -49,7 +49,8 @@ displays_text = ['\nWhich Plot to Plot?:', ...
     '\n(1) - Epileptic Vs Naive Animals', ...
     '\n(2) - Long Vs Short Seizures', ...
     '\n(3) - Successfully Evocations Vs Failed Evocations', ...
-    '\n(4) - Additional Stimulation or Not - INCOMPLETE',...
+    '\n(4) - Comparison of Levetiracetam and Phenytoin with Control',...
+    '\n(5) - Additional Stimulation Or Not (INCOMPLETE)',...
     '\nEnter a number: '];
 
 main_division = input(displays_text);
@@ -77,7 +78,7 @@ naive_ep = 1;
 end
 
 if main_division ~= 3
-    
+
 displays_text_4 = ['\nDo you want to exclude short events?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
@@ -119,12 +120,20 @@ if no_to_early == 1
     an_excl = input('\nType in Animal Number Below Which To Exclude (e.g. 12 = 2022/11/07, 22 = 2023/01/16): ');
 end
 
+if main_division ~= 4
+
 displays_text_7 = ['\nDo you want to exclude DIAZEPAM recordings?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
 
 excl_diaz = input(displays_text_7);
+
+else
+
+excl_diaz = 0;
+
+end
 
 clear displays_text displays_text_2 displays_text_3 displays_text_4 displays_text_5 displays_text_6 displays_text_7
 
@@ -226,8 +235,28 @@ switch main_division
         
         clear excluded_indices
         
-    case 4 % Additional Stimulation or Not
+    case 4 % Levetiracetam vs Phenytoin vs Diazepam
+
+        % Include Short Events and Diazepam
+        excl_diaz = 0;
+
+        % Control
+        subdiv_index{1} = find(merged_sz_parameters(:,16) == 0 & merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) == 0);
         
+        % Levetiracetam Alone
+        subdiv_index{2} = find(merged_sz_parameters(:,17) > 0 & merged_sz_parameters(:,18) == 0);
+
+        % Phenytoin Alone
+        subdiv_index{3} = find(merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) > 0);
+
+        % Diazepam Alone
+        subdiv_index{4} = find(merged_sz_parameters(:,16) > 0);
+
+        % In Combination
+        subdiv_index{5} = find(merged_sz_parameters(:,17) > 0 & merged_sz_parameters(:,18) > 0);
+        
+    case 5 % Additional Stimulation
+
         % Can Add More To Differentiate Into Unique
         
         excl_addl = 0;
@@ -367,6 +396,8 @@ for cnt = 1:length(subdiv_index)
         indv_stim_duration = merged_sz_parameters(subdiv_index{cnt}(seizure_idx),12);
         
         % Create Indices For Thirds
+        if indv_stim_duration ~= 0
+
         sz_start = (t_before + indv_stim_duration)/winDisp;
         sz_end = sz_start + indv_duration/winDisp;
         indices = [1 , t_before/winDisp , sz_start , sz_start+round((sz_end-sz_start)/3), ...
@@ -379,19 +410,34 @@ for cnt = 1:length(subdiv_index)
         end
         
         % Calculate Means In Indices
-        mean_pre_stim = mean(indv_data(indices(1):indices(2),:));
-        mean_during_stim = mean(indv_data(indices(2):indices(3),:));
-        mean_first_third = mean(indv_data(indices(3):indices(4),:));
-        mean_second_third = mean(indv_data(indices(4):indices(5),:));
-        mean_final_third = mean(indv_data(indices(5):indices(6),:));
+        mean_pre_stim = mean(indv_data(indices(1):indices(2),:),1);
+        mean_during_stim = mean(indv_data(indices(2):indices(3),:),1);
+        mean_first_third = mean(indv_data(indices(3):indices(4),:),1);
+        mean_second_third = mean(indv_data(indices(4):indices(5),:),1);
+        mean_final_third = mean(indv_data(indices(5):indices(6),:),1);
         if indices(6) ~= indices (7)
-        mean_post_ictal = mean(indv_data(indices(6):indices(7),:));
+        mean_post_ictal = mean(indv_data(indices(6):indices(7),:),1);
         else
         mean_post_ictal = mean_pre_stim;
         end
         
         final_divided = [mean_pre_stim; mean_during_stim; mean_first_third; ...
             mean_second_third; mean_final_third; mean_post_ictal];
+
+        else
+
+        % Calculate Only Pre and Post (and Stim). Otherwise Ignore
+        
+        indices = [1 , t_before/winDisp , sz_start , sz_start+round((sz_end-sz_start)/3), ...
+            sz_start+round(2*(sz_end-sz_start)/3) , sz_end , sz_end+30/winDisp];
+
+        mean_pre_stim = mean(indv_data(indices(1):indices(2),:),1);
+        mean_during_stim = mean(indv_data(indices(2):indices(3),:),1);
+        mean_post_ictal = mean(indv_data(indices(6):indices(7),:),1);
+
+        final_divided = [mean_pre_stim; mean_during_stim; 0; 0; 0; mean_post_ictal];
+
+        end
         
         % Segregates According to Channels
         if rem(length(mean_pre_stim),4) ~= 0
