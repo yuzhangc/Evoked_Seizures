@@ -2,16 +2,15 @@ clear all
 
 % Loads Files
 
-load('G:\Clone of ORG_YZ 20230710\20230624_37_KA_THY\Filtered Seizure Data.mat')
+load('G:\Clone of ORG_YZ 20230710\20230809_40_KA_THY\Filtered Seizure Data.mat')
 
 % Read Seizure Parameters
 
-sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
+sz_parameters = readmatrix(strcat('G:\Clone of ORG_YZ 20230710\20230809_40_KA_THY\','Trials Spreadsheet.csv'));
 
 % Model Seizure is 24 - one stim and 28 - 2 stim
 
-model_seizure_24 = output_data{24};
-model_seizure_28 = output_data{28};
+model_seizure_24 = output_data{16};
 
 %% Continuous Wavelet Transform
 
@@ -75,8 +74,6 @@ xlabel("Time (s)")
 ylabel("Filtered Signal")
 
 % 3D Scalogram
-
-figure;
 
 helperPlotScalogram3d(model_seizure_24(:,1),fs)
 
