@@ -15,7 +15,7 @@ zlabel("Magnitude")
 title("Scalogram In 3-D")
 % set(gca,Yscale="log")
 shading interp
-xlim([0,60])
+xlim([0,120])
 ylim([1 100])
 view([-40 30])
 end
