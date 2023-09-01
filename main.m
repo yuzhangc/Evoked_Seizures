@@ -4,7 +4,7 @@ clear all; close all; clc;
 directory = 'G:\Clone of ORG_YZ 20230710\';
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
-real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'20230806_38_KA_THY')); 
+real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END'));
 subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
 clear complete_list dirFlags real_folder_st real_folder_end;
 
@@ -80,7 +80,11 @@ end
 % Training Function - fitcknn(X,Y) where X is merged temp_output_array and
 % Y is kmeans(X,3)
 
+% load('seizure_model_net.mat')
+% countdown_sec = 3;
+
 load('seizure_model.mat')
+% countdown_sec = 5;
 
 % Loads 'To Fix' File For Manual Seizure Duration Fix (~15% of Trials)
 
