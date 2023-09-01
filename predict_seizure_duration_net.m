@@ -1,4 +1,4 @@
-function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration_net(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot)
+function [seizure_duration,output_array,sz_parameters] = predict_seizure_duration_net(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot)
 
 % Uses a deep learning network to identify seizure length.
 
@@ -13,20 +13,10 @@ function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seiz
 % Output Variables
 % 1) seizure_duration - calculated seizure_duration
 %
-% 2) min_thresh - has below components
-% power - power at which 2/3 of time reliably induce seizures
-% duration - duration at which 2/3 of time reliably induce seizures
-% seizures - trial #s for evoked events above min power AND duration
-%       (excluding diazepam)
-% avg_success - success rate for evocation above min power AND duration or
-%       for ALL if threshold was not found (excluding diazepam)
-% diaz_seizures - trial # for diazepam seizures above threshold
-% diaz_success - success rate for evocation with diazepam
-%
-% 3) output_array - concactenated features, indexed by seizure. NOT THE
+% 2) output_array - concactenated features, indexed by seizure. NOT THE
 % SAME FORMAT AS IN THE K NEAREST NEIGHBORS
 %
-% 4) sz_parameters - seizure parameters
+% 3) sz_parameters - seizure parameters
 
 % For deep learning network, each individual timepoint needs to become its
 % own 1 x feature x channel array, where the number of features is the y and t is
