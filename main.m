@@ -173,4 +173,4 @@ clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
 [sz_corr, sz_lag, sz_grp] = calculate_seizure_corr(path_extract, [1:4], to_plot);
 
-% Plots Feature Space For Spontaneous Vs Evoked
+% Spontaneous Seizure Neural Net Training
