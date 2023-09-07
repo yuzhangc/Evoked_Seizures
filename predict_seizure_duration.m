@@ -193,6 +193,17 @@ for sz_cnt = 1:size(sz_parameters,1)
 %         zlabel('PCA Component 3')
 %         close(fig1)
         
+        else
+
+        if ismember([sz_parameters(sz_cnt,1),sz_parameters(sz_cnt,2)],to_fix_chart(:,1:2),'rows')
+            
+            % Find the column where the row matches in entirety
+            [logical_val, fixed_duration_row] = ismember([sz_parameters(sz_cnt,1),sz_parameters(sz_cnt,2)],to_fix_chart(:,1:2),'rows');
+            % Fixes output for seizure duration
+            seizure_duration(sz_cnt) = to_fix_chart(fixed_duration_row,3);
+           
+        end
+
         end
         
     end
