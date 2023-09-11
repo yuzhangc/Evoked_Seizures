@@ -8,6 +8,7 @@ function [final_feature_output, subdiv_index, merged_sz_duration] = categorizati
 % merged_sz_parameters - complete seizure information list
 % seizure_duration_list - list of seizure duration, organized by folder
 % directory - directory to extract feature info from
+% within_animal - within animal comparison, animal #
 
 % Output Variables
 % final_feature_output - features segregated by class, channels, then
@@ -92,6 +93,8 @@ end
 
 if excl_short == 1
     short_duration = input('\nHow many seconds is considered a short/non-evoked event? Type in a number (e.g. 15): ');
+else
+    short_duration = 0;
 end
 
 if main_division ~= 4
@@ -250,13 +253,13 @@ switch main_division
         subdiv_index{1} = find(merged_sz_parameters(:,16) == 0 & merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) == 0);
         
         % Levetiracetam Alone
-        subdiv_index{2} = find(merged_sz_parameters(:,17) > 0 & merged_sz_parameters(:,18) == 0);
+        subdiv_index{2} = find(merged_sz_parameters(:,17) > 0 & merged_sz_parameters(:,18) == 0 & merged_sz_parameters(:,16) == 0);
 
         % Phenytoin Alone
-        subdiv_index{3} = find(merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) > 0);
+        subdiv_index{3} = find(merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) > 0 & merged_sz_parameters(:,16) == 0);
 
         % Diazepam Alone
-        subdiv_index{4} = find(merged_sz_parameters(:,16) > 0);
+        subdiv_index{4} = find(merged_sz_parameters(:,16) > 0 & merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) == 0);
 
         % In Combination
         subdiv_index{5} = find(merged_sz_parameters(:,17) > 0 & merged_sz_parameters(:,18) > 0);

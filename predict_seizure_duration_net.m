@@ -32,6 +32,11 @@ load(strcat(path_extract,'Normalized Features.mat'));
 load(strcat(path_extract,'Filtered Seizure Data.mat'))
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 
+% Adds Levetiracetam and Phenytoin Information For Early Trials
+if size(sz_parameters,2) == 16
+sz_parameters(1:end,17:18) = 0;
+end
+
 % -------------------------------------------------------------------------
 
 % Step 2: Generate Generate Seizure Duration Matrix. Initiate all to Zeros. Extract

@@ -126,8 +126,21 @@ end
 % 4.7500    0.5775
 % 5.0000    0.5608
 
+% FOR 658 SZ IN ANIMAL 22 - 45 EXCL 24 25 (1 sec)
+%      0    0.3526
+% 0.5000    0.5152
+% 1.0000    0.5258
+% 1.5000    0.5106
+% 2.0000    0.5015
+% 2.5000    0.4726
+% 3.0000    0.4453
+% 3.5000    0.4271
+% 4.0000    0.4027
+% 4.5000    0.3845
+% 5.0000    0.3723
+
 load('seizure_model.mat')
-countdown_sec = 5; % See Countdown Sec Vs Accuracy Table FOR ALL
+% countdown_sec = 5; % See Countdown Sec Vs Accuracy Table FOR ALL
 %     1.0000    0.7640  (within 5secs abs value)
 %     1.2500    0.7920
 %     1.5000    0.8103
@@ -235,7 +248,13 @@ clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
 [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory);
 
-% Further split into responder and nonresponder
+% Within Animal Example
+
+animal = 39;
+targeted_sz_parameters = merged_sz_parameters(merged_sz_parameters(:,1) == 39,:);
+targeted_output_array = {merged_output_array{find(merged_sz_parameters(:,1) == 39)}};
+targeted_seizure_duration_list{1} = seizure_duration_list{animal};
+categorization_plot_func(targeted_output_array,targeted_sz_parameters,targeted_seizure_duration_list,directory);
 
 %% Spontaneous Seizure Processing
 

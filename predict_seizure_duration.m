@@ -37,6 +37,11 @@ load(strcat(path_extract,'Filtered Seizure Data.mat'))
 load(strcat(path_extract,'Normalized Features.mat'))
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 
+% Adds Levetiracetam and Phenytoin Information For Early Trials
+if size(sz_parameters,2) == 16
+sz_parameters(1:end,17:18) = 0;
+end
+
 % Step 2: Generate Seizure Duration Matrix. Initiate all to Zeros. Extract
 % feature names
 
@@ -232,7 +237,7 @@ min_thresh.duration = 1000;
 
 for cnt = 1:length(number_power)
     
-    trials = find(sz_parameters(:,9) == number_power(cnt) & sz_parameters(:,16) == 0);
+    trials = find(sz_parameters(:,9) == number_power(cnt) & sz_parameters(:,16) == 0 & sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0);
     
     % Ignore One/Two Offs & Higher Powers if Threshold Already Determined
     if length(trials) > 2 && number_power(cnt) < min_thresh.power
@@ -251,7 +256,7 @@ end
 
 for cnt = 1:length(number_duration)
     
-    trials = find(sz_parameters(:,12) == number_duration(cnt) & sz_parameters(:,16) == 0);
+    trials = find(sz_parameters(:,12) == number_duration(cnt) & sz_parameters(:,16) == 0 & sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0);
     
     % Ignore one/two offs & higher durations if threshold already determined
     if length(trials) > 2 && number_duration(cnt) < min_thresh.duration
@@ -290,7 +295,8 @@ end
 if min_thresh.power ~= -1 && min_thresh.duration ~= -1
     
     min_thresh.seizures = find(sz_parameters(:,12) >= min_thresh.duration & ...
-        sz_parameters(:,9) >= min_thresh.power & sz_parameters(:,16) == 0);
+        sz_parameters(:,9) >= min_thresh.power & sz_parameters(:,16) == 0 &...
+        sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0);
     min_thresh.avg_success = mean(sz_parameters(min_thresh.seizures,5));
     min_thresh.diaz_seizures = find(sz_parameters(:,12) >= min_thresh.duration & ...
         sz_parameters(:,9) >= min_thresh.power & sz_parameters(:,16) == 1);
