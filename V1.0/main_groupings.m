@@ -209,12 +209,12 @@ clear i j k folder_num
 
 if to_plot
     
-evoked_sz_to_plot = [7,1];
+evoked_sz_to_plot = [10,20];
 
 path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
 load([path_evoked,'Standardized Seizure Data.mat']);
 
-plot_duration = 80;
+plot_duration = 55;
 
 figure
 subplot(2,3,1:3)
@@ -238,7 +238,7 @@ for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
         ./norm_factor(k)+(k-1)*1,'Color','k')
     hold off
     ylim([-1,k])
-    xlim([9,19])
+    xlim([15,25])
     xlabel('Time (sec)')
 end
 
@@ -250,7 +250,7 @@ for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
         ./norm_factor(k)+(k-1)*1,'Color','k')
     hold off
     ylim([-1,k])
-    xlim([31,41])
+    xlim([28,38])
     xlabel('Time (sec)')
 end
 
@@ -262,7 +262,7 @@ for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
         ./norm_factor(k)+(k-1)*1,'Color','k')
     hold off
     ylim([-1,k])
-    xlim([63,73])
+    xlim([40,50])
     xlabel('Time (sec)')
 end
 
@@ -274,12 +274,12 @@ end
 
 if to_plot
     
-evoked_sz_to_plot = [1,6];
+evoked_sz_to_plot = [25,15];
 
 path_evoked = strcat(path_EEG,subFolders(evoked_sz_to_plot(1,1)+2).name,'\');
 load([path_evoked,'Standardized Seizure Data.mat']);
 
-plot_duration = 80;
+plot_duration = 55;
 
 figure
 subplot(2,3,1:3)
@@ -327,7 +327,7 @@ for k = 1:size(evoked_sz{evoked_sz_to_plot(1,2)},2)
         ./norm_factor(k)+(k-1)*1,'Color','k')
     hold off
     ylim([-1,k])
-    xlim([39,49])
+    xlim([45,55])
     xlabel('Time (sec)')
 end
 

@@ -422,8 +422,14 @@ for cnt = 1:length(subdiv_index)
         indices = [1 , t_before/winDisp , sz_start , sz_start+round((sz_end-sz_start)/3), ...
             sz_start+round(2*(sz_end-sz_start)/3) , sz_end , sz_end+30/winDisp];
         
+        % Prepare For Case In Which End + 30 Seconds Exceed Bounds
+        if sz_end + 30/winDisp >= (t_after + t_before)/winDisp - 1
+            indices(7) = (t_after + t_before)/winDisp - 1;
+        end
+
         % Prepare For Edge Case Where Seizures Doesnt Stop
-        if sz_end <= (t_after + t_before)/winDisp
+        if sz_end >= (t_after + t_before)/winDisp - 1
+            sz_end
             indices(6) = (t_after + t_before)/winDisp - 1;
             indices(7) = indices(6);
         end

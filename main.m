@@ -25,12 +25,17 @@ feat_calc = 1;
 to_plot = 0; plot_duration = 95;
 % Fixes Certain Duration Calculations
 to_fix = 1;
+% Wavelets
+wavelets = 8;
 
 % Global Variables
 % Target sampling rate
 target_fs = 2000;
 % Feature window size (s). Window displacement (s). Spectrogram frequency limit. 
 winLen = 0.5; winDisp = 0.25; overlap_per = winDisp/winLen*100; freq_limits = [1 300];
+if wavelets > 0
+winLen = 2; % For Wavelets
+end
 % Spectrogram plot colorbar limits
 colorbarlim_evoked = [-30,-0];
 % Feature List - 1:12 include all features. Refer to calculate_features for
@@ -69,6 +74,15 @@ if feat_calc == 1
     for folder_num = 1:length(subFolders)
         path_extract = strcat(directory,subFolders(folder_num).name,'\');
         calculate_features(path_extract,filter_sz,feature_list,winLen, winDisp, bp_filters);
+    end
+end
+
+%% Wavelet Feature Calculation
+
+if feat_calc == 1
+    for folder_num = 1:length(subFolders)
+        path_extract = strcat(directory,subFolders(folder_num).name,'\');
+        calculate_wavelet_features(path_extract,filter_sz,wavelets,feature_list,winLen, winDisp);
     end
 end
 
