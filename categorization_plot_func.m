@@ -645,11 +645,16 @@ for ch = 1:4
             
             % Plots Group Data
             
+            if std_cnt == 0
+            
             boxplot(indv_data,'Positions',xaxis,'Widths',0.5/size(final_feature_output,2),'Colors',Colorset_plot(class_split,:))
             
-            % errorbar(xaxis,mean(indv_data),std_cnt.*std(indv_data)./sqrt(size(indv_data,1)),plot_info,...
-            %     "MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:),...
-            %     'Color',Colorset_plot(class_split,:),'LineWidth',2)
+            else 
+
+            errorbar(xaxis,mean(indv_data),std_cnt.*std(indv_data)./sqrt(size(indv_data,1)),plot_info,...
+                 "MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:),...
+                 'Color',Colorset_plot(class_split,:),'LineWidth',2)
+            end
             
             else
                 scatter(0,0)

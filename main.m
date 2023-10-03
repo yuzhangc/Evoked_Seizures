@@ -264,11 +264,11 @@ clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
 % Within Animal Example
 
-animal = 39;
-targeted_sz_parameters = merged_sz_parameters(merged_sz_parameters(:,1) == 39,:);
-targeted_output_array = {merged_output_array{find(merged_sz_parameters(:,1) == 39)}};
-targeted_seizure_duration_list{1} = seizure_duration_list{animal};
-categorization_plot_func(targeted_output_array,targeted_sz_parameters,targeted_seizure_duration_list,directory);
+% animal = 39;
+% targeted_sz_parameters = merged_sz_parameters(merged_sz_parameters(:,1) == 39,:);
+% targeted_output_array = {merged_output_array{find(merged_sz_parameters(:,1) == 39)}};
+% targeted_seizure_duration_list{1} = seizure_duration_list{animal};
+% categorization_plot_func(targeted_output_array,targeted_sz_parameters,targeted_seizure_duration_list,directory);
 
 %% Spontaneous Seizure Processing
 
