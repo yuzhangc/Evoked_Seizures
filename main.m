@@ -263,9 +263,16 @@ animal_info = readtable(strcat(directory,'Animal Master.csv'));
 for folder_num = 1:length(subFolders)
 
 path_extract = strcat(directory,subFolders(folder_num).name,'\');
-extract_data_R(animal_info,path_extract,seizure_duration_list,folder_num)
+
+if folder_num == 1
+[final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,[]);
+else
+[final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,feature_list);
+end
 
 end
+
+clear animal_info
 
 %% Evoked Seizures Processing
 

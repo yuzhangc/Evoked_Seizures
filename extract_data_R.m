@@ -1,10 +1,22 @@
-function [final_feature_output,sz_parameters] = extract_data_R(animal_info,path_extract,seizure_duration_list,folder_num)
+function [final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,feature_list)
 
 % Uses Seizure Duration to Splice Feature Data into Before, During Stim,
 % and Thirds. Exports the Means Along With Spliced Seizure Parameters For
 % Processing in R.
 
+% Input Variables
+% animal_info - Animal Information Spreadhseet
+% path_extract - Directory to Load Features From
+% seizure_duration_list - Calculated Seizure Durations (For Thirds
+% Splitting)
+
+% Output Variables
+% sz_parameters - Seizure Parameters For Animal
+% final_divided - Features Divided By Thirds By Animal
+
 % -------------------------------------------------------------------------
+
+disp("Working on: " + path_extract)
 
 % Step 1: Read Seizure Parameters and Features
 
@@ -144,46 +156,152 @@ end
 
 feature_names = fieldnames(norm_features);
 
-for feature_number = 1:length(feature_names)
+% IO for Features
 
+if isempty(feature_list)
+
+for feature_number = 1:length(feature_names)
+    displays_text = strcat("\nDo You Want to Output Feature ",strrep(feature_names(feature_number),"_"," "),"?",...
+        "\n(1) Yes (0) No: ");
+    yesorno = input(displays_text);
+
+    if yesorno
+        feature_list = [feature_list,feature_number];
+    else
+    end
+
+end
+
+end
+
+% Determine Number of Channels
+if (isequal(feature_names{end},'Band_Power'))
+    total_channels = size(norm_features.(feature_names{end}){1}{1},2);
+else
+    total_channels = size(norm_features.(feature_names{end}){1},2);
+end
+
+clear final_divided all_titles
+
+% Loops Through Channels
+for ch = 1:total_channels
+
+temp_ch_features = [];
+temp_ch_titles = [];
+
+% Loops Through Features
+for feature_number = 1:length(feature_list)
+    
     % Special Case for Band Power, Concactenate Increasing BP
     % Filters in Order
-    if (isequal(feature_names{feature_number},'Band_Power'))
-        for bp_cnt = 1:size(bp_filters,1)
+    if (isequal(feature_names{feature_list(feature_number)},'Band_Power'))
+    
+        for bp_cnt = 1:size(bp_filters,1)  
 
-            % Loop Through Seizures
-            for seizure_idx = 1:num_seizures
+        temp_sz_features = [];
+    
+        % Loop Through Seizures
+        for seizure_idx = 1:num_seizures        
 
-                feature_data = norm_features.(feature_names{feature_number}){bp_cnt}{seizure_idx};
+            feature_data = norm_features.(feature_names{feature_list(feature_number)}){bp_cnt}{seizure_idx};
 
-                % Loop Through Channels
-                for ch = 1:size(feature_data,2)
+            % Calculate Thirds
 
-                    % Calculate Thirds
-                    mean_pre_stim = mean(feature_data(indices(seizure_idx,1):indices(seizure_idx,2),ch),1);
-                    mean_during_stim = mean(feature_data(indices(seizure_idx,2):indices(seizure_idx,3),ch),1);
-                    mean_first_third = mean(feature_data(indices(seizure_idx,3):indices(seizure_idx,4),ch),1);
-                    mean_second_third = mean(feature_data(indices(seizure_idx,4):indices(seizure_idx,5),ch),1);
-                    mean_final_third = mean(feature_data(indices(seizure_idx,5):indices(seizure_idx,6),ch),1);
-                    if indices(seizure_idx,6) ~= indices (seizure_idx,7)
-                    mean_post_ictal = mean(feature_data(indices(seizure_idx,6):indices(seizure_idx,7),ch),1);
-                    else
-                    mean_post_ictal = mean_pre_stim;
-                    end
-
-                    % PROBLEM WITH ASSIGNMENT
-                    final_divided{ch}(seizure_idx,:) = [final_divided{ch}(seizure_idx,:), mean_pre_stim, mean_during_stim, mean_first_third, ...
-                        mean_second_third, mean_final_third, mean_post_ictal];
-
-                end
+            mean_pre_stim = mean(feature_data(indices(seizure_idx,1):indices(seizure_idx,2),ch),1);
+            mean_during_stim = mean(feature_data(indices(seizure_idx,2):indices(seizure_idx,3),ch),1);
+            mean_first_third = mean(feature_data(indices(seizure_idx,3):indices(seizure_idx,4),ch),1);
+            mean_second_third = mean(feature_data(indices(seizure_idx,4):indices(seizure_idx,5),ch),1);
+            mean_final_third = mean(feature_data(indices(seizure_idx,5):indices(seizure_idx,6),ch),1);
+            if indices(seizure_idx,6) ~= indices (seizure_idx,7)
+            mean_post_ictal = mean(feature_data(indices(seizure_idx,6):indices(seizure_idx,7),ch),1);
+            else
+            mean_post_ictal = mean_pre_stim;
             end
+
+            % Put Into Output Array
+
+            feature_for_ch = [mean_pre_stim, mean_during_stim, mean_first_third, mean_second_third, ...
+                mean_final_third, mean_post_ictal];
+            
+            temp_sz_features(seizure_idx,:) = feature_for_ch;
+
+            % Assign Variable Titles
+
+            if seizure_idx == 1
+            common_title = strcat("Ch ",num2str(ch), " ", strrep(feature_names{feature_list(feature_number)},"_"," "));
+            common_title_bp = strcat(common_title," ",num2str(bp_filters(bp_cnt,1))," Hz to ",...
+                num2str(bp_filters(bp_cnt,2)),"Hz");
+            variable_titles = [strcat(common_title_bp, " Before Stim"), strcat(common_title_bp, " During Stim"), ...
+                strcat(common_title_bp, " First Third"), strcat(common_title_bp, " Second Third"),...
+                strcat(common_title_bp, " Final Third"), strcat(common_title_bp, " After Seizure")];
+            temp_ch_titles = [temp_ch_titles,variable_titles];
+            end
+
+        end
+
+        temp_ch_features = [temp_ch_features, temp_sz_features];
+
         end
 
     else
+
+        temp_sz_features = [];
+    
+        % Loop Through Seizures
+        for seizure_idx = 1:num_seizures        
+
+            feature_data = norm_features.(feature_names{feature_list(feature_number)}){seizure_idx};
+
+            % Calculate Thirds
+
+            mean_pre_stim = mean(feature_data(indices(seizure_idx,1):indices(seizure_idx,2),ch),1);
+            mean_during_stim = mean(feature_data(indices(seizure_idx,2):indices(seizure_idx,3),ch),1);
+            mean_first_third = mean(feature_data(indices(seizure_idx,3):indices(seizure_idx,4),ch),1);
+            mean_second_third = mean(feature_data(indices(seizure_idx,4):indices(seizure_idx,5),ch),1);
+            mean_final_third = mean(feature_data(indices(seizure_idx,5):indices(seizure_idx,6),ch),1);
+            if indices(seizure_idx,6) ~= indices (seizure_idx,7)
+            mean_post_ictal = mean(feature_data(indices(seizure_idx,6):indices(seizure_idx,7),ch),1);
+            else
+            mean_post_ictal = mean_pre_stim;
+            end
+
+            % Put Into Output Array
+
+            feature_for_ch = [mean_pre_stim, mean_during_stim, mean_first_third, mean_second_third, ...
+                mean_final_third, mean_post_ictal];
+            
+            temp_sz_features(seizure_idx,:) = feature_for_ch;
+
+            % Assign Variable Titles
+
+            if seizure_idx == 1
+            common_title = strcat("Ch ",num2str(ch), " ", strrep(feature_names{feature_list(feature_number)},"_"," "));
+            variable_titles = [strcat(common_title, " Before Stim"), strcat(common_title, " During Stim"), ...
+                strcat(common_title, " First Third"), strcat(common_title, " Second Third"),...
+                strcat(common_title, " Final Third"), strcat(common_title, " After Seizure")];
+            temp_ch_titles = [temp_ch_titles,variable_titles];
+            end
+
+        end
+
+        temp_ch_features = [temp_ch_features, temp_sz_features];
 
     end
 
 end
 
+final_divided{ch} = temp_ch_features;
+all_titles{ch} = temp_ch_titles;
+
+end
+
+% -------------------------------------------------------------------------
+
+% Step 5: Create Tables and Save Output
+
+for ch = 1:size(all_titles,2)
+
+    final_table = horzcat(beginning_data,array2table(final_divided{ch},'VariableNames',all_titles{ch}));
+    writetable(final_table,strcat(path_extract,"Extracted_Features_Channel_",num2str(ch),".csv"))
 
 end
