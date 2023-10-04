@@ -256,6 +256,17 @@ threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_
 
 clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
+%% Output Data To R
+
+animal_info = readtable(strcat(directory,'Animal Master.csv'));
+
+for folder_num = 1:length(subFolders)
+
+path_extract = strcat(directory,subFolders(folder_num).name,'\');
+extract_data_R(animal_info,path_extract,seizure_duration_list,folder_num)
+
+end
+
 %% Evoked Seizures Processing
 
 % Plots By Category
