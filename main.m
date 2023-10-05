@@ -265,9 +265,9 @@ for folder_num = 1:length(subFolders)
 path_extract = strcat(directory,subFolders(folder_num).name,'\');
 
 if folder_num == 1
-[final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,[]);
+[final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,[],folder_num);
 else
-[final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,feature_list);
+[final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,feature_list,folder_num);
 end
 
 end

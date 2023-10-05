@@ -1,4 +1,4 @@
-function [final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,feature_list)
+function [final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,feature_list,folder_num)
 
 % Uses Seizure Duration to Splice Feature Data into Before, During Stim,
 % and Thirds. Exports the Means Along With Spliced Seizure Parameters For
@@ -9,6 +9,7 @@ function [final_divided,sz_parameters,feature_list] = extract_data_R(animal_info
 % path_extract - Directory to Load Features From
 % seizure_duration_list - Calculated Seizure Durations (For Thirds
 % Splitting)
+% folder_num - Used for Taking Correct Seizure Durations
 
 % Output Variables
 % sz_parameters - Seizure Parameters For Animal
@@ -109,13 +110,17 @@ col16 = num2cell(sz_parameters(:,17));
 
 col17 = num2cell(sz_parameters(:,18));
 
+% Column 18 - Seizure Duration
+
+col18 = num2cell(seizure_duration_list{folder_num});
+
 % Create Tables For Common Data
 
 beginning_data = table(col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11,col12,...
-    col13,col14,col15,col16,col17,'VariableNames',["Animal","Epileptic","Gender","Age",...
+    col13,col14,col15,col16,col17,col18,'VariableNames',["Animal","Epileptic","Gender","Age",...
     "Weeks Post KA","Successful Evocation","Laser 1 - Color","Laser 1 - Power","Laser 1 - Duration",...
     "Laser 2 - Color", "Laser 2 - Power", "Laser 2 - Duration","Delay","Laser 2 - Frequency",...
-    "Diazepam","Levetiracetam","Phenytoin"]);
+    "Diazepam","Levetiracetam","Phenytoin","Evoked Activity Duration"]);
 
 % -------------------------------------------------------------------------
 
