@@ -18,7 +18,7 @@ subFolders <- complete_list[(real_folder_st + 1):(real_folder_end - 1)]
 folder_num <- 37
 
 # Imports Files
-csv_file_list <- list.files(path = subFolders[folder_num], pattern = "Extracted_Features_Channel",
+csv_file_list <- list.files(path = subFolders[folder_num], pattern = "Extracted_Features_Channel_V2",
            full.names = FALSE, ignore.case = FALSE)
 
 # Target Channel
@@ -35,3 +35,4 @@ min_time <- 15
 indices <- which(feature_data$Evoked.Activity.Duration > min_time)
 
 feature_data <- feature_data[indices,]
+
