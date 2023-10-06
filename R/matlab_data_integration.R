@@ -6,7 +6,7 @@ library(dplyr)
 
 # Change to local folder directory
 
-directory <- "G:/Clone of ORG_YZ 20230710/"
+directory <- "G:/Clone of ORG_YZ 20231006/"
 
 # Generate subfolder list
 
@@ -81,4 +81,4 @@ kept_indices <- which(all_data$Animal > as.integer(min_anim))
 all_data <- all_data[kept_indices,]
 
 # Responder - Band Power Predictor - Time Point Random Effect Epileptic?
-summary(lme(Ch.2.Band.Power.1.Hz.to.30Hz ~ Time.Point, random = ~ 1|Epileptic, data = feature_data))
+summary(lme(Ch.1.Band.Power.1.Hz.to.30Hz ~ Time.Point, random = ~ 1|Epileptic, data = feature_data))
