@@ -73,19 +73,45 @@ all_data <- rbind(all_data,feature_data)
 
 # Step 3: Filters Data Frame
 
-# Remove Short Events - INPUT 15
+# Remove Short Events - INPUT 15 SEC
 
 min_time <- readline(prompt="Do you want to exclude short events?\nIf so, type in the second duration of events to exclude.\nAny events smaller than the duration will be excluded: ")
 15
 kept_indices <- which(all_data$Evoked.Activity.Duration > as.numeric(min_time))
 all_data <- all_data[kept_indices,]
 
-# Remove Early Recordings - INPUT 12
+# Remove Early Recordings - INPUT 12 (ANIMAL #)
 
 min_anim <- readline(prompt="Do you want to exclude early animals?\nIf so, type in the smallest animal to exclude.\nAny events smaller than or equal to it will be excluded. \nCommon Ones: 12 = 2022/11/07, 22 = 2023/01/16: ")
 12
 kept_indices <- which(all_data$Animal > as.integer(min_anim))
 all_data <- all_data[kept_indices,]
+
+# Removes Diazepam Levetiracetam and Phenytoin Recordings
+
+drugged_indices <- which(all_data$Levetiracetam == 1 | all_data$Phenytoin == 1 | all_data$Diazepam == 1)
+kept_indices <- which(all_data$Levetiracetam == 0 & all_data$Phenytoin == 0 & all_data$Diazepam == 0)
+all_data <- all_data[kept_indices,]
+
+# Separates Second Blue Stimulation Trials From Single Stimulation (Evocation Only) Trials
+
+single_stim_indices <- which(is.na(all_data$Laser.2...Color))
+double_blue_stim_indices <- which(all_data$Laser.2...Color == 473 & all_data$Delay > 0)
+
+sing_vs_db_data = all_data[c(single_stim_indices,double_blue_stim_indices),]
+sing_vs_db_data$Sing <- is.na(sing_vs_db_data$Delay)
+sing_vs_db_data$Sing <- factor(sing_vs_db_data$Sing, levels = c(TRUE, FALSE))
+
+kept_indices <- which(sing_vs_db_data$Epileptic == TRUE)
+sing_vs_db_ep_data = sing_vs_db_data[kept_indices,]
+
+# Single Stimulation (Evocation Only) Trials
+
+sing_data = all_data[single_stim_indices,]
+
+# ---------------------------------------------------------------------------------------------------
+
+# Step 4: Perform LME Models On Epileptic Vs Naive
 
 # Responder - Area is Outcome, Multiplied Predictor Terms Have Interactions
 # Added Predictor Terms Do Not Have Interactions. So If Epileptic and Time.Point
@@ -94,9 +120,28 @@ all_data <- all_data[kept_indices,]
 # '|' is random. And (1|RandomEffect) means the intercept is changed by the random factor.
 # So in this case, we are assuming there is a random effect from the animals (e.g. one of the)
 # seizures are more similar within animals than between animals.
-summary(lmer(Ch.1.Area ~ Epileptic * Time.Point + (1|Animal), data = all_data))
 
-# Upon evaluation, we find that the summary is presented as follows
+summary(lmer(Ch.1.Area ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.1.Skew ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.1.Line.Length ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+
+# ---------------------------------------------------------------------------------------------------
+
+# Step 5: Perform LME Models On Single Vs Double Stim (EPILEPTIC ONLY)
+
+summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
+summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
+summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
+summary(lmer(Ch.1.Line.Length ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
+summary(lmer(Ch.1.Area ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
+summary(lmer(Ch.1.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
+
+# IGNORE BELOW.
+
+# ALL DATA CASE: NOT VALID FOR SING DATA. Upon evaluation, we find that the summary is presented as follows
 # The first few rows indicate what each factor contributes...and whether or not there is a difference
 # compared to the base element/level in the Epileptic or Time Point. We see obviously that there is a
 # significant difference during seizure. Next, we see the combination. We find that when Epileptic is True
@@ -106,4 +151,4 @@ summary(lmer(Ch.1.Area ~ Epileptic * Time.Point + (1|Animal), data = all_data))
 # Evaluating random effects in first few lines requires an evaluation of the values for the area. So we find that
 # since the variance is 0.04, it is big since our entire area value is pretty small.
 
-summary(all_data$Ch.1.Area)
+# summary(sing_data$Ch.1.Area)
