@@ -6,7 +6,7 @@ library(dplyr)
 
 # Change to local folder directory
 
-directory <- "E:/" #"G:/Clone of ORG_YZ 20231006/"
+directory <- "G:/Clone of ORG_YZ 20231006/"
 
 # Generate subfolder list
 

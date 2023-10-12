@@ -290,9 +290,7 @@ for feature_number = 1:length(feature_list)
 
         if seizure_idx == 1
         common_title = strcat("Ch ",num2str(ch), " ", strrep(feature_names{feature_list(feature_number)},"_"," "));
-        common_title_bp = strcat(common_title," ",num2str(bp_filters(bp_cnt,1))," Hz to ",...
-            num2str(bp_filters(bp_cnt,2)),"Hz");
-        temp_ch_titles = [temp_ch_titles,common_title_bp];
+        temp_ch_titles = [temp_ch_titles,common_title];
         end
 
     end
