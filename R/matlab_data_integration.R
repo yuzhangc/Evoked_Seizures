@@ -113,20 +113,42 @@ sing_data = all_data[single_stim_indices,]
 
 # Step 4: Perform LME Models On Epileptic Vs Naive
 
-# Responder - Area is Outcome, Multiplied Predictor Terms Have Interactions
-# Added Predictor Terms Do Not Have Interactions. So If Epileptic and Time.Point
-# are not significantly correlated, we can just do addition. 
-
-# '|' is random. And (1|RandomEffect) means the intercept is changed by the random factor.
-# So in this case, we are assuming there is a random effect from the animals (e.g. one of the)
-# seizures are more similar within animals than between animals.
-
 summary(lmer(Ch.1.Area ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
 summary(lmer(Ch.1.Skew ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
 summary(lmer(Ch.1.Line.Length ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
 summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
 summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
 summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+
+# Summaries For Measures Other Than 'Epileptic'. For 'Epileptic', See PowerPoint.
+
+# Female to Male Comparisons
+# Gender - Ch 1 - 30 - 300 Hz - 1st and 2nd Third.
+# Gender - Ch 2 - Skew - Final Third.
+# (Signficance ONLY during Stim were excluded) 
+
+# What is the BASE for these? (-1?)
+
+# Weeks Post KA - Ch 1 - No Difference. (excluding during stim) 
+# Weeks Post KA - Ch 2 - Skew - Stim + Seizure Time Point.
+# Weeks Post KA - Ch 2 - 1 - 30 Hz Band Power - Stim + 1st and 2nd Third.
+# (Signficance ONLY during Stim were excluded) 
+
+# What is the BASE for these?
+
+# Laser Power - Ch 1 - Area - Stim + Seizure Time Pt.
+# Laser Power - Ch 1 - Skew - Stim + 1st Third + Post.
+# Laser Power - Ch 1 - Line Length - Stim + 1st Third.
+# Laser Power - Ch 1 - 1 - 30 Hz Band Power - ALL Time Pt.
+# Laser Power - Ch 1 - 30 - 300 Hz Band Power - Stim + 1st Third.
+# Laser Power - Ch 1 - 300 - 1000 Hz Band Power - 1st Third.
+
+# Laser Power - Ch 2 - Area - Stim + 2nd Third + Final Third.
+# Laser Power - Ch 2 - Skew - ALL Time Pt.
+# Laser Power - Ch 2 - Line Length - Stim + 1st Third.
+# Laser Power - Ch 2 - 1 - 30 Hz Band Power - Stim + Seizure Time Pt.
+# Laser Power - Ch 2 - 30 - 300 Hz Band Power - ALL Time Pt.
+# Laser Power - Ch 2 - 300 - 1000 Hz Band Power - Stim + 1st Third.
 
 # ---------------------------------------------------------------------------------------------------
 
@@ -139,7 +161,23 @@ summary(lmer(Ch.1.Line.Length ~ Sing * Time.Point + (1|Animal), data = sing_vs_d
 summary(lmer(Ch.1.Area ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
 summary(lmer(Ch.1.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
 
-# IGNORE BELOW.
+# What Does It All Mean?
+
+# The function is Outcome Measure ~ Predictor + Random Effect.
+
+# In the first example, 'Area' is the Outcome and our predictors - fixed effects - are 'Epileptic' and 'Time.Point'
+# We multiply these predictors because the summary of the model shows that there is a significant
+# difference when 'Epileptic' and 'Time.Point' are varied together. (See the EpilepticTRUE:Time.Point Terms)
+# Otherwise, if they are not significantly correlated, we would add the predictors.
+
+# '|' is random. And (1|RandomEffect) means the intercept is changed by the random factor. In this case,
+# we are assuming there is a random effect from the animals (e.g. seizures are more similar within animals
+# than between animals.
+
+# To see if there is a random effect, we look at the Random Effects. The variance needs to be tiny for there
+# to be no effect.
+
+# Everything is compared to the baseline case (Epileptic - False and Time.Point - Pre Stim)
 
 # ALL DATA CASE: NOT VALID FOR SING DATA. Upon evaluation, we find that the summary is presented as follows
 # The first few rows indicate what each factor contributes...and whether or not there is a difference
