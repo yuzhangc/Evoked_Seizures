@@ -190,3 +190,100 @@ summary(lmer(Ch.1.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data)
 # since the variance is 0.04, it is big since our entire area value is pretty small.
 
 # summary(sing_data$Ch.1.Area)
+
+# ---------------------------------------------------------------------------------------------------
+
+# Step 6: Drug Analysis
+
+all_data <- data.frame()
+
+for (folder_num in seq(1:length(subFolders))) {
+  
+  # Imports Files
+  csv_file_list <- list.files(path = subFolders[folder_num], pattern = "Extracted_Features_Channel_V2_DRUG",
+                              full.names = FALSE, ignore.case = FALSE)
+  
+  # Target Channel
+  target_ch <- 1
+  
+  # Reads CSV into Dataframe IF File Exists
+  
+  if (file.exists(paste(subFolders[folder_num],csv_file_list[target_ch],sep="/"))){
+  
+  feature_data <- read.csv(paste(subFolders[folder_num],csv_file_list[target_ch],sep="/"))
+  feature_data$Successful.Evocation <- as.logical(feature_data$Successful.Evocation)
+  feature_data$Epileptic <- as.logical(feature_data$Epileptic)
+  
+  # Changes factor order so that FALSE is the first level - and what we compare to.
+  feature_data$Epileptic <- factor(feature_data$Epileptic, levels = c(FALSE, TRUE))
+  
+  feature_data$Diazepam <- as.logical(feature_data$Diazepam)
+  feature_data$Levetiracetam <- as.logical(feature_data$Levetiracetam)
+  feature_data$Phenytoin <- as.logical(feature_data$Phenytoin)
+  
+  # Make Time Point A Factor. All Other Factorization Will Happen Post-Op
+  
+  feature_data$Time.Point <- factor(feature_data$Time.Point, levels = c("Before Stimulation", "During Stimulation",
+                                                                        "Seizure - First Third", "Seizure - Second Third", "Seizure - Final Third", "Post Seizure"))
+  
+  # Fixes Gender Imported As 'False'
+  
+  if (any(feature_data$Gender == 'FALSE')) feature_data$Gender[which(feature_data$Gender == 'FALSE')] <- 'F'
+  
+  # Replace -1 With NA
+  
+  feature_data$Laser.2...Color[which(feature_data$Laser.2...Color == -1)] <- NA
+  feature_data$Laser.2...Power[which(feature_data$Laser.2...Power == -1)] <- NA
+  feature_data$Laser.2...Duration[which(feature_data$Laser.1...Duration == -1)] <- NA
+  feature_data$Laser.2...Frequency[which(feature_data$Laser.2...Frequency == -1)] <- NA
+  feature_data$Delay[which(feature_data$Delay == -1)] <- NA
+  
+  # Append to All_Data
+  
+  all_data <- rbind(all_data,feature_data)
+  
+  }
+
+}
+
+# Remove Naive Animals
+
+kept_indices <- which(all_data$Epileptic == TRUE)
+all_data <- all_data[kept_indices,]
+
+# Split into Diazepam, Levetiracetam, and Phenytoin
+
+# Identify Unique Animals
+
+diaz_an <- unique(all_data$Animal[all_data$Diazepam == TRUE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == FALSE])
+leve_an <- unique(all_data$Animal[all_data$Diazepam == FALSE & all_data$Levetiracetam == TRUE & all_data$Phenytoin == FALSE])
+phe_an <- unique(all_data$Animal[all_data$Diazepam == FALSE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == TRUE])
+leve_phe_an <- unique(all_data$Animal[all_data$Diazepam == FALSE & all_data$Levetiracetam == TRUE & all_data$Phenytoin == TRUE])
+
+# Control Trials
+
+diaz_cont <- which(all_data$Animal %in% diaz_an & all_data$Diazepam == FALSE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == FALSE & all_data$Time.Point == "Before Stimulation")
+leve_cont <- which(all_data$Animal %in% leve_an & all_data$Diazepam == FALSE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == FALSE & all_data$Time.Point == "Before Stimulation")
+phe_cont <- which(all_data$Animal %in% phe_an & all_data$Diazepam == FALSE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == FALSE & all_data$Time.Point == "Before Stimulation")
+leve_phe_cont <- which(all_data$Animal %in% leve_phe_an & all_data$Diazepam == FALSE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == FALSE & all_data$Time.Point == "Before Stimulation")
+
+# Drug Trials
+
+diaz_trials <- which(all_data$Animal %in% diaz_an & all_data$Diazepam == TRUE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == FALSE & all_data$Time.Point == "Before Stimulation")
+leve_trials <- which(all_data$Animal %in% leve_an & all_data$Diazepam == FALSE & all_data$Levetiracetam == TRUE & all_data$Phenytoin == FALSE & all_data$Time.Point == "Before Stimulation")
+phe_trials <- which(all_data$Animal %in% phe_an & all_data$Diazepam == FALSE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == TRUE & all_data$Time.Point == "Before Stimulation")
+leve_phe_trials <- which(all_data$Animal %in% leve_phe_an & all_data$Diazepam == FALSE & all_data$Levetiracetam == TRUE & all_data$Phenytoin == TRUE & all_data$Time.Point == "Before Stimulation")
+
+# Split Data Frame
+
+diaz_data <- all_data[c(diaz_cont,diaz_trials),]
+leve_data <- all_data[c(leve_cont,leve_trials),]
+phe_data <- all_data[c(phe_cont,phe_trials),]
+leve_phe_data <- all_data[c(leve_phe_cont,leve_phe_trials),]
+
+# Perform LME Models On Drug Vs Duration
+
+summary(lmer(Evoked.Activity.Duration ~ Levetiracetam + (1|Animal), data = leve_data))
+summary(lmer(Evoked.Activity.Duration ~ Phenytoin + (1|Animal), data = phe_data))
+summary(lmer(Evoked.Activity.Duration ~ Diazepam + (1|Animal), data = diaz_data))
+summary(lmer(Evoked.Activity.Duration ~ Levetiracetam + (1|Animal), data = leve_phe_data))

@@ -316,32 +316,12 @@ for ch = 1:size(all_titles,2)
 
     final_table = horzcat(true_beginning_data,array2table(final_divided{ch},'VariableNames',all_titles{ch}));
 
-    % Special Case For Drug Tests
     if drug
 
-    % Do Not Write File If No Drug Tests
-    drug_test_indices = cell2mat(table2array(final_table(:,15:17))) > 0;
-
-    if any(any(drug_test_indices))
-    % Find 'Threshold Stimulus' Trials Only
-
-    threshold_power = min(cell2mat(table2array(final_table(any(drug_test_indices')',"Laser 1 - Power"))));
-    threshold_duration = min(cell2mat(table2array(final_table(any(drug_test_indices')',"Laser 1 - Duration"))));
-
-    trials_to_keep = cell2mat(final_table.("Laser 1 - Power")) >= threshold_power & cell2mat(final_table.("Laser 1 - Duration")) >= threshold_duration;
-
-    final_table = final_table(trials_to_keep,:);
-
-    file_name = "Extracted_Features_Channel_V2_DRUG_";
-    writetable(final_table,strcat(path_extract,file_name,num2str(ch),".csv"))
-
-    end
+    % Find Minimum 
 
     else
-    
-    file_name = "Extracted_Features_Channel_V2_";
-    writetable(final_table,strcat(path_extract,file_name,num2str(ch),".csv"))
-
+    writetable(final_table,strcat(path_extract,,num2str(ch),".csv"))
     end
 
 end
