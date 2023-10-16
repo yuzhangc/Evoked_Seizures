@@ -133,29 +133,84 @@ beginning_data = table(col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11,
 
 seizure_duration = seizure_duration_list{sz_parameters(:,1)};
 
+clear pre_stim_indices during_stim_indices first_third_indices
+clear second_third_indices final_third_indices post_ictal_indices
+
 for seizure_idx = 1:num_seizures
+
+    indices = [];
 
     indv_stim_duration = sz_parameters(seizure_idx,12);
     indv_duration = seizure_duration(seizure_idx);
+
+    % Second Stim Variables
+    second_stim_freq = sz_parameters(seizure_idx,15);
+    second_stim_delay = sz_parameters(seizure_idx,13);
+    second_stim_dur = sz_parameters(seizure_idx,14);
+    second_stim_color = sz_parameters(seizure_idx,10);
 
     % Create Indices For Thirds
 
     sz_start = (t_before + indv_stim_duration)/winDisp;
     sz_end = sz_start + indv_duration/winDisp;
-    indices(seizure_idx,1:7) = [1 , t_before/winDisp , sz_start , sz_start+round((sz_end-sz_start)/3), ...
-        sz_start+round(2*(sz_end-sz_start)/3) , sz_end , sz_end+30/winDisp];
+    indices(seizure_idx,1:7) = [1 , floor(t_before/winDisp) , floor(sz_start) , floor(sz_start+round((sz_end-sz_start)/3)), ...
+        floor(sz_start+round(2*(sz_end-sz_start)/3)) , floor(sz_end) , floor(sz_end+30/winDisp)];
     
     % Prepare For Case In Which End + 30 Seconds Exceed Bounds
 
     if sz_end + 30/winDisp >= (t_after + t_before)/winDisp - 1
-        indices(seizure_idx,7) = (t_after + t_before)/winDisp - 1;
+        indices(seizure_idx,7) = floor((t_after + t_before)/winDisp) - 1;
     end
 
     % Prepare For Edge Case Where Seizures Doesnt Stop
     
     if sz_end >= (t_after + t_before)/winDisp - 1
-        indices(seizure_idx,6) = (t_after + t_before)/winDisp - 1;
+        indices(seizure_idx,6) = floor((t_after + t_before)/winDisp) - 1;
         indices(seizure_idx,7) = indices(seizure_idx,6);
+    end
+
+    % Generate Second Stim Indices
+    if second_stim && second_stim_color == 473 && second_stim_freq > 1
+
+        % Generate Indices
+
+        pre_stim_indices{seizure_idx} = indices(seizure_idx,1):indices(seizure_idx,2);
+        during_stim_indices{seizure_idx} = indices(seizure_idx,2):indices(seizure_idx,3);
+        first_third_indices{seizure_idx} = indices(seizure_idx,3):indices(seizure_idx,4);
+        second_third_indices{seizure_idx} = indices(seizure_idx,4):indices(seizure_idx,5);
+        final_third_indices{seizure_idx} = indices(seizure_idx,5):indices(seizure_idx,6);
+
+        if indices(seizure_idx,6) ~= indices (seizure_idx,7)
+        post_ictal_indices{seizure_idx} = indices(seizure_idx,6):indices(seizure_idx,7);
+        else
+        post_ictal_indices{seizure_idx} = pre_stim_indices{seizure_idx};
+        end
+
+        % Remove Second Stimulation
+        second_stim_st = floor((t_before + second_stim_delay)/winDisp);
+        second_stim_end = floor((t_before + second_stim_delay + second_stim_dur)/winDisp);
+
+        pre_stim_indices{seizure_idx} = pre_stim_indices{seizure_idx}(~ismember(pre_stim_indices{seizure_idx}, second_stim_st:second_stim_end));
+        during_stim_indices{seizure_idx} = during_stim_indices{seizure_idx}(~ismember(during_stim_indices{seizure_idx}, second_stim_st:second_stim_end));
+        first_third_indices{seizure_idx} = first_third_indices{seizure_idx}(~ismember(first_third_indices{seizure_idx}, second_stim_st:second_stim_end));
+        second_third_indices{seizure_idx} = second_third_indices{seizure_idx}(~ismember(second_third_indices{seizure_idx}, second_stim_st:second_stim_end));
+        final_third_indices{seizure_idx} = final_third_indices{seizure_idx}(~ismember(final_third_indices{seizure_idx}, second_stim_st:second_stim_end));
+        post_ictal_indices{seizure_idx} = post_ictal_indices{seizure_idx}(~ismember(post_ictal_indices{seizure_idx}, second_stim_st:second_stim_end));
+
+    else
+
+        pre_stim_indices{seizure_idx} = indices(seizure_idx,1):indices(seizure_idx,2);
+        during_stim_indices{seizure_idx} = indices(seizure_idx,2):indices(seizure_idx,3);
+        first_third_indices{seizure_idx} = indices(seizure_idx,3):indices(seizure_idx,4);
+        second_third_indices{seizure_idx} = indices(seizure_idx,4):indices(seizure_idx,5);
+        final_third_indices{seizure_idx} = indices(seizure_idx,5):indices(seizure_idx,6);
+
+        if indices(seizure_idx,6) ~= indices (seizure_idx,7)
+        post_ictal_indices{seizure_idx} = indices(seizure_idx,6):indices(seizure_idx,7);
+        else
+        post_ictal_indices{seizure_idx} = pre_stim_indices{seizure_idx};
+        end
+
     end
 
 end
@@ -177,7 +232,6 @@ for feature_number = 1:length(feature_names)
 
     if yesorno
         feature_list = [feature_list,feature_number];
-    else
     end
 
 end
@@ -228,15 +282,36 @@ for feature_number = 1:length(feature_list)
 
             % Calculate Thirds
 
-            mean_pre_stim = mean(feature_data(indices(seizure_idx,1):indices(seizure_idx,2),ch),1);
-            mean_during_stim = mean(feature_data(indices(seizure_idx,2):indices(seizure_idx,3),ch),1);
-            mean_first_third = mean(feature_data(indices(seizure_idx,3):indices(seizure_idx,4),ch),1);
-            mean_second_third = mean(feature_data(indices(seizure_idx,4):indices(seizure_idx,5),ch),1);
-            mean_final_third = mean(feature_data(indices(seizure_idx,5):indices(seizure_idx,6),ch),1);
-            if indices(seizure_idx,6) ~= indices (seizure_idx,7)
-            mean_post_ictal = mean(feature_data(indices(seizure_idx,6):indices(seizure_idx,7),ch),1);
-            else
-            mean_post_ictal = mean_pre_stim;
+            mean_pre_stim = mean(feature_data(pre_stim_indices{seizure_idx},ch),1);
+            mean_during_stim = mean(feature_data(during_stim_indices{seizure_idx},ch),1);
+            mean_first_third = mean(feature_data(first_third_indices{seizure_idx},ch),1);
+            mean_second_third = mean(feature_data(second_third_indices{seizure_idx},ch),1);
+            mean_final_third = mean(feature_data(final_third_indices{seizure_idx},ch),1);
+            mean_post_ictal = mean(feature_data(post_ictal_indices{seizure_idx},ch),1);
+
+            % Convert 'EMPTY' Mean Values to NaN
+            if isempty(mean_pre_stim)
+                mean_pre_stim = NaN
+            end
+    
+            if isempty(mean_during_stim)
+                mean_during_stim  = NaN
+            end
+    
+            if isempty(mean_first_third)
+                mean_first_third = NaN
+            end
+    
+            if isempty(mean_second_third)
+                mean_second_third = NaN
+            end
+    
+            if isempty(mean_final_third)
+                mean_final_third = NaN
+            end
+    
+            if isempty(mean_post_ictal )
+                mean_post_ictal  = NaN
             end
 
             % Put Into Output Array
@@ -267,15 +342,36 @@ for feature_number = 1:length(feature_list)
 
         % Calculate Thirds
 
-        mean_pre_stim = mean(feature_data(indices(seizure_idx,1):indices(seizure_idx,2),ch),1);
-        mean_during_stim = mean(feature_data(indices(seizure_idx,2):indices(seizure_idx,3),ch),1);
-        mean_first_third = mean(feature_data(indices(seizure_idx,3):indices(seizure_idx,4),ch),1);
-        mean_second_third = mean(feature_data(indices(seizure_idx,4):indices(seizure_idx,5),ch),1);
-        mean_final_third = mean(feature_data(indices(seizure_idx,5):indices(seizure_idx,6),ch),1);
-        if indices(seizure_idx,6) ~= indices (seizure_idx,7)
-        mean_post_ictal = mean(feature_data(indices(seizure_idx,6):indices(seizure_idx,7),ch),1);
-        else
-        mean_post_ictal = mean_pre_stim;
+        mean_pre_stim = mean(feature_data(pre_stim_indices{seizure_idx},ch),1);
+        mean_during_stim = mean(feature_data(during_stim_indices{seizure_idx},ch),1);
+        mean_first_third = mean(feature_data(first_third_indices{seizure_idx},ch),1);
+        mean_second_third = mean(feature_data(second_third_indices{seizure_idx},ch),1);
+        mean_final_third = mean(feature_data(final_third_indices{seizure_idx},ch),1);
+        mean_post_ictal = mean(feature_data(post_ictal_indices{seizure_idx},ch),1);
+
+        % Convert 'EMPTY' Mean Values to NaN
+        if isempty(mean_pre_stim)
+            mean_pre_stim = NaN
+        end
+
+        if isempty(mean_during_stim)
+            mean_during_stim  = NaN
+        end
+
+        if isempty(mean_first_third)
+            mean_first_third = NaN
+        end
+
+        if isempty(mean_second_third)
+            mean_second_third = NaN
+        end
+
+        if isempty(mean_final_third)
+            mean_final_third = NaN
+        end
+
+        if isempty(mean_post_ictal )
+            mean_post_ictal  = NaN
         end
 
         % Put Into Output Array
@@ -337,6 +433,11 @@ for ch = 1:size(all_titles,2)
     writetable(final_table,strcat(path_extract,file_name,num2str(ch),".csv"))
 
     end
+
+    elseif second_stim
+
+    file_name = "Extracted_Features_Channel_V2_2StimREMOVED_";
+    writetable(final_table,strcat(path_extract,file_name,num2str(ch),".csv"))
 
     else
     
