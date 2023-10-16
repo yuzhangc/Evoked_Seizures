@@ -37,7 +37,7 @@ feature_names = fieldnames(norm_features);
 % -------------------------------------------------------------------------
 
 % Step 1: Receive User Input
-% Generates 4 variables
+% Generates 7 variables
 % 1) main_division - main plot
 % 2) ind_data - plot individual dots or not
 % 3) naive_ep - splits naive or epileptic
@@ -50,8 +50,8 @@ displays_text = ['\nWhich Plot to Plot?:', ...
     '\n(1) - Epileptic Vs Naive Animals', ...
     '\n(2) - Long Vs Short Seizures', ...
     '\n(3) - Successfully Evocations Vs Failed Evocations', ...
-    '\n(4) - Comparison of Levetiracetam and Phenytoin with Control',...
-    '\n(5) - Additional Stimulation Or Not (INCOMPLETE)',...
+    '\n(4) - Comparison of Levetiracetam and Phenytoin with Control (DO IN R)',...
+    '\n(5) - Additional Stimulation Or Not (473 nm AFTER Onset ONLY)',...
     '\nEnter a number: '];
 
 main_division = input(displays_text);
@@ -97,7 +97,7 @@ else
     short_duration = 0;
 end
 
-if main_division ~= 4
+if main_division ~= 5
     
 displays_text_5 = ['\nDo you want to exclude events with additional stimulation?', ...
     '\n(1) - Yes', ...
@@ -125,7 +125,7 @@ end
 
 if main_division ~= 4
 
-displays_text_7 = ['\nDo you want to exclude DIAZEPAM recordings?', ...
+displays_text_7 = ['\nDo you want to exclude DRUG recordings?', ...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
     '\nEnter a number: '];
@@ -135,6 +135,21 @@ excl_diaz = input(displays_text_7);
 else
 
 excl_diaz = 0;
+
+end
+
+if main_division ~= 1
+
+displays_text_8 = ['\nDo you want to exclude NAIVE recordings?', ...
+    '\n(1) - Yes', ...
+    '\n(0) - No', ...
+    '\nEnter a number: '];
+
+excl_naiv = input(displays_text_8);
+
+else
+
+excl_naiv = 0;
 
 end
 
@@ -271,15 +286,33 @@ switch main_division
         % Can Add More To Differentiate Into Unique
         
         excl_addl = 0;
-        disp("Colors")
-        addl_stim_parameters = unique(merged_sz_parameters(:,[10]))
+        excl_diaz = 1;
         
-        % INCOMPLETE - ONLY FOR COLOR RN
+        % Identify Animals With Additional Stimulation
         
-        for cnt = 1:length(addl_stim_parameters)
-            subdiv_index{cnt} = find(merged_sz_parameters(:,10) == addl_stim_parameters(cnt));
-        end
+        an_w_addl = unique(merged_sz_parameters(merged_sz_parameters(:,10) == 473 & merged_sz_parameters(:,13) > 0,1));
+
+        % Control
+        subdiv_index{1} = find(ismember(merged_sz_parameters(:,1), an_w_addl) & merged_sz_parameters(:,10) == -1);
         
+        % 10+ Hz Stimulation IMMEDIATELY AFTER
+        subdiv_index{2} = find(ismember(merged_sz_parameters(:,1), an_w_addl) & merged_sz_parameters(:,15) >= 10 & ...
+            merged_sz_parameters(:,13) == merged_sz_parameters(:,12));
+        
+        % Constant Light IMMEDIATELY AFTER
+        subdiv_index{3} = find(ismember(merged_sz_parameters(:,1), an_w_addl) & merged_sz_parameters(:,15) == 0 & ...
+            merged_sz_parameters(:,13) == merged_sz_parameters(:,12));
+        
+        % 10+ Hz Stimulation ANY DELAY
+        subdiv_index{4} = find(ismember(merged_sz_parameters(:,1), an_w_addl) & merged_sz_parameters(:,15) >= 10 & ...
+            merged_sz_parameters(:,13) > merged_sz_parameters(:,12));
+        
+        % Constant Light ANY DELAY
+        subdiv_index{5} = find(ismember(merged_sz_parameters(:,1), an_w_addl) & merged_sz_parameters(:,15) == 0 & ...
+            merged_sz_parameters(:,13) > merged_sz_parameters(:,12));
+
+        duration_labels = {'Control', 'High Freq No Delay', 'Const No Delay', 'High Freq Any Delay', 'Const Any Delay'};
+                
 end
 
 % -------------------------------------------------------------------------
@@ -323,8 +356,17 @@ if naive_ep
         duration_labels{dur_text} = strcat(duration_labels{dur_text}," Epileptic");
         end
 
+        % If Exclude Naive, Remove Naive Subdiv Index (Second Half)
+        if excl_naiv
+
+        subdiv_index = subdiv_index(1:size(subdiv_index,2)/2);
+        
+        else
+
         duration_labels = [duration_labels,addl_duration_labels];
         
+        end
+    
     end
 end
 
@@ -375,11 +417,11 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 8: Exclude Diazepam
+% Step 8: Exclude Diazepam (and Other Drugs)
 
 if excl_diaz
     
-    excluded_indices = find(merged_sz_parameters(:,16) == 1);
+    excluded_indices = find(merged_sz_parameters(:,16) > 0 | merged_sz_parameters(:,17) > 0 | merged_sz_parameters(:,18) > 0);
     for cnt = 1:length(subdiv_index)
         subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
     end
@@ -419,22 +461,90 @@ for cnt = 1:length(subdiv_index)
 
         sz_start = (t_before + indv_stim_duration)/winDisp;
         sz_end = sz_start + indv_duration/winDisp;
-        indices = [1 , t_before/winDisp , sz_start , sz_start+round((sz_end-sz_start)/3), ...
-            sz_start+round(2*(sz_end-sz_start)/3) , sz_end , sz_end+30/winDisp];
+        indices = [1 , floor(t_before/winDisp) , floor(sz_start) , floor(sz_start+round((sz_end-sz_start)/3)), ...
+            floor(sz_start+round(2*(sz_end-sz_start)/3)) , floor(sz_end) , floor(sz_end+30/winDisp)];
         
         % Prepare For Case In Which End + 30 Seconds Exceed Bounds
         if sz_end + 30/winDisp >= (t_after + t_before)/winDisp - 1
-            indices(7) = (t_after + t_before)/winDisp - 1;
+            indices(7) = floor((t_after + t_before)/winDisp) - 1;
         end
 
         % Prepare For Edge Case Where Seizures Doesnt Stop
         if sz_end >= (t_after + t_before)/winDisp - 1
-            sz_end
-            indices(6) = (t_after + t_before)/winDisp - 1;
+            indices(6) = floor((t_after + t_before)/winDisp) - 1;
             indices(7) = indices(6);
         end
         
-        % Calculate Means In Indices
+        % Calculate Means In Indices. However, EXCLUDE STIM For Second Stim
+        % Does Task ONLY If Frequency > 1 Hz
+        
+        if main_division == 5 && merged_sz_parameters(subdiv_index{cnt}(seizure_idx),15) > 1
+
+        % Determine Duration and Delay of Onset of Second Stim
+        indv_delay =  merged_sz_parameters(subdiv_index{cnt}(seizure_idx),13);
+        indv_sec_dur =  merged_sz_parameters(subdiv_index{cnt}(seizure_idx),14);
+
+        % Find Indices For Second Stim
+        second_stim_st = floor((t_before + indv_delay)/winDisp);
+        second_stim_end = floor((t_before + indv_delay + indv_sec_dur)/winDisp);
+
+        % Set Indices For Pre, During, Etc.
+        pre_stim_indices = indices(1):indices(2);
+        during_stim_indices = indices(2):indices(3);
+        first_third_indices = indices(3):indices(4);
+        second_third_indices = indices(4):indices(5);
+        final_third_indices = indices(5):indices(6);
+        if indices(6) ~= indices (7)
+        post_ictal_indices = indices(6):indices(7);
+        else
+        post_ictal_indices = pre_stim_indices;
+        end
+
+        % Find Values Not in Stimulation
+        pre_stim_indices = pre_stim_indices(~ismember(pre_stim_indices, second_stim_st:second_stim_end));
+        during_stim_indices = during_stim_indices(~ismember(during_stim_indices, second_stim_st:second_stim_end));
+        first_third_indices = first_third_indices(~ismember(first_third_indices, second_stim_st:second_stim_end));
+        second_third_indices = second_third_indices(~ismember(second_third_indices, second_stim_st:second_stim_end));
+        final_third_indices = final_third_indices(~ismember(final_third_indices, second_stim_st:second_stim_end));
+        post_ictal_indices = post_ictal_indices(~ismember(post_ictal_indices, second_stim_st:second_stim_end));
+
+        % Calculate Mean. May End Up With 'EMPTY' Row Vector if All Removed
+        mean_pre_stim = mean(indv_data(pre_stim_indices,:),1);
+        mean_during_stim = mean(indv_data(during_stim_indices,:),1);
+        mean_first_third = mean(indv_data(first_third_indices,:),1);
+        mean_second_third = mean(indv_data(second_third_indices,:),1);
+        mean_final_third = mean(indv_data(final_third_indices,:),1);
+        mean_post_ictal = mean(indv_data(post_ictal_indices,:),1);
+
+        % Convert 'EMPTY' Mean Values to NaN
+        if isempty(mean_pre_stim)
+            mean_pre_stim = NaN
+        end
+
+        if isempty(mean_during_stim)
+            mean_during_stim  = NaN
+        end
+
+        if isempty(mean_first_third)
+            mean_first_third = NaN
+        end
+
+        if isempty(mean_second_third)
+            mean_second_third = NaN
+        end
+
+        if isempty(mean_final_third)
+            mean_final_third = NaN
+        end
+
+        if isempty(mean_post_ictal )
+            mean_post_ictal  = NaN
+        end
+
+        % Otherwise, Calculate With All Indices
+
+        else
+        
         mean_pre_stim = mean(indv_data(indices(1):indices(2),:),1);
         mean_during_stim = mean(indv_data(indices(2):indices(3),:),1);
         mean_first_third = mean(indv_data(indices(3):indices(4),:),1);
@@ -444,6 +554,8 @@ for cnt = 1:length(subdiv_index)
         mean_post_ictal = mean(indv_data(indices(6):indices(7),:),1);
         else
         mean_post_ictal = mean_pre_stim;
+        end
+
         end
         
         final_divided = [mean_pre_stim; mean_during_stim; mean_first_third; ...
@@ -598,7 +710,7 @@ for ch = 1:4
         
         % Removes Color 3 (Green)
         
-        if naive_ep && main_division ~= 1
+        if naive_ep && main_division ~= 1 && excl_naiv == 0
             positioning(1:size(final_feature_output,2)/2) = '*';
             positioning(size(final_feature_output,2)/2 + 1:size(final_feature_output,2)) = '^';
             Colorset_plot = Colorset_plot(4:end,:);

@@ -1,4 +1,4 @@
-function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug)
+function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim)
 
 % Uses Seizure Duration to Splice Feature Data into Before, During Stim,
 % and Thirds. Exports the Means Along With Spliced Seizure Parameters For
@@ -14,6 +14,7 @@ function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_i
 % folder_num - Used for Taking Correct Seizure Durations
 
 % drug - Special Case For Drug Trials
+% second_stim - Remove Second Stimulation Artifacts
 
 % Output Variables
 % sz_parameters - Seizure Parameters For Animal

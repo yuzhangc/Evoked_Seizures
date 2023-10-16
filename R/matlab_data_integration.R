@@ -246,9 +246,12 @@ for (folder_num in seq(1:length(subFolders))) {
 
 }
 
-# Remove Naive Animals
+# Remove Naive Animals and Second Trials
 
 kept_indices <- which(all_data$Epileptic == TRUE)
+all_data <- all_data[kept_indices,]
+
+kept_indices <- which(is.na(all_data$Laser.2...Color))
 all_data <- all_data[kept_indices,]
 
 # Split into Diazepam, Levetiracetam, and Phenytoin
@@ -256,9 +259,20 @@ all_data <- all_data[kept_indices,]
 # Identify Unique Animals
 
 diaz_an <- unique(all_data$Animal[all_data$Diazepam == TRUE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == FALSE])
+
+# Remove Specific Animals
+diaz_an[c(1,7,9)] = NA
+diaz_an = na.omit(diaz_an)
+
 leve_an <- unique(all_data$Animal[all_data$Diazepam == FALSE & all_data$Levetiracetam == TRUE & all_data$Phenytoin == FALSE])
+leve_an[c(4,5)] = NA
+leve_an = na.omit(leve_an)
+
 phe_an <- unique(all_data$Animal[all_data$Diazepam == FALSE & all_data$Levetiracetam == FALSE & all_data$Phenytoin == TRUE])
+
 leve_phe_an <- unique(all_data$Animal[all_data$Diazepam == FALSE & all_data$Levetiracetam == TRUE & all_data$Phenytoin == TRUE])
+leve_phe_an[c(4,5)] = NA
+leve_phe_an = na.omit(leve_phe_an)
 
 # Control Trials
 
@@ -283,7 +297,40 @@ leve_phe_data <- all_data[c(leve_phe_cont,leve_phe_trials),]
 
 # Perform LME Models On Drug Vs Duration
 
+summary(lmer(Evoked.Activity.Duration ~ Diazepam + (1|Animal), data = diaz_data))
 summary(lmer(Evoked.Activity.Duration ~ Levetiracetam + (1|Animal), data = leve_data))
 summary(lmer(Evoked.Activity.Duration ~ Phenytoin + (1|Animal), data = phe_data))
-summary(lmer(Evoked.Activity.Duration ~ Diazepam + (1|Animal), data = diaz_data))
 summary(lmer(Evoked.Activity.Duration ~ Levetiracetam + (1|Animal), data = leve_phe_data))
+
+# Calculate Animal Means
+
+# Diazepam
+diaz_mean = matrix(nrow = 0, ncol = 2)
+for (an in diaz_an) {
+  an_cont <- mean(diaz_data$Evoked.Activity.Duration[diaz_data$Animal == an & diaz_data$Diazepam == FALSE])
+  an_diaz <- mean(diaz_data$Evoked.Activity.Duration[diaz_data$Animal == an & diaz_data$Diazepam == TRUE])
+  diaz_mean <- rbind(diaz_mean,c(an_cont,an_diaz))
+}
+
+# Levetiracetam
+leve_mean = matrix(nrow = 0, ncol = 2)
+for (an in leve_an) {
+  an_cont <- mean(leve_data$Evoked.Activity.Duration[leve_data$Animal == an & leve_data$Levetiracetam == FALSE])
+  an_leve <- mean(leve_data$Evoked.Activity.Duration[leve_data$Animal == an & leve_data$Levetiracetam == TRUE])
+  leve_mean <- rbind(leve_mean,c(an_cont,an_leve))
+}
+
+phe_mean = matrix(nrow = 0, ncol = 2)
+for (an in phe_an) {
+  an_cont <- mean(phe_data$Evoked.Activity.Duration[phe_data$Animal == an & phe_data$Phenytoin == FALSE])
+  an_phe <- mean(phe_data$Evoked.Activity.Duration[phe_data$Animal == an & phe_data$Phenytoin == TRUE])
+  phe_mean <- rbind(phe_mean,c(an_cont,an_phe))
+}
+
+# Levetiracetam and Phenytoin
+leve_phe_mean = matrix(nrow = 0, ncol = 2)
+for (an in leve_phe_an) {
+  an_cont <- mean(leve_phe_data$Evoked.Activity.Duration[leve_phe_data$Animal == an & leve_phe_data$Levetiracetam == FALSE])
+  an_leve_phe <- mean(leve_phe_data$Evoked.Activity.Duration[leve_phe_data$Animal == an & leve_phe_data$Levetiracetam == TRUE])
+  leve_phe_mean <- rbind(leve_phe_mean,c(an_cont,an_leve_phe))
+}

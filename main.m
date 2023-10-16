@@ -262,15 +262,17 @@ animal_info = readtable(strcat(directory,'Animal Master.csv'));
 
 % Special Case For Drug Trials. Only Export Above Threshold Ones W Pairing
 drug = 1;
+% Removes Second Stim Indices.
+second_stim = 1;
 
 for folder_num = 1:length(subFolders)
 
 path_extract = strcat(directory,subFolders(folder_num).name,'\');
 
 if folder_num == 1
-[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,[],folder_num,drug);
+[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,[],folder_num,drug,second_stim);
 else
-[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug);
+[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim);
 end
 
 end
