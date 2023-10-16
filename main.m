@@ -261,7 +261,7 @@ clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 animal_info = readtable(strcat(directory,'Animal Master.csv'));
 
 % Special Case For Drug Trials. Only Export Above Threshold Ones W Pairing
-drug = 1;
+drug = 0;
 % Removes Second Stim Indices.
 second_stim = 1;
 

@@ -24,7 +24,7 @@ all_data <- data.frame()
 for (folder_num in seq(1:length(subFolders))) {
 
 # Imports Files
-csv_file_list <- list.files(path = subFolders[folder_num], pattern = "Extracted_Features_Channel_V2",
+csv_file_list <- list.files(path = subFolders[folder_num], pattern = "Extracted_Features_Channel_V2_2StimREMOVED",
            full.names = FALSE, ignore.case = FALSE)
 
 # Target Channel

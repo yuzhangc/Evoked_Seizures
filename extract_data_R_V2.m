@@ -429,7 +429,12 @@ for ch = 1:size(all_titles,2)
 
     final_table = final_table(trials_to_keep,:);
 
+    if second_stim
+    file_name = "Extracted_Features_Channel_V2_DRUG_2StimREMOVED_";
+    else
     file_name = "Extracted_Features_Channel_V2_DRUG_";
+    end
+    
     writetable(final_table,strcat(path_extract,file_name,num2str(ch),".csv"))
 
     end
