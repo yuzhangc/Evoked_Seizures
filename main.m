@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'G:\Clone of ORG_YZ 20231006\';
+directory = 'D:\Clone of ORG_YZ 20231006\';
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
 real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END'));
@@ -26,7 +26,7 @@ to_plot = 0; plot_duration = 95;
 % Fixes Certain Duration Calculations
 to_fix = 1;
 % Wavelets
-wavelets = 8;
+wavelets = 0;
 
 % Global Variables
 % Target sampling rate
@@ -279,9 +279,7 @@ end
 
 clear animal_info
 
-%% Evoked Seizures Processing
-
-% Plots By Category
+%% Evoked Seizures Processing - Plots By Category
 
 [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory);
 
@@ -292,6 +290,10 @@ clear animal_info
 % targeted_output_array = {merged_output_array{find(merged_sz_parameters(:,1) == 39)}};
 % targeted_seizure_duration_list{1} = seizure_duration_list{animal};
 % categorization_plot_func(targeted_output_array,targeted_sz_parameters,targeted_seizure_duration_list,directory);
+
+%% Evoked Seizures Processing - Cross Correlation
+
+calculate_seizure_corr_evoked(min_thresh_list,seizure_duration_list,directory)
 
 %% Spontaneous Seizure Processing
 
