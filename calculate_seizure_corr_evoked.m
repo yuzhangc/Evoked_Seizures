@@ -40,6 +40,13 @@ displays_text_3 = '\nHow many seconds is considered a failed/non-evoked event? T
 
 short_duration = input(displays_text_3);
 
+displays_text_4 = ['\nDo You Want to Plot Individual Data?',...
+    '\n(1) - Yes', ...
+    '\n(0) - No', ...
+    '\nEnter a number: '];
+
+indv_plot = input(displays_text_4);
+
 % -------------------------------------------------------------------------
 
 % Step 1: Determine Success/Failure Evocation
@@ -191,6 +198,10 @@ end
 displays_text_2 = "Do you want to do all channels (0) or specific channels (input number): ";
 channels_list = input(displays_text_2);
 
+if channels_list == 0
+    channels_list = 1:4;
+end
+
 % Loops Through All Animals to Extract Feature Data
 % Generates Feature Cell Array That is ANIMAL, SEIZURE, FEATURE
 % Has Lot of Blank Cells For Excluded Animals And Other Seizures.
@@ -242,7 +253,14 @@ for sz = 1:size(sz_in_an,1)
 
     for feature_number = 1:length(feature_list)
 
-        temp_ft_array{feature_list(feature_number)} = norm_features.(feature_names{feature_list(feature_number)});
+        % Special Case For Band Power
+        if (isequal(feature_names{feature_list(feature_number)},'Band_Power'))
+            for bp_cnt = 1:size(bp_filters,1)
+                temp_ft_array{feature_list(feature_number)}{bp_cnt} = norm_features.(feature_names{feature_list(feature_number)}){bp_cnt}{sz};
+            end
+        else
+        temp_ft_array{feature_list(feature_number)} = norm_features.(feature_names{feature_list(feature_number)}){sz};
+        end
 
     end
 
@@ -259,5 +277,151 @@ end
 % -------------------------------------------------------------------------
 
 % Step 3: Calculate Cross Correlation For Selected Features
+
+for ch = 1:length(channels_list)
+    
+disp(strcat("Working on Channel ", num2str(channels_list(ch))));
+    
+% Specific to Channel
+
+ch_all_feat = {};
+
+for an = 1:length(processed_animals)
+    
+% Specific To Animal
+    
+an_all_feat = {};
+an_all_feat_lag = {};
+    
+% Calculates Per Feature
+
+within_seizure_list = within_success{find(processed_animals(an) == successful_animals)};
+with_other_seizure_list = with_outside{find(processed_animals(an) == successful_animals)};
+with_failed_seizure_list = with_failed{find(processed_animals(an) == successful_animals)};
+    
+for feature_number = 1:length(feature_list)
+    
+    % Specific to Feature
+    
+    within_feat = []; within_feat_lag = [];
+    with_other_feat = []; with_other_feat_lag = [];
+    with_failed_feat = []; with_failed_feat_lag = [];
+    
+    % Loops Through Lists
+    
+    % Within
+    
+    for sz_pair = 1:size(within_seizure_list,1)
+        
+    if (isequal(feature_names{feature_list(feature_number)},'Band_Power'))
+        
+    % FILL OUT
+        
+    else
+    
+    [c,lags] = xcorr(master_an_array{within_seizure_list(sz_pair,1)}{within_seizure_list(sz_pair,2)}{feature_list(feature_number)}(:,channels_list(ch)),...
+        master_an_array{within_seizure_list(sz_pair,3)}{within_seizure_list(sz_pair,4)}{feature_list(feature_number)}(:,channels_list(ch)));
+    within_feat = [within_feat; max(c)];
+    within_feat_lag = [within_feat_lag ; lags(find(max(c) == c))];
+        
+    end
+    
+    end
+    
+    % With Others
+    
+    for sz_pair = 1:size(with_other_seizure_list,1)
+        
+    if (isequal(feature_names{feature_list(feature_number)},'Band_Power'))
+        
+    % FILL OUT
+        
+    else
+    
+    [c,lags] = xcorr(master_an_array{with_other_seizure_list(sz_pair,1)}{with_other_seizure_list(sz_pair,2)}{feature_list(feature_number)}(:,channels_list(ch)),...
+        master_an_array{with_other_seizure_list(sz_pair,3)}{with_other_seizure_list(sz_pair,4)}{feature_list(feature_number)}(:,channels_list(ch)));
+    with_other_feat = [with_other_feat; max(c)];
+    with_other_feat_lag = [with_other_feat_lag ; lags(find(max(c) == c))];
+        
+    end
+    
+    end
+    
+    % With Failed
+    
+    for sz_pair = 1:size(with_failed_seizure_list,1)
+        
+    if (isequal(feature_names{feature_list(feature_number)},'Band_Power'))
+        
+    % FILL OUT
+        
+    else
+    
+    [c,lags] = xcorr(master_an_array{with_failed_seizure_list(sz_pair,1)}{with_failed_seizure_list(sz_pair,2)}{feature_list(feature_number)}(:,channels_list(ch)),...
+        master_an_array{with_failed_seizure_list(sz_pair,3)}{with_failed_seizure_list(sz_pair,4)}{feature_list(feature_number)}(:,channels_list(ch)));
+    with_failed_feat = [with_failed_feat; max(c)];
+    with_failed_feat_lag = [with_failed_feat_lag ; lags(find(max(c) == c))];
+        
+    end
+    
+    end
+    
+    max_size = max([length(within_feat),length(with_other_feat),length(with_failed_feat)]);
+    
+    an_feat = NaN(max_size,3);
+    an_feat(1:length(within_feat),1) = within_feat;
+    an_feat(1:length(with_other_feat),2) = with_other_feat;
+    an_feat(1:length(with_failed_feat),3) = with_failed_feat;
+    
+    an_all_feat{feature_number} = an_feat;
+    
+    if indv_plot
+    
+    anova1(an_all_feat{feature_number})
+    xticks(1:3);
+    xtickoptions = {'Vs Same Animal Evoked','Vs Other Animals Evoked','Vs Failed'};
+    xticklabels(xtickoptions);
+    xtickangle(45);
+    title(strcat("Animal ", num2str(processed_animals(an))," ", strrep(feature_names{feature_list(feature_number)},"_"," ")));
+        
+    end
+    
+    an_feat = NaN(max_size,3);
+    an_feat(1:length(within_feat),1) = within_feat_lag;
+    an_feat(1:length(with_other_feat),2) = with_other_feat_lag;
+    an_feat(1:length(with_failed_feat),3) = with_failed_feat_lag;
+    
+    an_all_feat_lag{feature_number} = an_feat;
+
+end
+
+% Loops To Transfer Features to Channels
+
+for feature = 1:length(feature_list)
+    
+    if isempty(ch_all_feat)
+    ch_all_feat{feature_number} = [an_all_feat{feature_number}];
+    else
+    ch_all_feat{feature_number} = [ch_all_feat{feature_number};an_all_feat{feature_number}];
+    end
+    
+end
+
+end
+
+% Compiled Anova of All Animals Per Channel
+
+for feature_number = 1:length(feature_list)
+    
+    anova1(an_all_feat{feature_number})
+    xticks(1:3);
+    xtickoptions = {'Vs Same Animal Evoked','Vs Other Animals Evoked','Vs Failed'};
+    xticklabels(xtickoptions);
+    xtickangle(45);
+    title(strcat("All Animals Channel ", num2str(channels_list(ch))," ", strrep(feature_names{feature_list(feature_number)},"_"," ")));
+    
+end
+
+end
 
 end
