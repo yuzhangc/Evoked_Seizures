@@ -299,6 +299,9 @@ master_an_array = {};
 for an = 1:length(total_unique_an)
     
 path_extract = strcat(directory,subFolders(total_unique_an(an)).name,'\');
+
+% Loads Filtered Seizure Data and Features
+% load(strcat(path_extract,"Filtered Seizure Data.mat"))
 load(strcat(path_extract,"Normalized Features.mat"))
 
 feature_names = fieldnames(norm_features);
@@ -343,23 +346,25 @@ for sz = 1:size(sz_in_an,1)
 
         % Special Case For Band Power
         if (isequal(feature_names{feature_list(feature_number)},'Band_Power'))
-            temp_ft_array{feature_number} = norm_features.(feature_names{feature_list(feature_number)}){bp_cnter}{sz};
+            temp_ft_array{feature_number} = norm_features.(feature_names{feature_list(feature_number)}){bp_cnter}{sz_in_an(sz)};
             if bp_cnter == size(bp_filters,1)
             bp_cnter = 1;
             else
             bp_cnter = bp_cnter + 1;
             end
         else
-        temp_ft_array{feature_number} = norm_features.(feature_names{feature_list(feature_number)}){sz};
+        temp_ft_array{feature_number} = norm_features.(feature_names{feature_list(feature_number)}){sz_in_an(sz)};
         end
 
     end
 
     temp_sz_array {sz_in_an(sz)} = temp_ft_array;
+    % temp_filtered_array {sz_in_an(sz)} = output_data{sz_in_an(sz)};
 
 end
 
 master_an_array{total_unique_an(an)} = temp_sz_array;
+% master_filtered_array{total_unique_an(an)} = temp_filtered_array;
 
 end
 
