@@ -9,6 +9,9 @@ function [ch_all_feat] = calculate_seizure_corr_evoked(min_thresh_list,seizure_d
 % directory - Master directory
 % feature_list - List of features
 
+% Output Variables
+% ch_all_feat - contains groupings of all calculated correlation values by feature
+
 % -------------------------------------------------------------------------
 
 % Step 0: Access Directory, Determine General Parameters
@@ -308,7 +311,7 @@ feature_names = fieldnames(norm_features);
 
 % IO for Features
 
-bp_cnter = 1;
+bp_cnter = 1; % Keeps Track of Band Power Pairing
 
 if isempty(feature_list)
 
@@ -334,7 +337,7 @@ end
 
 sz_in_an = [all_successful(all_successful(:,1) == total_unique_an(an),2); all_failed(all_failed(:,1) == total_unique_an(an),2)];
 
-% Loops Through Seizures
+% Loops Through Seizures, Putting Features into Cell Arrays
 
 temp_sz_array = {};
 
@@ -388,7 +391,7 @@ for an = 1:length(processed_animals)
 an_all_feat = {};
 an_all_feat_lag = {};
     
-% Calculates Per Feature
+% Calculates Per Feature For Each Animal
 
 within_seizure_list = within_success{find(processed_animals(an) == successful_animals)};
 with_other_seizure_list = with_outside{find(processed_animals(an) == successful_animals)};
@@ -437,6 +440,8 @@ for feature_number = 1:length(feature_list)
     
     end
     
+    % Collate into Anova Capable Test
+
     max_size = max([length(within_feat),length(with_other_feat),length(with_failed_feat)]);
     
     an_feat = NaN(max_size,3);
@@ -445,6 +450,8 @@ for feature_number = 1:length(feature_list)
     an_feat(1:length(with_failed_feat),3) = with_failed_feat;
     
     an_all_feat{feature_number} = an_feat;
+
+    % Individual Plots
     
     if indv_plot
     
@@ -466,6 +473,8 @@ for feature_number = 1:length(feature_list)
     end
         
     end
+
+    % Collates Lags
     
     an_feat = NaN(max_size,3);
     an_feat(1:length(within_feat),1) = within_feat_lag;
