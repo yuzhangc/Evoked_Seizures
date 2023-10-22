@@ -28,7 +28,7 @@ csv_file_list <- list.files(path = subFolders[folder_num], pattern = "Extracted_
            full.names = FALSE, ignore.case = FALSE)
 
 # Target Channel
-target_ch <- 1
+target_ch <- 2
 
 # Reads CSV into Dataframe
 
@@ -113,12 +113,12 @@ sing_data = all_data[single_stim_indices,]
 
 # Step 4: Perform LME Models On Epileptic Vs Naive
 
-summary(lmer(Ch.1.Area ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Skew ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Line.Length ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Area ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Skew ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Line.Length ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Band.Power.1.Hz.to.30Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Band.Power.30.Hz.to.300Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
 
 # Summaries For Measures Other Than 'Epileptic'. For 'Epileptic', See PowerPoint.
 
@@ -154,12 +154,12 @@ summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Anim
 
 # Step 5: Perform LME Models On Single Vs Double Stim (EPILEPTIC ONLY)
 
-summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
-summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
-summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
-summary(lmer(Ch.1.Line.Length ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
-summary(lmer(Ch.1.Area ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
-summary(lmer(Ch.1.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_data))
+summary(lmer(Ch.2.Band.Power.1.Hz.to.30Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
+summary(lmer(Ch.2.Band.Power.30.Hz.to.300Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
+summary(lmer(Ch.2.Band.Power.300.Hz.to.1000Hz ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
+summary(lmer(Ch.2.Line.Length ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
+summary(lmer(Ch.2.Area ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
+summary(lmer(Ch.2.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
 
 # What Does It All Mean?
 
