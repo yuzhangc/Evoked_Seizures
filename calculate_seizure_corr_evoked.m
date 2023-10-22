@@ -1,4 +1,4 @@
-function calculate_seizure_corr_evoked(min_thresh_list,seizure_duration_list, directory, feature_list)
+function [ch_all_feat] = calculate_seizure_corr_evoked(min_thresh_list,seizure_duration_list, directory, feature_list)
 
 % Calculates Correlation of Evocations Above Threshold in Feature Space
 
@@ -23,6 +23,15 @@ complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = c
 real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END'));
 subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
 
+% Identify Main Question
+
+main_division = ['\nWhich analysis to run?',...
+    '\n(1) - Between Animal Analysis',...
+    '\n(2) - Between Duration Analysis',...
+    '\nEnter a number: '];
+
+main_div = input(main_division);
+
 % Identify Exclusion Criteria
 
 displays_text_1 = '\nType in Animal Number Below Which To Exclude (e.g. 12 = 2022/11/07, 22 = 2023/01/16): ';
@@ -36,9 +45,30 @@ displays_text_2 = ['\nDo you want to include naive data?', ...
 
 naive_ep = input(displays_text_2);
 
+% Identify Threshold for 'Failed' Evocation
+
 displays_text_3 = '\nHow many seconds is considered a failed/non-evoked event? Type in a number (e.g. 10): ';
 
 short_duration = input(displays_text_3);
+
+% Define Boundaries of Seizures Duration if Main Division is #2
+
+if main_div == 2
+
+displays_text_5 = '\nType in minimum duration to include (in secs): ';
+min_incl = input(displays_text_5);
+
+displays_text_6 = '\nType in maximum duration to include (in secs): ';
+max_incl = input(displays_text_6);
+
+else
+
+min_incl = short_duration;
+max_incl = 6000;
+
+end
+
+% Plot Individual Plots For Each Animal
 
 displays_text_4 = ['\nDo You Want to Plot Individual Data?',...
     '\n(1) - Yes', ...
@@ -76,7 +106,6 @@ for an = an_excl:size(min_thresh_list,2)
     path_extract = strcat(directory,subFolders(an).name,'\');
     sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
     
-    temp_sz_duration = seizure_duration_list{an};
     temp_thresh_list = min_thresh_list(an).seizures;
     
     for sz = 1:length(temp_thresh_list)
@@ -89,18 +118,18 @@ for an = an_excl:size(min_thresh_list,2)
             if seizure_duration_list{an}(temp_thresh_list(sz)) < short_duration
                 
                 if size(all_failed,1) == 0
-                all_failed = [an, temp_thresh_list(sz)];
+                all_failed = [an, temp_thresh_list(sz),seizure_duration_list{an}(temp_thresh_list(sz))];
                 else
-                all_failed(end+1,:) = [an, temp_thresh_list(sz)];
+                all_failed(end+1,:) = [an, temp_thresh_list(sz),seizure_duration_list{an}(temp_thresh_list(sz))];
                 end
                 
             % Otherwise Include Into Successfully Evoked
             else
                 
                 if size(all_successful,1) == 0
-                all_successful = [an, temp_thresh_list(sz)];
+                all_successful = [an, temp_thresh_list(sz),seizure_duration_list{an}(temp_thresh_list(sz))];
                 else
-                all_successful(end+1,:) = [an, temp_thresh_list(sz)];
+                all_successful(end+1,:) = [an, temp_thresh_list(sz),seizure_duration_list{an}(temp_thresh_list(sz))];
                 end
                 
             end
@@ -121,11 +150,13 @@ end
 successful_animals = unique(all_successful(:,1));
 failed_animals = unique(all_failed(:,1));
 
+if main_div == 1
+
 for pair1 = 1:length(successful_animals)
     
     % Extracts Successful Seizures
     
-    within_successful_seizures = all_successful(all_successful(:,1) == successful_animals(pair1),:);
+    within_successful_seizures = all_successful(all_successful(:,1) == successful_animals(pair1),1:2);
     
     % Makes Successful Seizures Pairs
     
@@ -143,7 +174,7 @@ for pair1 = 1:length(successful_animals)
     
     % Makes Outside Successful Seizure Pairs
     
-    outside_successful_seizures = all_successful(all_successful(:,1) ~= successful_animals(pair1),:);
+    outside_successful_seizures = all_successful(all_successful(:,1) ~= successful_animals(pair1),1:2);
     
     temp_with_outside = [];
     
@@ -164,12 +195,62 @@ for pair1 = 1:length(successful_animals)
     for sz1 = 1:size(within_successful_seizures,1)
         for sz2 = 1:size(all_failed,1)
             
-            temp_with_failed = [temp_with_failed;within_successful_seizures(sz1,:),all_failed(sz2,:)];
+            temp_with_failed = [temp_with_failed;within_successful_seizures(sz1,:),all_failed(sz2,1:2)];
             
         end
     end
     
     with_failed{pair1} = temp_with_failed;
+
+end
+
+elseif main_div == 2
+
+% Determine Seizures Within Duration
+
+target_duration_seizures = all_successful(all_successful(:,3) >= min_incl & all_successful(:,3) <= max_incl,1:2);
+not_target_duration_seizures = all_successful(all_successful(:,3) < min_incl | all_successful(:,3) > max_incl,1:2);
+
+temp_within_success = [];
+temp_with_outside = [];
+temp_with_failed = [];
+
+for sz1 = 1:size(target_duration_seizures,1)
+
+    % Within Success
+
+    for sz2 = 1:size(target_duration_seizures,1)
+
+        % Eliminates Identical Pairings
+        if sz1 ~= sz2
+        temp_within_success = [temp_within_success;target_duration_seizures(sz1,:),target_duration_seizures(sz2,:)];
+        end
+
+    end
+
+    % With Outside Duration Window
+
+    for sz2 = 1:size(not_target_duration_seizures,1)
+        temp_with_outside = [temp_with_outside;target_duration_seizures(sz1,:),not_target_duration_seizures(sz2,:)];
+    end
+
+    % With Failed
+    for sz2 = 1:size(all_failed,1)
+        temp_with_failed = [temp_with_failed;target_duration_seizures(sz1,:),all_failed(sz2,1:2)];
+    end
+
+
+end
+
+% Moves to Animals
+
+for pair1 = 1:length(successful_animals)
+
+    within_success{pair1} = temp_within_success(temp_within_success(:,1) == successful_animals(pair1),:);
+    with_outside{pair1} = temp_with_outside(temp_with_outside(:,1) == successful_animals(pair1),:);
+    with_failed{pair1} = temp_with_failed(temp_with_failed(:,1) == successful_animals(pair1),:);
+
+end
 
 end
 
@@ -223,6 +304,8 @@ load(strcat(path_extract,"Normalized Features.mat"))
 feature_names = fieldnames(norm_features);
 
 % IO for Features
+
+bp_cnter = 1;
 
 if isempty(feature_list)
 
@@ -291,8 +374,7 @@ for ch = 1:length(channels_list)
 disp(strcat("Working on Channel ", num2str(channels_list(ch))));
     
 % Specific to Channel
-
-ch_all_feat = {};
+ch_all_feat = cell(1,length(feature_list));
 
 for an = 1:length(processed_animals)
     
@@ -322,7 +404,7 @@ for feature_number = 1:length(feature_list)
     for sz_pair = 1:size(within_seizure_list,1)
   
     [c,lags] = xcorr(master_an_array{within_seizure_list(sz_pair,1)}{within_seizure_list(sz_pair,2)}{feature_number}(:,channels_list(ch)),...
-        master_an_array{within_seizure_list(sz_pair,3)}{within_seizure_list(sz_pair,4)}{feature_number}(:,channels_list(ch)));
+        master_an_array{within_seizure_list(sz_pair,3)}{within_seizure_list(sz_pair,4)}{feature_number}(:,channels_list(ch)),20);
     within_feat = [within_feat; max(c)];
     within_feat_lag = [within_feat_lag ; lags(find(max(c) == c))];
             
@@ -333,7 +415,7 @@ for feature_number = 1:length(feature_list)
     for sz_pair = 1:size(with_other_seizure_list,1)
     
     [c,lags] = xcorr(master_an_array{with_other_seizure_list(sz_pair,1)}{with_other_seizure_list(sz_pair,2)}{feature_number}(:,channels_list(ch)),...
-        master_an_array{with_other_seizure_list(sz_pair,3)}{with_other_seizure_list(sz_pair,4)}{feature_number}(:,channels_list(ch)));
+        master_an_array{with_other_seizure_list(sz_pair,3)}{with_other_seizure_list(sz_pair,4)}{feature_number}(:,channels_list(ch)),20);
     with_other_feat = [with_other_feat; max(c)];
     with_other_feat_lag = [with_other_feat_lag ; lags(find(max(c) == c))];
         
@@ -344,7 +426,7 @@ for feature_number = 1:length(feature_list)
     for sz_pair = 1:size(with_failed_seizure_list,1)
     
     [c,lags] = xcorr(master_an_array{with_failed_seizure_list(sz_pair,1)}{with_failed_seizure_list(sz_pair,2)}{feature_number}(:,channels_list(ch)),...
-        master_an_array{with_failed_seizure_list(sz_pair,3)}{with_failed_seizure_list(sz_pair,4)}{feature_number}(:,channels_list(ch)));
+        master_an_array{with_failed_seizure_list(sz_pair,3)}{with_failed_seizure_list(sz_pair,4)}{feature_number}(:,channels_list(ch)),20);
     with_failed_feat = [with_failed_feat; max(c)];
     with_failed_feat_lag = [with_failed_feat_lag ; lags(find(max(c) == c))];
     
@@ -389,11 +471,15 @@ for feature_number = 1:length(feature_list)
 
 end
 
+% -------------------------------------------------------------------------
+
+% Step 4: Output Plots
+
 % Loops To Transfer Features to Channels
 
-for feature = 1:length(feature_list)
+for feature_number = 1:length(feature_list)
     
-    if isempty(ch_all_feat)
+    if isempty(ch_all_feat{feature_number})
     ch_all_feat{feature_number} = [an_all_feat{feature_number}];
     else
     ch_all_feat{feature_number} = [ch_all_feat{feature_number};an_all_feat{feature_number}];
@@ -412,9 +498,9 @@ else
 
 for feature_number = 1:length(feature_list)
     
-    a = anova1(an_all_feat{feature_number});
+    a = anova1(ch_all_feat{feature_number});
     xticks(1:3);
-    xtickoptions = {'Vs Same Animal Evoked','Vs Other Animals Evoked','Vs Failed'};
+    xtickoptions = {'Vs Same Evoked Category','Vs Other Evoked Seizures','Vs Failed Evocations'};
     xticklabels(xtickoptions);
     xtickangle(45);
     if feature_names{feature_list(feature_number)} == "Band_Power"
