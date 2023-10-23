@@ -293,7 +293,7 @@ clear animal_info
 
 %% Evoked Seizures Processing - Cross Correlation
 
-ch_all_feat = calculate_seizure_corr_evoked(min_thresh_list,seizure_duration_list,directory,[]);
+[all_ch_feat, ch_all_lag, feature_list] = calculate_seizure_corr_evoked(min_thresh_list,seizure_duration_list,directory,[]);
 
 %% Spontaneous Seizure Processing
 

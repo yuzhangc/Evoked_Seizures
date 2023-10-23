@@ -88,7 +88,7 @@ ylabel('Count')
 
 % This limit excludes the 25mW+ threshold, which only happened when I was
 % learning to use the fiber.
-xlim([5,25])
+xlim([0,25])
 
 % -------------------------------------------------------------------------
 
@@ -100,6 +100,8 @@ xlim([5,25])
 figure;
 
 hold on
+% To ONLY Includes True Threshold. Add '& list_of_power' ~= -1'
+% to get all animals
 h1 = histogram(list_of_duration(list_of_duration' ~= -1 & animal_info(:,5) == 1),'FaceColor',[1 0 0]);
 h1.BinWidth = 2;
 h2 = histogram(list_of_duration(list_of_duration' ~= -1 & animal_info(:,5) == 0),'FaceColor',[0 0 1]);

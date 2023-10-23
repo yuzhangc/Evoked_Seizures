@@ -1,4 +1,4 @@
-function [ch_all_feat] = calculate_seizure_corr_evoked(min_thresh_list,seizure_duration_list, directory, feature_list)
+function [all_ch_feat, ch_all_lag, feature_list] = calculate_seizure_corr_evoked(min_thresh_list,seizure_duration_list, directory, feature_list)
 
 % Calculates Correlation of Evocations Above Threshold in Feature Space
 
@@ -10,7 +10,9 @@ function [ch_all_feat] = calculate_seizure_corr_evoked(min_thresh_list,seizure_d
 % feature_list - List of features
 
 % Output Variables
-% ch_all_feat - contains groupings of all calculated correlation values by feature
+% all_ch_feat - contains groupings of all calculated correlation values by feature
+% all_ch_lag - contains groupings of all lag values
+% feature_list - list of features
 
 % -------------------------------------------------------------------------
 
@@ -377,12 +379,16 @@ end
 
 % Step 3: Calculate Cross Correlation For Selected Features
 
+all_ch_feat = cell(1,length(channels_list));
+all_ch_lag = cell(1,length(channels_list));
+
 for ch = 1:length(channels_list)
     
 disp(strcat("Working on Channel ", num2str(channels_list(ch))));
     
 % Specific to Channel
 ch_all_feat = cell(1,length(feature_list));
+ch_all_lag = cell(1,length(feature_list));
 
 for an = 1:length(processed_animals)
     
@@ -477,9 +483,9 @@ for feature_number = 1:length(feature_list)
     % Collates Lags
     
     an_feat = NaN(max_size,3);
-    an_feat(1:length(within_feat),1) = within_feat_lag;
-    an_feat(1:length(with_other_feat),2) = with_other_feat_lag;
-    an_feat(1:length(with_failed_feat),3) = with_failed_feat_lag;
+    an_feat(1:length(within_feat_lag),1) = within_feat_lag;
+    an_feat(1:length(with_other_feat_lag),2) = with_other_feat_lag;
+    an_feat(1:length(with_failed_feat_lag),3) = with_failed_feat_lag;
     
     an_all_feat_lag{feature_number} = an_feat;
 
@@ -495,8 +501,10 @@ for feature_number = 1:length(feature_list)
     
     if isempty(ch_all_feat{feature_number})
     ch_all_feat{feature_number} = [an_all_feat{feature_number}];
+    ch_all_lag{feature_number} = [an_all_feat_lag{feature_number}];
     else
     ch_all_feat{feature_number} = [ch_all_feat{feature_number};an_all_feat{feature_number}];
+    ch_all_lag{feature_number} = [ch_all_lag{feature_number};an_all_feat_lag{feature_number}];
     end
     
 end
@@ -531,6 +539,9 @@ for feature_number = 1:length(feature_list)
 end
 
 end
+
+all_ch_feat{ch} = ch_all_feat;
+all_ch_lag{ch} = ch_all_lag;
 
 end
 
