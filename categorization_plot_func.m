@@ -52,6 +52,7 @@ displays_text = ['\nWhich Plot to Plot?:', ...
     '\n(3) - Successfully Evocations Vs Failed Evocations', ...
     '\n(4) - Comparison of Levetiracetam and Phenytoin with Control (DO IN R)',...
     '\n(5) - Additional Stimulation Or Not (473 nm AFTER Onset ONLY)',...
+    '\n(6) - Evoked Vs Spontaneous',...
     '\nEnter a number: '];
 
 main_division = input(displays_text);
@@ -138,7 +139,22 @@ excl_diaz = 0;
 
 end
 
-if main_division ~= 1
+if main_division ~= 6
+    
+displays_text_9 = ['\nDo you want to INCLUDE SPONTANEOUS recordings?', ...
+'\n(1) - Yes', ...
+'\n(0) - No', ...
+'\nEnter a number: '];
+
+incl_spont = input(displays_text_9);
+
+else
+    
+incl_spont = 1;
+
+end
+
+if main_division ~= 1 && main_division == 6
 
 displays_text_8 = ['\nDo you want to exclude NAIVE recordings?', ...
     '\n(1) - Yes', ...
@@ -147,6 +163,10 @@ displays_text_8 = ['\nDo you want to exclude NAIVE recordings?', ...
 
 excl_naiv = input(displays_text_8);
 
+elseif main_division == 6
+    
+excl_naiv = 1;
+    
 else
 
 excl_naiv = 0;
@@ -312,12 +332,58 @@ switch main_division
             merged_sz_parameters(:,13) > merged_sz_parameters(:,12));
 
         duration_labels = {'Control', 'High Freq No Delay', 'Const No Delay', 'High Freq Any Delay', 'Const Any Delay'};
-                
+   
+    case 6 % Spontaneous Vs Evoked
+        
+        % Spontaneous
+        subdiv_index{1} = find(merged_sz_parameters(:,8) == -1 && merged_sz_parameters(:,5) == 1);
+        
+        % Evoked
+        subdiv_index{2} = find(merged_sz_parameters(:,8) ~= -1);
+        
+        duration_labels = {'Spontaneous', 'Evoked'};
+        
 end
 
 % -------------------------------------------------------------------------
 
-% Step 4: Refine Indices Based on Epileptic Or Naive
+% Step 4A: Refine Based on Spontaneous or Evoked. Remove if not include
+% spontaneous
+
+if incl_spont
+    
+    if main_division == 6
+    else
+        
+        spont_indices = find(merged_sz_parameters(:,8) == -1 && merged_sz_parameters(:,5) == 1);
+        length_subdiv = length(subdiv_index);
+        for cnt = 1:length_subdiv
+            subdiv_index{length_subdiv + cnt} = intersect(subdiv_index{cnt},spont_indices);
+            subdiv_index{cnt} = setdiff(subdiv_index{cnt},spont_indices);
+        end 
+
+        % Extends Duration Labelling
+        for dur_text = 1:length(duration_labels)
+        addl_duration_labels{dur_text} = strcat(duration_labels{dur_text}," Spontaneous");
+        duration_labels{dur_text} = strcat(duration_labels{dur_text}," Evoked");
+        end
+        
+        duration_labels = [duration_labels,addl_duration_labels];
+        
+    end
+    
+else 
+   
+    excluded_indices = find(merged_sz_parameters(:,8) == -1);
+    for cnt = 1:length(subdiv_index)
+        subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
+    end
+    
+end
+
+% -------------------------------------------------------------------------
+
+% Step 4B: Refine Indices Based on Epileptic Or Naive
 
 if naive_ep
     

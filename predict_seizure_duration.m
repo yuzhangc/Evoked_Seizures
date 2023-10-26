@@ -97,16 +97,31 @@ for sz_cnt = 1:size(sz_parameters,1)
         countdown_lim = countdown_sec/winDisp;
         
         % Uses Stimulation Duration to Set Seizure Start As Immediately After
+        if sz_parameters(sz_cnt,12) ~= -1
         sz_start = (t_before + sz_parameters(sz_cnt,12))/winDisp;
+        else
+        sz_start = (t_before)/winDisp;
+        end
         sz_pos = sz_start;
         sz_end = sz_start;
         
         % If countdown hasn't reached termination limit OR if seizure is
         % still ongoing (class 2 or 1), continue
-        while (k_means_pred(sz_pos) == 2 || k_means_pred(sz_pos) == 1) || countdown < countdown_lim
+        
+        if sz_parameters(1,1) < 100
+            sz_classes_1 = 2;
+            sz_classes_2 = 1;
+            non_sz_class = 3;
+        else
+            sz_classes_1 = 2;
+            sz_classes_2 = 3;
+            non_sz_class = 1;
+        end
+        
+        while (k_means_pred(sz_pos) == sz_classes_2 || k_means_pred(sz_pos) == sz_classes_1) || countdown < countdown_lim
             
             % Keeps on Moving Forward if Still Seizing
-            if k_means_pred(sz_pos) ~= 3
+            if k_means_pred(sz_pos) ~= non_sz_class
                 countdown = 0;
                 sz_end = sz_pos;
                 
@@ -149,7 +164,10 @@ for sz_cnt = 1:size(sz_parameters,1)
         end
         
         % Plots Scatterplot of K Means Predictions on Top of Channel 1
-        Colorset_plot = [1 0 0; 1 0 0; 0 1 0];
+        Colorset_plot = [0 0 0; 0 0 0; 0 0 0];
+        Colorset_plot(sz_classes_1,:) = [1 0 0];
+        Colorset_plot(sz_classes_2,:) = [1 0 0];
+        Colorset_plot(non_sz_class,:) = [0 1 0];
         scatter( winDisp : winDisp : t_after + t_before - winDisp, ones(length(k_means_pred),1) + channel - 1,...
             [], Colorset_plot(k_means_pred,:) , 'filled');
         
@@ -226,6 +244,7 @@ end
 % Unique Counts
 number_power = unique(sz_parameters(:,9));
 number_duration = unique(sz_parameters(:,12));
+number_duration = number_duration(find(number_duration~=-1));
 
 % Sets Up Output
 min_thresh.power = 1000;

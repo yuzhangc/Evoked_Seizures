@@ -44,7 +44,7 @@ filelist = dir(strcat(path_extract,'*Cage*.mat'));
 mkdir(path_extract,'Figures\Raw')
 
 % Step 0: Extracts Visually Identified Stimulation/Seizure Start Time
-stim_start_all = sz_parameters(:,17);
+stim_start_all = sz_parameters(:,19);
 
 for count = 1:length(filelist)
     
