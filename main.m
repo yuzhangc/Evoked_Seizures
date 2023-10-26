@@ -294,11 +294,3 @@ clear animal_info
 %% Evoked Seizures Processing - Cross Correlation
 
 [all_ch_feat, ch_all_lag, feature_list] = calculate_seizure_corr_evoked(min_thresh_list,seizure_duration_list,directory,[]);
-
-%% Spontaneous Seizure Processing
-
-% Cross Correlation Across Seizures 
-
-[sz_corr, sz_lag, sz_grp] = calculate_seizure_corr(path_extract, [1:4], to_plot);
-
-% Spontaneous Seizure Neural Net Training
