@@ -26,9 +26,9 @@ disp("Working on: " + path_extract)
 
 % Step 1: Read Seizure Parameters and Features
 
-sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
-
 load(strcat(path_extract,"Normalized Features.mat"))
+
+sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 
 % Make Adjustments - Adds in Phenytoin & Levetiracetam Columnns
 
@@ -51,21 +51,27 @@ num_seizures = size(sz_parameters,1);
 
 col1 = num2cell(sz_parameters(:,1));
 
+if sz_parameters(1,1) >= 100
+    act_number = sz_parameters(1,1) - 99;
+else
+    act_number = sz_parameters(1,1);
+end
+
 % Column 2 - Epileptic Or Not
 
-col2(1:num_seizures,1) = table2cell(animal_info(sz_parameters(1,1),5));
+col2(1:num_seizures,1) = table2cell(animal_info(act_number,5));
 
 % Column 3 - Gender
 
-col3(1:num_seizures,1) = table2cell(animal_info(sz_parameters(1,1),6));
+col3(1:num_seizures,1) = table2cell(animal_info(act_number,6));
 
 % Column 4 - Age
 
-col4(1:num_seizures,1) = table2cell(animal_info(sz_parameters(1,1),7));
+col4(1:num_seizures,1) = table2cell(animal_info(act_number,7));
 
 % Column 5 - Weeks Post KA 
 
-col5(1:num_seizures,1) = table2cell(animal_info(sz_parameters(1,1),10));
+col5(1:num_seizures,1) = table2cell(animal_info(act_number,10));
 
 % Column 6 - Seizure Or Not
 
@@ -131,7 +137,7 @@ beginning_data = table(col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11,
 
 % Step 3: Create Indices for Seizure Duration
 
-seizure_duration = seizure_duration_list{sz_parameters(:,1)};
+seizure_duration = seizure_duration_list{act_number};
 
 clear pre_stim_indices during_stim_indices first_third_indices
 clear second_third_indices final_third_indices post_ictal_indices

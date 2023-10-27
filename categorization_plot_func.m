@@ -1,4 +1,4 @@
-function [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory)
+function [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,spont_vs_naive)
 
 % Use Integrated Feature Information Across All Channels, Then Separates Them
 % According to User Input and Categorization. Makes Plots Too
@@ -23,13 +23,22 @@ anova_excluded_indices = [];
 
 % Loads Animal Information
 
+if spont_vs_naive == 1
 animal_info = readmatrix(strcat(directory,'Animal Master.csv'));
+else
+animal_info = readmatrix(strcat(directory,'Animal Master Freely Moving.csv'));
+end
 
 % Extract Features Information and Names From Last Folder in Directory
 
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
+if spont_vs_naive == 1
 real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END')); 
 subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
+else
+real_folder_st = find(ismember({subFolders.name},'EEG_01_2023_06_26_100_KA_THY_SST_CHR')); real_folder_end = find(ismember({subFolders.name},'EEG_04_2023_07_11_103_KA_THY_PV_ARCH'));
+subFolders = subFolders(real_folder_st:real_folder_end);   
+end
 path_extract = strcat(directory,subFolders(length(subFolders)).name,'\');
 load(strcat(path_extract,'Normalized Features.mat'))
 feature_names = fieldnames(norm_features);
@@ -336,7 +345,7 @@ switch main_division
     case 6 % Spontaneous Vs Evoked
         
         % Spontaneous
-        subdiv_index{1} = find(merged_sz_parameters(:,8) == -1 && merged_sz_parameters(:,5) == 1);
+        subdiv_index{1} = find(merged_sz_parameters(:,8) == -1 & merged_sz_parameters(:,5) == 1);
         
         % Evoked
         subdiv_index{2} = find(merged_sz_parameters(:,8) ~= -1);
@@ -355,7 +364,7 @@ if incl_spont
     if main_division == 6
     else
         
-        spont_indices = find(merged_sz_parameters(:,8) == -1 && merged_sz_parameters(:,5) == 1);
+        spont_indices = find(merged_sz_parameters(:,8) == -1 & merged_sz_parameters(:,5) == 1);
         length_subdiv = length(subdiv_index);
         for cnt = 1:length_subdiv
             subdiv_index{length_subdiv + cnt} = intersect(subdiv_index{cnt},spont_indices);
@@ -523,9 +532,12 @@ for cnt = 1:length(subdiv_index)
         indv_stim_duration = merged_sz_parameters(subdiv_index{cnt}(seizure_idx),12);
         
         % Create Indices For Thirds
-        if indv_stim_duration ~= 0
-
+        if indv_stim_duration ~= -1
         sz_start = (t_before + indv_stim_duration)/winDisp;
+        else
+        sz_start = (t_before)/winDisp;
+        end
+
         sz_end = sz_start + indv_duration/winDisp;
         indices = [1 , floor(t_before/winDisp) , floor(sz_start) , floor(sz_start+round((sz_end-sz_start)/3)), ...
             floor(sz_start+round(2*(sz_end-sz_start)/3)) , floor(sz_end) , floor(sz_end+30/winDisp)];
@@ -626,21 +638,6 @@ for cnt = 1:length(subdiv_index)
         
         final_divided = [mean_pre_stim; mean_during_stim; mean_first_third; ...
             mean_second_third; mean_final_third; mean_post_ictal];
-
-        else
-
-        % Calculate Only Pre and Post (and Stim). Otherwise Ignore
-        
-        indices = [1 , t_before/winDisp , sz_start , sz_start+round((sz_end-sz_start)/3), ...
-            sz_start+round(2*(sz_end-sz_start)/3) , sz_end , sz_end+30/winDisp];
-
-        mean_pre_stim = mean(indv_data(indices(1):indices(2),:),1);
-        mean_during_stim = mean(indv_data(indices(2):indices(3),:),1);
-        mean_post_ictal = mean(indv_data(indices(6):indices(7),:),1);
-
-        final_divided = [mean_pre_stim; mean_during_stim; 0; 0; 0; mean_post_ictal];
-
-        end
         
         % Segregates According to Channels
         if rem(length(mean_pre_stim),4) ~= 0
@@ -793,12 +790,19 @@ for ch = 1:4
         hold on
         
         % Plots All Classes
+        num_on_x = 0;
+
         for class_split = 1:size(final_feature_output,2)
             
             % Case For No Items in Class
             if not(isempty(final_feature_output{class_split}))
             % Extracts Relevant Data
             indv_data = final_feature_output{class_split}{ch}{idx_feature};
+
+            % Adds to Size
+            if size(indv_data,2) > num_on_x
+                num_on_x = size(indv_data,2);
+            end
             
             % Define X Axes and Appropriate Offset
             xaxis = [1:length(mean(indv_data))];
@@ -845,7 +849,7 @@ for ch = 1:4
         
         % Draws 0 Point and Labels X Axes
         yline(0,'-k','LineWidth',1);
-        xticks(1:size(indv_data,2));
+        xticks(1:num_on_x);
         xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'});
         xtickangle(45);
         

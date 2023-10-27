@@ -1,5 +1,5 @@
-trial = 58;
-maximum = 65;
+trial = 14;
+maximum = 30;
 
 figure
 hold on

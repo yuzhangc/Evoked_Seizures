@@ -118,4 +118,4 @@ end
 
 %% Seizure Duration / EEG Waveform Comparison
 
-% Seizure Model Was 3 Neighbor KNN Model
+[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,2);
