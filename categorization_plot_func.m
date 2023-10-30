@@ -8,7 +8,8 @@ function [final_feature_output, subdiv_index, merged_sz_duration] = categorizati
 % merged_sz_parameters - complete seizure information list
 % seizure_duration_list - list of seizure duration, organized by folder
 % directory - directory to extract feature info from
-% within_animal - within animal comparison, animal #
+% spont_vs_naive - 1 - Evoked Seizures Head Fixed, 2 - Evoked Seizures
+% Freely Moving and Spontaneous
 
 % Output Variables
 % final_feature_output - features segregated by class, channels, then
@@ -104,7 +105,7 @@ end
 if excl_short == 1
     short_duration = input('\nHow many seconds is considered a short/non-evoked event? Type in a number (e.g. 15): ');
 else
-    short_duration = 0;
+    short_duration = -1;
 end
 
 if main_division ~= 5
@@ -163,7 +164,7 @@ incl_spont = 1;
 
 end
 
-if main_division ~= 1 && main_division == 6
+if main_division ~= 1 && naive_ep == 1
 
 displays_text_8 = ['\nDo you want to exclude NAIVE recordings?', ...
     '\n(1) - Yes', ...
@@ -172,10 +173,6 @@ displays_text_8 = ['\nDo you want to exclude NAIVE recordings?', ...
 
 excl_naiv = input(displays_text_8);
 
-elseif main_division == 6
-    
-excl_naiv = 1;
-    
 else
 
 excl_naiv = 0;
@@ -635,9 +632,21 @@ for cnt = 1:length(subdiv_index)
         end
 
         end
-        
-        final_divided = [mean_pre_stim; mean_during_stim; mean_first_third; ...
+
+        % No Seizure
+        if sz_start == sz_end
+            replacement = zeros(size(mean_pre_stim));
+            final_divided = [mean_pre_stim; mean_during_stim; replacement; ...
+                replacement; replacement; mean_post_ictal];
+        % Spontaneous
+        elseif merged_sz_parameters(subdiv_index{cnt}(seizure_idx),8) == -1
+            final_divided = [mean_pre_stim; zeros(size(mean_pre_stim)); mean_first_third; ...
             mean_second_third; mean_final_third; mean_post_ictal];
+        % Regular
+        else
+            final_divided = [mean_pre_stim; mean_during_stim; mean_first_third; ...
+            mean_second_third; mean_final_third; mean_post_ictal];
+        end
         
         % Segregates According to Channels
         if rem(length(mean_pre_stim),4) ~= 0
@@ -781,7 +790,7 @@ for ch = 1:4
         elseif main_division == 1
             positioning(1:size(final_feature_output,2)/2) = '*';
             positioning(size(final_feature_output,2)/2 + 1:size(final_feature_output,2)) = '^';
-            Colorset_plot = Colorset_plot(1:2,:);
+            Colorset_plot(size(final_feature_output,2)/2 + 1:size(final_feature_output,2),:) = Colorset_plot(1:size(final_feature_output,2)/2,:);
         else
             positioning(1:size(final_feature_output,2)) = 'o';
             Colorset_plot = Colorset_plot(4:end,:);
