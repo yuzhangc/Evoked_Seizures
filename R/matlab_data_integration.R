@@ -62,6 +62,7 @@ feature_data$Laser.2...Power[which(feature_data$Laser.2...Power == -1)] <- NA
 feature_data$Laser.2...Duration[which(feature_data$Laser.1...Duration == -1)] <- NA
 feature_data$Laser.2...Frequency[which(feature_data$Laser.2...Frequency == -1)] <- NA
 feature_data$Delay[which(feature_data$Delay == -1)] <- NA
+feature_data$Laser.1...Color[which(feature_data$Laser.1...Color == -1)] <- NA
 
 # Append to All_Data
 
@@ -95,8 +96,13 @@ all_data <- all_data[kept_indices,]
 
 # Separates Second Blue Stimulation Trials From Single Stimulation (Evocation Only) Trials
 
-single_stim_indices <- which(is.na(all_data$Laser.2...Color))
+single_stim_indices <- which(is.na(all_data$Laser.2...Color) & all_data$Laser.1...Color == 473)
 double_blue_stim_indices <- which(all_data$Laser.2...Color == 473 & all_data$Delay > 0)
+spont_indices <-  which(is.na(all_data$Laser.1...Color))
+
+spont_vs_evoked_data = all_data[c(single_stim_indices,spont_indices),]
+spont_vs_evoked_data$Spont <- is.na(spont_vs_evoked_data$Laser.1...Color)
+spont_vs_evoked_data$Spont <- factor(spont_vs_evoked_data$Spont, levels = c(FALSE, TRUE))
 
 sing_vs_db_data = all_data[c(single_stim_indices,double_blue_stim_indices),]
 sing_vs_db_data$Sing <- is.na(sing_vs_db_data$Delay)
@@ -139,6 +145,15 @@ summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Sing * Time.Point + (1|Animal), 
 summary(lmer(Ch.1.Line.Length ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
 summary(lmer(Ch.1.Area ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
 summary(lmer(Ch.1.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
+
+# Step 6: Perform Comparisons on Spontaneous Vs Evoked (FREELY MOVING ONLY)
+
+summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.1.Line.Length ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.1.Area ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.1.Skew ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
 
 # What Does It All Mean?
 
