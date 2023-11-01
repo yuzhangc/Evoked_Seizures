@@ -146,15 +146,16 @@ summary(lmer(Ch.1.Line.Length ~ Sing * Time.Point + (1|Animal), data = sing_vs_d
 summary(lmer(Ch.1.Area ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
 summary(lmer(Ch.1.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_data))
 
-# Step 6: Perform Comparisons on Spontaneous Vs Evoked (FREELY MOVING ONLY)
+# summary(lm(Ch.1.Skew ~ Sing * Time.Point, data = sing_vs_db_ep_data))
 
-summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lmer(Ch.1.Line.Length ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lmer(Ch.1.Area ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lmer(Ch.1.Skew ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+# Step 6: Perform Comparisons on Spontaneous Vs Evoked (FREELY MOVING ONLY - Single Animal Fixed Effect Model)
 
+summary(lm(Ch.1.Band.Power.1.Hz.to.30Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.1.Band.Power.30.Hz.to.300Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.1.Line.Length ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.1.Area ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.1.Skew ~ Spont * Time.Point, data = spont_vs_evoked_data))
 # What Does It All Mean?
 
 # The function is Outcome Measure ~ Predictor + Random Effect.
