@@ -1,4 +1,4 @@
-function [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,spont_vs_naive)
+function [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,spont_vs_naive)
 
 % Use Integrated Feature Information Across All Channels, Then Separates Them
 % According to User Input and Categorization. Makes Plots Too
@@ -32,14 +32,6 @@ end
 
 % Extract Features Information and Names From Last Folder in Directory
 
-complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
-if spont_vs_naive == 1
-real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END')); 
-subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
-else
-real_folder_st = find(ismember({subFolders.name},'EEG_01_2023_06_26_100_KA_THY_SST_CHR')); real_folder_end = find(ismember({subFolders.name},'EEG_04_2023_07_11_103_KA_THY_PV_ARCH'));
-subFolders = subFolders(real_folder_st:real_folder_end);   
-end
 path_extract = strcat(directory,subFolders(length(subFolders)).name,'\');
 load(strcat(path_extract,'Normalized Features.mat'))
 feature_names = fieldnames(norm_features);

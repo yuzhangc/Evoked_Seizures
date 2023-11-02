@@ -1,4 +1,4 @@
-function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot)
+function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders)
 
 % Uses a pre-defined seizure model to identify seizure length.
 % Concactenates features
@@ -27,6 +27,8 @@ function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seiz
 % 3) output_array - concactenated features, indexed by seizure
 %
 % 4) sz_parameters - seizure parameters
+%
+% 5) Subfolders - if size 1 - 1 animal, load raw
 
 % -------------------------------------------------------------------------
 
@@ -34,7 +36,11 @@ function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seiz
 
 disp("Working on: " + path_extract)
 load(strcat(path_extract,'Filtered Seizure Data.mat'))
+if size(subFolders,1) ~= 1
 load(strcat(path_extract,'Normalized Features.mat'))
+else
+load(strcat(path_extract,'Raw Features.mat'))
+end
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 
 % Adds Levetiracetam and Phenytoin Information For Early Trials

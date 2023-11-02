@@ -239,7 +239,7 @@ merged_sz_parameters = [];
 for folder_num = 1:length(subFolders)
     
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
-    [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot);
+    [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders);
     merged_output_array = [merged_output_array, output_array];
     merged_sz_parameters = [merged_sz_parameters; sz_parameters];
     seizure_duration_list(folder_num) = {seizure_duration};
@@ -281,7 +281,7 @@ clear animal_info
 
 %% Evoked Seizures Processing - Plots By Category
 
-[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,1);
+[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders);
 
 % Within Animal Example
 
