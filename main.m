@@ -270,9 +270,9 @@ for folder_num = 1:length(subFolders)
 path_extract = strcat(directory,subFolders(folder_num).name,'\');
 
 if folder_num == 1
-[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,[],folder_num,drug,second_stim);
+[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,[],folder_num,drug,second_stim,1);
 else
-[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim);
+[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim,1);
 end
 
 end
@@ -281,7 +281,7 @@ clear animal_info
 
 %% Evoked Seizures Processing - Plots By Category
 
-[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders);
+[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,1);
 
 % Within Animal Example
 

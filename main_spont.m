@@ -116,6 +116,29 @@ for folder_num = 1:length(subFolders)
     [sz_corr, sz_lag, sz_grp] = calculate_seizure_corr(path_extract, [1:4], to_plot);
 end
 
+%% Output Data To R
+
+animal_info = readtable(strcat(directory,'Animal Master Freely Moving.csv'));
+
+% Special Case For Drug Trials. Only Export Above Threshold Ones W Pairing
+drug = 0;
+% Removes Second Stim Indices.
+second_stim = 1;
+
+for folder_num = 1:length(subFolders)
+
+path_extract = strcat(directory,subFolders(folder_num).name,'\');
+
+if folder_num == 1
+[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,[],folder_num,drug,second_stim,0);
+else
+[final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim,0);
+end
+
+end
+
+clear animal_info
+
 %% Seizure Duration / EEG Waveform Comparison
 
-[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,2);
+[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,0);

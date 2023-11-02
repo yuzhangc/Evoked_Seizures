@@ -1,4 +1,4 @@
-function [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,spont_vs_naive)
+function [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,headfixed)
 
 % Use Integrated Feature Information Across All Channels, Then Separates Them
 % According to User Input and Categorization. Makes Plots Too
@@ -8,7 +8,7 @@ function [final_feature_output, subdiv_index, merged_sz_duration] = categorizati
 % merged_sz_parameters - complete seizure information list
 % seizure_duration_list - list of seizure duration, organized by folder
 % directory - directory to extract feature info from
-% spont_vs_naive - 1 - Evoked Seizures Head Fixed, 2 - Evoked Seizures
+% headfixed - 1 - Evoked Seizures Head Fixed, 0 - Evoked Seizures
 % Freely Moving and Spontaneous
 
 % Output Variables
@@ -24,7 +24,7 @@ anova_excluded_indices = [];
 
 % Loads Animal Information
 
-if spont_vs_naive == 1
+if headfixed == 1
 animal_info = readmatrix(strcat(directory,'Animal Master.csv'));
 else
 animal_info = readmatrix(strcat(directory,'Animal Master Freely Moving.csv'));

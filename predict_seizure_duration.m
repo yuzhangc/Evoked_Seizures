@@ -36,11 +36,10 @@ function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seiz
 
 disp("Working on: " + path_extract)
 load(strcat(path_extract,'Filtered Seizure Data.mat'))
-if size(subFolders,1) ~= 1
-load(strcat(path_extract,'Normalized Features.mat'))
-else
+if size(subFolders,1) == 1
 load(strcat(path_extract,'Raw Features.mat'))
 end
+load(strcat(path_extract,'Normalized Features.mat'))
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 
 % Adds Levetiracetam and Phenytoin Information For Early Trials
@@ -61,6 +60,9 @@ feature_names = fieldnames(norm_features);
 for sz_cnt = 1:size(sz_parameters,1)
     
     temp_output_array = [];
+    if size(subFolders,1) == 1
+        raw_output_array = [];
+    end
     
     % Step 3A: Check to determine if channels is equal to 4. Do not perform
     % operation if not
@@ -78,21 +80,32 @@ for sz_cnt = 1:size(sz_parameters,1)
         if (isequal(feature_names{feature_number},'Band_Power'))
             for bp_cnt = 1:size(bp_filters,1)
                 temp_output_array = [temp_output_array,norm_features.(feature_names{feature_number}){bp_cnt}{sz_cnt}];
+                if size(subFolders,1) == 1
+                raw_output_array = [raw_output_array,features.(feature_names{feature_number}){bp_cnt}{sz_cnt}];
+                end
             end
         else
             temp_output_array = [temp_output_array,norm_features.(feature_names{feature_number}){sz_cnt}];
+            if size(subFolders,1) == 1
+            raw_output_array = [raw_output_array,features.(feature_names{feature_number}){sz_cnt}];
+            end
         end
 
     end
     
-    output_array{sz_cnt} = temp_output_array;
+    pred_output_array{sz_cnt} = temp_output_array;
+    if size(subFolders,1) == 1
+        output_array{sz_cnt} = raw_output_array;
+    else
+        output_array{sz_cnt} = temp_output_array;
+    end
 
     % Skip Seizures If Visual Inspection Shows 0 OR Channel Incongruency
     if channel_incongruency
     else
         
         % Step 3C: Use Model to Classify Seizure or Not
-        k_means_pred = predict(sz_model, output_array{sz_cnt});
+        k_means_pred = predict(sz_model, pred_output_array{sz_cnt});
         
         % Step 3D: Using a Countup/Cooldown Timer to Determine True Seizure
         % Length and Ignore Brief Aberrations ----------------------------

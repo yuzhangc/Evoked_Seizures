@@ -1,4 +1,4 @@
-function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim)
+function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim,raw_or_normalized)
 
 % Uses Seizure Duration to Splice Feature Data into Before, During Stim,
 % and Thirds. Exports the Means Along With Spliced Seizure Parameters For
@@ -12,6 +12,7 @@ function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_i
 % seizure_duration_list - Calculated Seizure Durations (For Thirds
 % Splitting)
 % folder_num - Used for Taking Correct Seizure Durations
+% raw_or_normalized - 1 for normalized, 0 for raw
 
 % drug - Special Case For Drug Trials
 % second_stim - Remove Second Stimulation Artifacts
@@ -26,7 +27,16 @@ disp("Working on: " + path_extract)
 
 % Step 1: Read Seizure Parameters and Features
 
+if raw_or_normalized
+
 load(strcat(path_extract,"Normalized Features.mat"))
+
+else
+    
+load(strcat(path_extract,"Raw Features.mat"))
+norm_features = features;
+
+end
 
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 
