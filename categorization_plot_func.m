@@ -790,7 +790,6 @@ for ch = 1:4
         elseif main_division == 1
             positioning(1:size(final_feature_output,2)/2) = '*';
             positioning(size(final_feature_output,2)/2 + 1:size(final_feature_output,2)) = '^';
-            Colorset_plot(size(final_feature_output,2)/2 + 1:size(final_feature_output,2),:) = Colorset_plot(1:size(final_feature_output,2)/2,:);
         else
             positioning(1:size(final_feature_output,2)) = 'o';
             Colorset_plot = Colorset_plot(4:end,:);

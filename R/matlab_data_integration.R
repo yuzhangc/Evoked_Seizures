@@ -78,7 +78,7 @@ all_data <- rbind(all_data,feature_data)
 
 min_time <- readline(prompt="Do you want to exclude short events?\nIf so, type in the second duration of events to exclude.\nAny events smaller than the duration will be excluded: ")
 15
-kept_indices <- which(all_data$Evoked.Activity.Duration > as.numeric(min_time))
+kept_indices <- which(all_data$Evoked.Activity.Duration >= as.numeric(min_time))
 all_data <- all_data[kept_indices,]
 
 # Remove Early Recordings - INPUT 12 (ANIMAL #)
