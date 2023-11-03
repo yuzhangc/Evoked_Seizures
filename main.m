@@ -281,7 +281,7 @@ clear animal_info
 
 %% Evoked Seizures Processing - Plots By Category
 
-[final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,1);
+[final_feature_output, subdiv_index, merged_sz_duration, coeff,score] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,1);
 
 % Within Animal Example
 

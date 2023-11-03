@@ -1,4 +1,4 @@
-function [final_feature_output, subdiv_index, merged_sz_duration] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,headfixed)
+function [final_feature_output, subdiv_index, merged_sz_duration,coeff,score] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,headfixed)
 
 % Use Integrated Feature Information Across All Channels, Then Separates Them
 % According to User Input and Categorization. Makes Plots Too
@@ -16,6 +16,7 @@ function [final_feature_output, subdiv_index, merged_sz_duration] = categorizati
 % individual features across all divisions
 % subdiv_index - divisions
 % merged_sz_duration - Merged Seizure Durations
+% coeff,score - PCA outputs
 
 % -------------------------------------------------------------------------
 
@@ -170,6 +171,11 @@ else
 excl_naiv = 0;
 
 end
+
+displays_text_11 = ['\nFor PCA Plot, Enter How Many Seconds You Want to Plot (0 is no plot).', ...
+'\nEnter a number: '];
+
+pca_dur = input(displays_text_11);
 
 clear displays_text displays_text_2 displays_text_3 displays_text_4 displays_text_5 displays_text_6 displays_text_7
 
@@ -502,6 +508,7 @@ end
 for cnt = 1:length(subdiv_index)
     
     feature_output_for_plot = [];
+    pca_for_cnt = [];
     
     % Loops Through Trials
     for seizure_idx = 1:length(subdiv_index{cnt})
@@ -531,6 +538,9 @@ for cnt = 1:length(subdiv_index)
         indices = [1 , floor(t_before/winDisp) , floor(sz_start) , floor(sz_start+round((sz_end-sz_start)/3)), ...
             floor(sz_start+round(2*(sz_end-sz_start)/3)) , floor(sz_end) , floor(sz_end+30/winDisp)];
         
+        % Adds Data to PCA Matrix
+        pca_for_cnt = [pca_for_cnt;indv_data(sz_start:sz_start + pca_dur/winDisp,:)];
+
         % Prepare For Case In Which End + 30 Seconds Exceed Bounds
         if sz_end + 30/winDisp >= (t_after + t_before)/winDisp - 1
             indices(7) = floor((t_after + t_before)/winDisp) - 1;
@@ -671,6 +681,7 @@ for cnt = 1:length(subdiv_index)
     end
     
     final_feature_output{cnt} = feature_output_for_plot;
+    final_pca_plot{cnt} = pca_for_cnt;
     
 end
 
@@ -892,7 +903,43 @@ xtickangle(45);
 
 % -------------------------------------------------------------------------
 
-% Step 13: Outputs Number of Unique Animals Per Class
+% Step 13: PCA Plot
+
+if pca_dur > 0
+
+merged_data_for_pca = [];
+colors_for_pca = [];
+
+% Black
+end_color = [0 0 0];
+
+% Extracts Data
+for class_split = 1:length(subdiv_index)
+    merged_data_for_pca = [merged_data_for_pca;final_pca_plot{class_split}];
+
+    % Goes From Color to White (For End)
+    cmap = interp1([0, 1], [Colorset_plot(class_split,:); end_color], linspace(0, 1, pca_dur/winDisp + 1));
+    colors_for_pca = [colors_for_pca;repmat(cmap,size(subdiv_index{class_split},1),1)];
+end
+
+colors_for_pca(colors_for_pca>1) = 1;
+colors_for_pca(colors_for_pca<0) = 0;
+
+% PCA
+[coeff,score] = pca(merged_data_for_pca);
+
+% PLots
+figure
+scatter3(score(:,1),score(:,2),score(:,3),3,colors_for_pca,'filled');
+xlabel('Component 1')
+ylabel('Component 2')
+zlabel('Component 3')
+
+end
+
+% -------------------------------------------------------------------------
+
+% Step 14: Outputs Number of Unique Animals Per Class
 
 for class_split = 1:length(subdiv_index)
 % Following Line Is Used to Display Animals In Each Class
