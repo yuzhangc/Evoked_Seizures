@@ -34,7 +34,12 @@ end
 % Extract Features Information and Names From Last Folder in Directory
 
 path_extract = strcat(directory,subFolders(length(subFolders)).name,'\');
+if headfixed == 1
 load(strcat(path_extract,'Normalized Features.mat'))
+else
+load(strcat(path_extract,'Raw Features.mat'))
+norm_features = features;
+end
 feature_names = fieldnames(norm_features);
 
 % -------------------------------------------------------------------------
