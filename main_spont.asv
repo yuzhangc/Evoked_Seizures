@@ -126,13 +126,16 @@ for folder_num = 1:length(subFolders)
         end
     end
 
-    % Set P Value and Testing Groups - See Below - Refer to calculate_seizure_corr
+    % Set ANOVA Channel & Groups - See Below - Refer to calculate_seizure_corr
     % 1 - Spontaneous Success vs Sponaneous Success
     % 2 - Spontaneous Success vs Evoked Success
     % 3 - Spontaneous Success vs Evoked Failed
     % 4 - Evoked Success vs Evoked Success
     % 5 - Evoked Success vs Evoked Failed
     % 6 - Evoked Failed vs Evoked Failed
+
+        % P Value and Groups - CHANGE GROUPS HERE
+    
     p_val = 0.05; grp1 = 1; grp2 = 2;
 
     for ch = 1:4
@@ -171,7 +174,7 @@ for folder_num = 1:length(subFolders)
 
     end
 
-    clear grp1_idx grp2_idx test_array h p p_sig
+    clear grp1 grp2 grp1_idx grp2_idx test_array h p p_sig p_val
 
     end
 
