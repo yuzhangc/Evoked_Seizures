@@ -112,8 +112,48 @@ end
 % Cross Correlation Across Seizures Raw Waveform
 
 for folder_num = 1:length(subFolders)
+
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
     [sz_corr, sz_lag, sz_grp] = calculate_seizure_corr(path_extract, [1:4], to_plot);
+
+    % Removes One Maximum Outlier
+    if strcmp(subFolders(folder_num).name, "EEG_02_2023_06_26_101_KA_THY_SST_ARCH")
+        good_idx = sz_corr{1} ~= max(sz_corr{1});
+        for ch = 1:length(sz_corr)
+        sz_corr{ch} = sz_corr{ch}(good_idx);
+        sz_lag{ch} = sz_lag{ch}(good_idx);
+        sz_grp{ch} = sz_grp{ch}(good_idx,:);
+        end
+    end
+
+    % Set ANOVA Channel
+    ch = 1;
+    spont_v_self = sz_grp{ch}(:,3) == 1;
+    spont_v_evoke = sz_grp{ch}(:,3) == 2;
+    
+    % Ttest Only if Both Normal
+    if kstest(sz_corr{ch}(spont_v_self)) & kstest(sz_corr{ch}(spont_v_evoke))
+    
+        test_array = NaN(max(sum(spont_v_self),sum(spont_v_evoke)),1);
+        test_array(1:sum(spont_v_self),1) = sz_corr{ch}(spont_v_self);
+        test_array(1:sum(spont_v_evoke),2) = sz_corr{ch}(spont_v_evoke);
+        [h, p] = ttest2(test_array(:,1), test_array(:,2), 'Vartype','unequal');
+        disp(strcat("Welch T Test Decision: ", num2str(h), ", P Value: ", num2str(p)));
+
+    % Kruskall Wallis For ANOVA NonParametric (Sample Size Matters)
+    % Mann Whitney Otherwise
+    else
+
+        test_array = NaN(max(sum(spont_v_self),sum(spont_v_evoke)),1);
+        test_array(1:sum(spont_v_self),1) = sz_corr{ch}(spont_v_self);
+        test_array(1:sum(spont_v_evoke),2) = sz_corr{ch}(spont_v_evoke);
+        p =  kruskalwallis(test_array);
+        disp(strcat("Kruskal Wallis: ", num2str(p)));
+        [p, h] = ranksum(test_array(:,1), test_array(:,2));
+        disp(strcat("Rank Sum Decision: ", num2str(h), ", P Value: ", num2str(p)));
+
+    end
+
 end
 
 %% Output Data To R
