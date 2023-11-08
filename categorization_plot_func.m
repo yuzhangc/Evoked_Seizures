@@ -940,6 +940,11 @@ xlabel('Component 1')
 ylabel('Component 2')
 zlabel('Component 3')
 
+else
+
+coeff = NaN;
+score = NaN;
+
 end
 
 % -------------------------------------------------------------------------

@@ -262,6 +262,7 @@ end
 
 % Unique Counts
 number_power = unique(sz_parameters(:,9));
+number_power = number_power(find(number_power~=-1));
 number_duration = unique(sz_parameters(:,12));
 number_duration = number_duration(find(number_duration~=-1));
 
