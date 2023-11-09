@@ -76,6 +76,23 @@ if feat_calc == 1
     end
 end
 
+%% Plots Individual Seizures
+
+folder_num = find({subFolders.name} == "EEG_01_2023_06_26_100_KA_THY_SST_CHR");
+
+% Diazepam Plots
+seizure = 60; time_idx = [8, 18; 25, 35; 55, 65]; filtered = 1; plot_duration = 65;
+path_extract = strcat(directory,subFolders(folder_num).name,'\');
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+seizure = 62;
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
+% Spontaneous Vs Evoked Plots
+seizure = 6; time_idx = [12, 22; 24, 34; 46, 56]; filtered = 1; plot_duration = 65;
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+seizure = 3; time_idx = [6, 16; 18, 28; 42, 52]; 
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
 %% Seizure Duration Calculations
 
 % This particular seizure model was trained on 2023.06.26 (Animal 100)

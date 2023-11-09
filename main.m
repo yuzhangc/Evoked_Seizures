@@ -86,6 +86,27 @@ if feat_calc == 1
     end
 end
 
+%% Plots Individual Seizures
+
+% Naive Evocation
+
+folder_num = find({subFolders.name} == "20230221_25_NA_PV_ENP");
+
+seizure = 21; time_idx = [9, 19; 26, 36; 46, 56]; filtered = 1; plot_duration = 55;
+path_extract = strcat(directory,subFolders(folder_num).name,'\');
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
+% Epileptic Pairs
+
+folder_num = find({subFolders.name} == "20221101_10_KA_THY");
+
+seizure = 14; time_idx = [16, 26; 28, 38; 40, 50]; filtered = 1; plot_duration = 55;
+path_extract = strcat(directory,subFolders(folder_num).name,'\');
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
+seizure = 24; time_idx = [16, 26; 28, 38; 47, 57];
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
 %% Seizure Duration Calculations and Thresholding
 
 % Loads Seizure Model
