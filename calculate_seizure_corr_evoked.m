@@ -462,6 +462,7 @@ for feature_number = 1:length(feature_list)
     if indv_plot
     
     anova1(an_all_feat{feature_number})
+    boxplot(an_all_feat{feature_number},'Symbol','')
     xticks(1:3);
     xtickoptions = {'Vs Same Animal Evoked','Vs Other Animals Evoked','Vs Failed'};
     xticklabels(xtickoptions);
@@ -521,6 +522,7 @@ else
 for feature_number = 1:length(feature_list)
     
     a = anova1(ch_all_feat{feature_number});
+    boxplot(ch_all_feat{feature_number},'Symbol','')
     xticks(1:3);
     xtickoptions = {'Vs Same Evoked Category','Vs Other Evoked Seizures','Vs Failed Evocations'};
     xticklabels(xtickoptions);

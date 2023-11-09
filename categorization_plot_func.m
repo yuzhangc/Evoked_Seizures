@@ -647,7 +647,7 @@ for cnt = 1:length(subdiv_index)
                 replacement; replacement; mean_post_ictal];
         % Spontaneous
         elseif merged_sz_parameters(subdiv_index{cnt}(seizure_idx),8) == -1
-            final_divided = [mean_pre_stim; zeros(size(mean_pre_stim)); mean_first_third; ...
+            final_divided = [mean_pre_stim; nan(size(mean_pre_stim)); mean_first_third; ...
             mean_second_third; mean_final_third; mean_post_ictal];
         % Regular
         else
@@ -807,6 +807,10 @@ for ch = 1:4
         
         % Plots All Classes
         num_on_x = 0;
+        
+        % Y Limits
+        ylim_min = 0;
+        ylim_max = 0;
 
         for class_split = 1:size(final_feature_output,2)
             
@@ -823,7 +827,7 @@ for ch = 1:4
             % Define X Axes and Appropriate Offset
             xaxis = [1:length(mean(indv_data))];
             if offset
-                offsetval = - 1/size(final_feature_output,2)*(size(final_feature_output,2)-1) + class_split/size(final_feature_output,2);
+                offsetval = - 0.5/(size(final_feature_output,2) + 2) * (size(final_feature_output,2) + 1) + class_split/(size(final_feature_output,2) + 2);
             else
                 offsetval = 0;
             end
@@ -834,18 +838,27 @@ for ch = 1:4
                 plot_info = positioning(class_split);
                 
                 for row_cnt = 1:size(indv_data,1)
-                    scatter(xaxis,indv_data(row_cnt,:),"MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:));
+                    scatter(xaxis + (rand(size(xaxis)) - 0.5)./(size(final_feature_output,2) + 2),...
+                        indv_data(row_cnt,:),0.5,"MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:));
                 end
                 
             else
-                plot_info = strcat(":",positioning(class_split));     
+                plot_info = strcat(":",positioning(class_split)); % : for dotted line     
             end
             
             % Plots Group Data
             
             if std_cnt == 0
             
-            boxplot(indv_data,'Positions',xaxis,'Widths',0.5/size(final_feature_output,2),'Colors',Colorset_plot(class_split,:))
+            boxplot(indv_data,'Positions',xaxis,'Widths',0.5/(size(final_feature_output,2) + 2),'Colors',Colorset_plot(class_split,:),'Symbol','') % No Outlier Symbols
+            
+            % Fixes Y Lim For Box Plots
+            if min(indv_data,[],"all") < ylim_min
+                ylim_min = min(indv_data,[],"all");
+            end
+            if max(indv_data,[],"all") > ylim_max
+                ylim_max = max(indv_data,[],"all");
+            end
             
             else 
 
@@ -868,6 +881,12 @@ for ch = 1:4
         xticks(1:num_on_x);
         xticklabels({'Pre-Seizure','Stimulation','Sz - Beginning','Sz - Middle','Sz - End','Post Ictal'});
         xtickangle(45);
+        
+        % Y Limits on Box Plot Only
+        if ylim_max ~= ylim_min
+        ylim([ylim_min,ylim_max]);
+        end
+        xlim([0,num_on_x+1]);
         
         % Titling
         if idx_feature >= bp_index && idx_feature <= bp_index + size(bp_filters,1) - 1
