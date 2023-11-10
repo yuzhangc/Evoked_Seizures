@@ -202,7 +202,7 @@ end
 
 hold on
 scatter(xaxis1, yaxis1, 'filled',"MarkerFaceColor", [1 0 0])
-scatter(xaxis2, yaxis2, 'filled',"MarkerFaceColor", [0 0 1])
+scatter(xaxis2, yaxis2, 'filled',"MarkerFaceColor", [0 0.4470 0.7410])
 scatter(xaxis3, yaxis3, 'filled',"MarkerFaceColor",[0.9290 0.6940 0.1250])
 scatter(xaxis4, yaxis4,'filled',"MarkerFaceColor",[0.9290 0.6940 0.1250])
 hold off
@@ -270,7 +270,7 @@ xaxis2 = ones(length(avg_above_thresh_naive),1) .* 3 - 0.1 + 0.2*rand(length(avg
 
 hold on
 scatter(xaxis1, avg_above_thresh_epileptic, 'filled',"MarkerFaceColor", [1 0 0]);
-scatter(xaxis2, avg_above_thresh_naive, 'filled',"MarkerFaceColor", [0 0 1]);
+scatter(xaxis2, avg_above_thresh_naive, 'filled',"MarkerFaceColor", [0 0.4470 0.7410]);
 
 % Errorbar
 
