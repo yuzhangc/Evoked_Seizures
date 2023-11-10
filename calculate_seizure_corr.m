@@ -261,6 +261,7 @@ if to_plot
 
     % Anova Test For Correlation
     [p, tbl, stats] = anova1(sz_corr{cnt}, sz_grp{cnt}(:,3));
+    boxplot(sz_corr{cnt},sz_grp{cnt}(:,3),'Symbol','')
 
     % Saves ANOVA Results
     txt_name = strcat("Figures\Correlation\ANOVA Cross Correlation Channel ", num2str(channels(cnt)));

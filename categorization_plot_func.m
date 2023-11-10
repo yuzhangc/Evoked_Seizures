@@ -101,7 +101,7 @@ excl_short = 1;
 end
 
 if excl_short == 1
-    short_duration = input('\nHow many seconds is considered a short/non-evoked event? Type in a number (e.g. 15): ');
+    short_duration = input('\nHow many seconds is considered a short/non-evoked event? Type in a number (e.g. 15 for head fixed, 10 for freely moving): ');
 else
     short_duration = -1;
 end
@@ -770,6 +770,22 @@ question = strcat("\nShould different classes be offset for clarity? ",...
     "\nEnter a number: ");
 offset = input(question);
 
+% Line For NOT Boxplots
+
+if std_cnt ~= 0
+question = strcat("\nShould there be a line connecting the two points? ",...
+    '\n(1) - Yes', ...
+    '\n(0) - No', ...
+    "\nEnter a number: ");
+yesline = input(question);
+
+if yesline
+    lineornot = ":";
+else
+    lineornot = "";
+end
+end
+
 for ch = 1:4
     
     figure;
@@ -843,7 +859,7 @@ for ch = 1:4
                 end
                 
             else
-                plot_info = strcat(":",positioning(class_split)); % : for dotted line     
+                plot_info = strcat(lineornot,positioning(class_split)); % : for dotted line     
             end
             
             % Plots Group Data
