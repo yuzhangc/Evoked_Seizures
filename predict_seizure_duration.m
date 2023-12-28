@@ -1,4 +1,4 @@
-function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders)
+function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders, max_trial)
 
 % Uses a pre-defined seizure model to identify seizure length.
 % Concactenates features
@@ -276,7 +276,7 @@ min_thresh.duration = 1000;
 
 for cnt = 1:length(number_power)
     
-    trials = find(sz_parameters(:,9) == number_power(cnt) & sz_parameters(:,16) == 0 & sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0);
+    trials = find(sz_parameters(:,9) == number_power(cnt) & sz_parameters(:,16) == 0 & sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0 & sz_parameters(:,2) <= max_trial);
     
     % Ignore One/Two Offs & Higher Powers if Threshold Already Determined
     if length(trials) > 2 && number_power(cnt) < min_thresh.power
@@ -295,7 +295,7 @@ end
 
 for cnt = 1:length(number_duration)
     
-    trials = find(sz_parameters(:,12) == number_duration(cnt) & sz_parameters(:,16) == 0 & sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0);
+    trials = find(sz_parameters(:,12) == number_duration(cnt) & sz_parameters(:,16) == 0 & sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0 & sz_parameters(:,2) <= max_trial);
     
     % Ignore one/two offs & higher durations if threshold already determined
     if length(trials) > 2 && number_duration(cnt) < min_thresh.duration
@@ -335,10 +335,10 @@ if min_thresh.power ~= -1 && min_thresh.duration ~= -1
     
     min_thresh.seizures = find(sz_parameters(:,12) >= min_thresh.duration & ...
         sz_parameters(:,9) >= min_thresh.power & sz_parameters(:,16) == 0 &...
-        sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0);
+        sz_parameters(:,17) == 0 & sz_parameters(:,18) == 0 & sz_parameters(:,2) <= max_trial);
     min_thresh.avg_success = mean(sz_parameters(min_thresh.seizures,5));
     min_thresh.diaz_seizures = find(sz_parameters(:,12) >= min_thresh.duration & ...
-        sz_parameters(:,9) >= min_thresh.power & sz_parameters(:,16) == 1);
+        sz_parameters(:,9) >= min_thresh.power & sz_parameters(:,16) == 1 & sz_parameters(:,2) <= max_trial);
     if isempty(min_thresh.diaz_seizures)
         min_thresh.diaz_success = -1;
     else
@@ -348,12 +348,12 @@ if min_thresh.power ~= -1 && min_thresh.duration ~= -1
 else
     
     min_thresh.seizures = [];
-    min_thresh.avg_success = mean(sz_parameters(find(sz_parameters(:,16) == 0),5));
+    min_thresh.avg_success = mean(sz_parameters(find(sz_parameters(:,16) == 0 & sz_parameters(:,2) <= max_trial),5));
     min_thresh.diaz_seizures = find(sz_parameters(:,16) == 1);
     if isempty(min_thresh.diaz_seizures)
         min_thresh.diaz_success = -1;
     else
-        min_thresh.diaz_success = mean(sz_parameters(find(sz_parameters(:,16) == 1),5));
+        min_thresh.diaz_success = mean(sz_parameters(find(sz_parameters(:,16) == 1 & sz_parameters(:,2) <= max_trial),5));
     end
     
 end

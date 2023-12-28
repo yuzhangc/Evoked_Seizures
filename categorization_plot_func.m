@@ -183,12 +183,12 @@ displays_text_11 = ['\nFor PCA Plot, Enter How Many Seconds You Want to Plot (0 
 pca_dur = input(displays_text_11);
 
 displays_text_12 = ['\nDo you want to limit the analysis to certain trials?', ...
-'\nEnter a maximum trial number: '];
+'\nEnter a maximum trial number (e.g. 20). Enter 100 for all: '];
 
 max_trial = input(displays_text_12);
 
 displays_text_13 = ['\nDo you want to limit the analysis to certain groupings of trials?', ...
-'\nEnter number of animals for each group: '];
+'\nEnter number of animals for each group (e.g. 5). Enter 100 for all: '];
 
 max_num = input(displays_text_13);
 
@@ -510,8 +510,9 @@ for cnt = 1:length(subdiv_index)
     % Determine Unique Animals
 
     an_unique = unique(merged_sz_parameters(subdiv_index{cnt},1));
-    if an_unique > max_num
+    if length(an_unique) > max_num
         an_selected = an_unique(randperm(length(an_unique),max_num));
+        % an_selected = [23, 31, 32, 34, 36]; % Minimizes Diazepam Re-Do
     else
         an_selected = an_unique;
     end
@@ -920,9 +921,11 @@ for ch = 1:4
             % Fixes Y Lim For Box Plots
             if min(indv_data,[],"all") < ylim_min
                 ylim_min = min(indv_data,[],"all");
+                % ylim_min = -3;
             end
             if max(indv_data,[],"all") > ylim_max
                 ylim_max = max(indv_data,[],"all");
+                % ylim_max = 6;
             end
             
             else 

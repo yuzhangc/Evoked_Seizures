@@ -242,6 +242,14 @@ load('seizure_model.mat')
 
 % Loads 'To Fix' File For Manual Seizure Duration Fix (~15% of Trials)
 
+% Potential For Limiting Trials
+
+displays_text_12 = ['\nDo you want to limit the analysis to certain trials?', ...
+'\nEnter a maximum trial number (e.g. 20). Enter 100 for all: '];
+
+max_trial = input(displays_text_12);
+
+
 if to_fix
 to_fix_chart = readmatrix(strcat(directory,"To Fix.csv"));
 else
@@ -260,7 +268,7 @@ merged_sz_parameters = [];
 for folder_num = 1:length(subFolders)
     
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
-    [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders);
+    [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders, max_trial);
     merged_output_array = [merged_output_array, output_array];
     merged_sz_parameters = [merged_sz_parameters; sz_parameters];
     seizure_duration_list(folder_num) = {seizure_duration};
