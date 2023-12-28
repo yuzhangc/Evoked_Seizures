@@ -28,7 +28,7 @@ csv_file_list <- list.files(path = subFolders[folder_num], pattern = "Extracted_
            full.names = FALSE, ignore.case = FALSE)
 
 # Target Channel
-target_ch <- 4
+target_ch <- 2
 
 # Reads CSV into Dataframe
 
@@ -77,7 +77,7 @@ all_data <- rbind(all_data,feature_data)
 # Remove Short Events - INPUT 15 SEC FOR HEAD FIXED AND 10 FOR FREELY MOVING
 
 min_time <- readline(prompt="Do you want to exclude short events?\nIf so, type in the second duration of events to exclude.\nAny events smaller than the duration will be excluded: ")
-10
+15
 kept_indices <- which(all_data$Evoked.Activity.Duration >= as.numeric(min_time))
 all_data <- all_data[kept_indices,]
 
@@ -93,6 +93,28 @@ all_data <- all_data[kept_indices,]
 drugged_indices <- which(all_data$Levetiracetam == 1 | all_data$Phenytoin == 1 | all_data$Diazepam == 1)
 kept_indices <- which(all_data$Levetiracetam == 0 & all_data$Phenytoin == 0 & all_data$Diazepam == 0)
 all_data <- all_data[kept_indices,]
+
+# ------------------------------------------------------------
+
+# Remove Recordings Above Certain Hours - INPUT 20 (5 HOURS)
+
+max_time <- readline(prompt="What is maximum trial number to include?\nIf so, type in the smallest animal to exclude.\nAny events smaller than or equal to it will be excluded. \nCommon Ones: 12 = 2022/11/07, 22 = 2023/01/16: ")
+20
+kept_indices <- which(all_data$Trial.Number <= as.integer(min_anim))
+all_data <- all_data[kept_indices,]
+
+# Permutations of Animals - This is to test if smaller clusters of animals have same significance as in larger clusters.
+
+class_1 <- unique(all_data$Animal [which(all_data$Epileptic == TRUE)])
+class_2 <- unique(all_data$Animal [which(all_data$Epileptic == FALSE)])
+
+if (length(class_1) > 5) class_1 <- class_1[sample(length(class_1),5)]
+if (length(class_2) > 5) class_2 <- class_2[sample(length(class_2),5)]
+
+kept_indices = which (all_data$Animal %in% c(class_1, class_2));
+all_data <- all_data[kept_indices,]
+
+# ------------------------------------------------------------
 
 # Separates Second Blue Stimulation Trials From Single Stimulation (Evocation Only) Trials
 
@@ -119,13 +141,13 @@ sing_data = all_data[single_stim_indices,]
 
 # Step 4: Perform LME Models On Epileptic Vs Naive
 
-summary(lmer(Ch.1.Area ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Skew ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Line.Length ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.AEntropy ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Area ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Skew ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Line.Length ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Band.Power.1.Hz.to.30Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Band.Power.30.Hz.to.300Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.2.AEntropy ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
 
 # Summaries For Measures Other Than 'Epileptic'. For 'Epileptic', See PowerPoint.
 

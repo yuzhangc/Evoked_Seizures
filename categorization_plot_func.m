@@ -182,6 +182,16 @@ displays_text_11 = ['\nFor PCA Plot, Enter How Many Seconds You Want to Plot (0 
 
 pca_dur = input(displays_text_11);
 
+displays_text_12 = ['\nDo you want to limit the analysis to certain trials?', ...
+'\nEnter a maximum trial number: '];
+
+max_trial = input(displays_text_12);
+
+displays_text_13 = ['\nDo you want to limit the analysis to certain groupings of trials?', ...
+'\nEnter number of animals for each group: '];
+
+max_num = input(displays_text_13);
+
 clear displays_text displays_text_2 displays_text_3 displays_text_4 displays_text_5 displays_text_6 displays_text_7
 
 % -------------------------------------------------------------------------
@@ -477,7 +487,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 7: Exclude Early Recordings (All < Animal 22)
+% Step 7A: Exclude Early Recordings (All < Animal 22)
 
 if no_to_early
     
@@ -492,7 +502,37 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 8: Exclude Diazepam (and Other Drugs)
+% Step 7B: Permutations of Animals
+% This is really used only for epileptic vs naive.
+
+for cnt = 1:length(subdiv_index)
+
+    % Determine Unique Animals
+
+    an_unique = unique(merged_sz_parameters(subdiv_index{cnt},1));
+    if an_unique > max_num
+        an_selected = an_unique(randperm(length(an_unique),max_num));
+    else
+        an_selected = an_unique;
+    end
+
+    % Create Included Indices
+
+    included_indices = [];
+
+    for an = 1:length(an_selected)
+        new_indices = find(merged_sz_parameters(:,1) == an_selected(an));
+        included_indices = [included_indices;new_indices];
+    end
+
+    % Replace
+    subdiv_index{cnt} = included_indices(ismember(included_indices,subdiv_index{cnt}));
+
+end
+
+% -------------------------------------------------------------------------
+
+% Step 8A: Exclude Diazepam (and Other Drugs)
 
 if excl_diaz
     
@@ -503,6 +543,15 @@ if excl_diaz
     anova_excluded_indices = union(anova_excluded_indices, excluded_indices);
     clear excluded_indices
     
+end
+
+% -------------------------------------------------------------------------
+
+% Step 8B: Exclude Trial Number
+
+excluded_indices = find(merged_sz_parameters(:,2) > max_trial);
+for cnt = 1:length(subdiv_index)
+    subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
 end
 
 % -------------------------------------------------------------------------
@@ -858,7 +907,7 @@ for ch = 1:4
                         indv_data(row_cnt,:),0.5,"MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:));
                 end
                 
-            else
+            elseif std_cnt ~= 0
                 plot_info = strcat(lineornot,positioning(class_split)); % : for dotted line     
             end
             
