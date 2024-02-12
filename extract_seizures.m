@@ -121,6 +121,9 @@ for count = 1:length(filelist)
         " Vis. Seizure: ",num2str(sz_parameters(count,5)));
     rational_check = [sz_parameters(count,10),sz_parameters(count,11),sz_parameters(count,13),sz_parameters(count,14),sz_parameters(count,15)];
     if ismember(-1,rational_check) && mean(rational_check == -1) == 1
+        if sz_parameters(count,1) > 99
+            plot_title = strcat(plot_title, " | Day ", num2str(sz_parameters(count,20)), " | Seizure Scale ", num2str(sz_parameters(count,21)));
+        end
     elseif ismember(-1,rational_check)
         figure_title = strcat(figure_title,"ERROR");
         plot_title = strcat(plot_title," ERROR");
@@ -134,6 +137,11 @@ for count = 1:length(filelist)
             condition_txt = "After";
         end
         plot_title = strcat(plot_title, " | Second Stim ", num2str(sz_parameters(count,15)), " Hz ", num2str(sz_parameters(count,10))," nm ", condition_txt);
+        
+        if sz_parameters(count,1) > 99
+            plot_title = strcat(plot_title, " | Day ", num2str(sz_parameters(count,20)), " | Seizure Scale ", num2str(sz_parameters(count,21)));
+        end
+        
         figure_title = strcat(figure_title,"_AND_",num2str(sz_parameters(count,10)),"STIM_POW",num2str(sz_parameters(count,11)),"mW_",...
             num2str(sz_parameters(count,14)),"sec_",num2str(sz_parameters(count,15)),"Hz_STARTING_",num2str(abs(sz_parameters(count,13))),...
             "sec_",condition_txt);

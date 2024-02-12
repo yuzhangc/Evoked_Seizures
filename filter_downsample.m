@@ -140,6 +140,9 @@ plot_title = strcat("Mouse: ",num2str(sz_parameters(sz_cnt,1))," Trial: ",num2st
     " Vis. Seizure: ",num2str(sz_parameters(sz_cnt,5)));
 rational_check = [sz_parameters(sz_cnt,10),sz_parameters(sz_cnt,11),sz_parameters(sz_cnt,13),sz_parameters(sz_cnt,14),sz_parameters(sz_cnt,15)];
 if ismember(-1,rational_check) && mean(rational_check == -1) == 1
+    if sz_parameters(sz_cnt,1) > 99
+        plot_title = strcat(plot_title, " | Day ", num2str(sz_parameters(sz_cnt,20)), " | Seizure Scale ", num2str(sz_parameters(sz_cnt,21)));
+    end
 elseif ismember(-1,rational_check)
     figure_title = strcat(figure_title,"ERROR");
     plot_title = strcat(plot_title," ERROR");
@@ -153,6 +156,11 @@ else
         condition_txt = "After";
     end
     plot_title = strcat(plot_title, " | Second Stim ", num2str(sz_parameters(sz_cnt,15)), " Hz ", num2str(sz_parameters(sz_cnt,10))," nm ", condition_txt);
+    
+    if sz_parameters(sz_cnt,1) > 99
+        plot_title = strcat(plot_title, " | Day ", num2str(sz_parameters(sz_cnt,20)), " | Seizure Scale ", num2str(sz_parameters(sz_cnt,21)));
+    end
+        
     figure_title = strcat(figure_title,"_AND_",num2str(sz_parameters(sz_cnt,10)),"STIM_POW",num2str(sz_parameters(sz_cnt,11)),"mW_",...
         num2str(sz_parameters(sz_cnt,14)),"sec_",num2str(sz_parameters(sz_cnt,15)),"Hz_STARTING_",num2str(abs(sz_parameters(sz_cnt,13))),...
         "sec_",condition_txt);
