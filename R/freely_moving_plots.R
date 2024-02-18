@@ -3,10 +3,11 @@
 library(readxl)
 library(ggplot2)
 library(ggbreak)
+library(ggpubr)
 
 # Change to local folder directory
 
-directory <- "E:/"
+directory <- "D:/"
 
 # Read Trial Master Spreadsheet
 
@@ -141,6 +142,7 @@ for (animal in unique(trial_info$Animal)){
        
        drug_free_trials <- specific_trials[which(specific_trials$Diazepam == 0 & specific_trials$Levetiracetam == 0 & specific_trials$Phenytoin == 0),]
        electrographic_sz_cnt <- sum(drug_free_trials$`Seizure Or Not`)
+       true_behavioral_success <- length(which(drug_free_trials$`Racine` > 0))/drug_free_total * 100
        electrographic_success <- electrographic_sz_cnt/drug_free_total * 100
        
        # Percentage Electrographic Seizures That Are Also Behavioral
@@ -174,7 +176,7 @@ for (animal in unique(trial_info$Animal)){
       if (lev_elec_sz_cnt > 0) {
         
       lev_behav_success <- length(which(lev_trials$`Racine` > 0 & lev_trials$`Seizure Or Not` == 1))/
-        lev_elec_sz_cnt * 100
+        lev_total * 100
         
       } else {
       
@@ -200,7 +202,7 @@ for (animal in unique(trial_info$Animal)){
       if (diaz_elec_sz_cnt > 0) {
       
       diaz_behav_success <- sum(diaz_trials$`Racine` > 0 & diaz_trials$`Seizure Or Not` == 1)/
-        diaz_elec_sz_cnt * 100
+        diaz_total * 100
       
       } else {
         
@@ -217,12 +219,13 @@ for (animal in unique(trial_info$Animal)){
     
     # Incorporate Into Dataframe
     
-    temp_data <- data.frame(animal,day,drug_free_total,electrographic_success,behavioral_success,
+    temp_data <- data.frame(animal,day,drug_free_total,electrographic_success,behavioral_success, true_behavioral_success,
             lev_total,lev_elec_success,lev_behav_success,diaz_total, diaz_elec_success, diaz_behav_success,
             trial_info$Epileptic[which(trial_info$Animal == animal)][1])
-    names(temp_data) <- c("Animal","Day","Drug Free Evocations","Success Rate (E) - Drug Free","Behavioral Manifestation of Electrographic Seizures - Drug Free",
-       "Levetiracetam Evocations","Success Rate (E) - Levetiracetam","Behavioral Manifestation of Electrographic Seizures - Levetiracetam",
-       "Diazepam Evocations","Success Rate (E) - Diazepam","Behavioral Manifestation of Electrographic Seizures - Diazepam", "Epileptic")        
+    names(temp_data) <- c("Animal","Day","Drug Free Evocations","Success Rate (E) - Drug Free","Behavioral Manifestation of Electrographic Seizures - Drug Free", 
+                          "Behavioral Manifestation of All Seizures - Drug Free","Levetiracetam Evocations","Success Rate (E) - Levetiracetam",
+                          "Behavioral Manifestation of All Seizures - Levetiracetam", "Diazepam Evocations",
+                          "Success Rate (E) - Diazepam","Behavioral Manifestation of All Seizures - Diazepam", "Epileptic")        
     
     evk_sz_data <- rbind(evk_sz_data, temp_data)
     
@@ -230,7 +233,7 @@ for (animal in unique(trial_info$Animal)){
     
     rm(specific_trials, diaz_trials, lev_trials, drug_free_trials, temp_data,diaz_behav_success,diaz_elec_success,
        lev_behav_success,lev_elec_success,diaz_elec_sz_cnt,lev_elec_sz_cnt,electrographic_sz_cnt,behavioral_success,
-       drug_free_total, lev_total, diaz_total)
+       drug_free_total, lev_total, diaz_total,true_behavioral_success)
     
     }
 
@@ -319,8 +322,18 @@ evoked_sz_rate_beh +
 # -----------------------------------------------------------------------------
 
 # Step 9: Organize Data For Drug
+# Note: Behavior For Drug Efficacy is Over TOTAL Stimulations, Not Just Electrographic
 
-evk_elec_drug_sz_plots <- data.frame(no_drug_elec)
+# Sets Up Variables
+
+no_drug_elec_d = c()
+diaz_elec = c()
+no_drug_behav_d = c()
+diaz_behav = c()
+no_drug_elec_l = c()
+lev_elec = c()
+no_drug_behav_l = c()
+lev_behav = c()
 
 for (animal in unique(evk_sz_data$Animal)) {
 
@@ -335,8 +348,73 @@ for (animal in unique(evk_sz_data$Animal)) {
     
     for (day in unique(diaz_drug_days)) {
       
-      evk_elec_drug_sz_plots$no_drug_elec <- rbind(evk_elec_drug_sz_plots$no_drug_elec,
-         evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day)]$`Success Rate(E) - Drug Free`)
+      # Appends Control Trial Info
+      
+      if (is.null(no_drug_elec_d)) {
+        
+        no_drug_elec_d[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`
+        no_drug_behav_d[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Drug Free`
+        
+      } else {
+      
+        no_drug_elec_d <- append(no_drug_elec_d, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`)
+        no_drug_behav_d <- append(no_drug_behav_d, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Drug Free`)
+        
+      }
+      
+      # Appends Diazepam Trial Info
+      
+      if (is.null(diaz_elec)) {
+        
+        diaz_elec[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Diazepam`
+        diaz_behav[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Diazepam`
+        
+      } else {
+        
+        diaz_elec <- append(diaz_elec, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Diazepam`)
+        diaz_behav <- append(diaz_behav,evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Diazepam`)
+        
+      }
+    
+      }
+    
+  }
+  
+  # Levetiracetam
+  
+  if (length(lev_drug_days) > 0) {
+    
+    # Extract Success Rate For Non-Drug and Drug Trials on Drug Day
+    
+    for (day in unique(lev_drug_days)) {
+      
+      # Appends Control Trial Info
+      
+      if (is.null(no_drug_elec_l)) {
+        
+        no_drug_elec_l[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`
+        no_drug_behav_l[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Drug Free`
+        
+      } else {
+        
+        no_drug_elec_l <- append(no_drug_elec_l, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`)
+        no_drug_behav_l <- append(no_drug_behav_l, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Drug Free`)
+        
+      }
+      
+      # Appends Levetiracetam Trial Info
+      
+      if (is.null(lev_elec)) {
+        
+        lev_elec[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Levetiracetam`
+        lev_behav[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Levetiracetam`
+        
+      } else {
+        
+        lev_elec <- append(lev_elec, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Levetiracetam`)
+        lev_behav <- append(lev_behav,evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Levetiracetam`)
+        
+      }
       
     }
     
@@ -344,22 +422,30 @@ for (animal in unique(evk_sz_data$Animal)) {
   
 }
 
-for (day in unique(evk_sz_data$Day)){
-  
-  # Evocation Segregation
-  
-  unique_elec_counts <- unique(evk_sz_data$`Success Rate (E) - Drug Free`[which(evk_sz_data$Day == day)])
-  
-  for(success_rate_electrographic in unique_elec_counts){
-    
-    counts_ep = length(which(evk_sz_data$Day == day & evk_sz_data$`Success Rate (E) - Drug Free` == success_rate_electrographic & evk_sz_data$Epileptic == 1))
-    counts_nv = length(which(evk_sz_data$Day == day & evk_sz_data$`Success Rate (E) - Drug Free` == success_rate_electrographic & evk_sz_data$Epileptic == 0))
-    evk_elec_diaz_sz_plots <- rbind(evk_elec_diaz_sz_plots, data.frame(day,success_rate_electrographic,counts_ep,counts_nv))
-    
-  }
-  
-}
+# Compile Into Dataframe
 
-evoked_sz_rate_lev <- ggplot()
-evoked_sz_rate_lev +
-  
+compiled_success <- c(no_drug_elec_d, diaz_elec, no_drug_behav_d , diaz_behav,
+                      no_drug_elec_l, lev_elec, no_drug_behav_l, lev_behav)
+compiled_names <- c(rep("WT-D-E",length(no_drug_elec_d)),rep("DZ-E",length(diaz_elec)),
+                    rep("WT-D-B",length(no_drug_behav_d)),rep("DZ-B",length(diaz_behav)),
+                    rep("WT-L-E",length(no_drug_elec_l)),rep("LV-E",length(lev_elec)),
+                    rep("WT-L-B",length(no_drug_behav_l)),rep("LV-B",length(lev_behav)))
+conditions <- c(rep("Control",length(no_drug_elec_d)),rep("Diazepam",length(diaz_elec)),
+               rep("Control",length(no_drug_behav_d)),rep("Diazepam",length(diaz_behav)),
+               rep("Control",length(no_drug_elec_l)),rep("Levetiracetam",length(lev_elec)),
+               rep("Control",length(no_drug_behav_l)),rep("Levetiracetam",length(lev_behav)))
+
+drug_test_plot <- data.frame(compiled_names,compiled_success, conditions)
+names(drug_test_plot) <- c("Condition","Success Rate","Control Or Not")
+
+drug_comparison <- ggplot()
+drug_comparison +
+  # Box Plot For Data
+  ggboxplot(drug_test_plot,x = "Condition",y = "Success Rate",add = "dotplot",  palette = c("black", "forestgreen", "purple2"),
+            color = "Control Or Not")
+
+# Clear Workspace
+
+rm(lev_behav,lev_elec,no_drug_behav_d,no_drug_behav_l,no_drug_elec_d,no_drug_elec_l,diaz_behav,diaz_elec,
+   diaz_drug_days,lev_drug_days,success_rate_behavior,success_rate_electrographic,electrographic_success, animal,
+   counts_ep, counts_nv, day, unique_elec_counts, compiled_names, compiled_success, conditions)
