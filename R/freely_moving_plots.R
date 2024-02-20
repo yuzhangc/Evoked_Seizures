@@ -7,7 +7,7 @@ library(ggpubr)
 
 # Change to local folder directory
 
-directory <- "D:/"
+directory <- "E:/"
 
 # Read Trial Master Spreadsheet
 

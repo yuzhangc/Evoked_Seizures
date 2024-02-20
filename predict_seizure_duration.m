@@ -137,7 +137,9 @@ for sz_cnt = 1:size(sz_parameters,1)
             non_sz_class = 1;
         end
         
-        while (k_means_pred(sz_pos) == sz_classes_2 || k_means_pred(sz_pos) == sz_classes_1) || countdown < countdown_lim
+        final_end = false;
+        
+        while ((k_means_pred(sz_pos) == sz_classes_2 || k_means_pred(sz_pos) == sz_classes_1) || countdown < countdown_lim) && not(final_end)
             
             % Keeps on Moving Forward if Still Seizing
             if k_means_pred(sz_pos) ~= non_sz_class
@@ -149,9 +151,10 @@ for sz_cnt = 1:size(sz_parameters,1)
                 countdown = countdown + 1;
             end
             
-            % Moves Up One Window, Unless at End
+            % Moves Up One Window, Unless at End, then Break
             if sz_pos == size(norm_features.(feature_names{end}){sz_cnt},1)
             countdown = countdown_lim;
+            final_end = true;
             else
             sz_pos = sz_pos + 1;
             end

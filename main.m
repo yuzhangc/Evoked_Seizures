@@ -1,10 +1,21 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'G:\Clone of ORG_YZ 20231006\';
+directory = 'E:\';
+% Freely Moving Or Not
+freely_moving = 1;
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
+
+% Select Folders
+if not(freely_moving)
+% For Head Fixed
 real_folder_st = find(ismember({subFolders.name},'00000000 DO NOT PROCESS')); real_folder_end = find(ismember({subFolders.name},'99999999 END'));
+else
+% For Freely Moving
+real_folder_st = find(ismember({subFolders.name},'99999999 END')); real_folder_end = find(ismember({subFolders.name},'EEG_END'));
+end
+
 subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
 clear complete_list dirFlags real_folder_st real_folder_end;
 
@@ -115,6 +126,12 @@ plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 % Training Function - fitcknn(X,Y) where X is merged temp_output_array and
 % Y is kmeans(X,3)
 
+if not(freely_moving)
+    load('seizure_model.mat')
+else
+    load('seizure_model_spont.mat')
+end
+
 % load('seizure_model_net.mat')
 % countdown_sec = 1; % See Countdown Sec Vs Accuracy Table FOR ALL
 %   0.0000    0.6433  (within 5 secs abs value)
@@ -174,7 +191,6 @@ plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 % 4.5000    0.3845
 % 5.0000    0.3723
 
-load('seizure_model.mat')
 % countdown_sec = 5; % See Countdown Sec Vs Accuracy Table FOR ALL
 %     1.0000    0.7640  (within 5secs abs value)
 %     1.2500    0.7920
@@ -240,15 +256,14 @@ load('seizure_model.mat')
 % 4.7500    0.8495
 % 5.0000    0.8495
 
-% Loads 'To Fix' File For Manual Seizure Duration Fix (~15% of Trials)
-
 % Potential For Limiting Trials
 
 displays_text_12 = ['\nDo you want to limit the analysis to certain trials?', ...
-'\nEnter a maximum trial number (e.g. 20). Enter 100 for all: '];
+'\nEnter a maximum trial number (e.g. 20). Enter 200 for all: '];
 
 max_trial = input(displays_text_12);
 
+% Loads 'To Fix' File For Manual Seizure Duration Fix (~15% of Trials)
 
 if to_fix
 to_fix_chart = readmatrix(strcat(directory,"To Fix.csv"));
