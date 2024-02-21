@@ -4,6 +4,8 @@ library(readxl)
 library(ggplot2)
 library(ggbreak)
 library(ggpubr)
+library(tidyverse)
+library(rstatix)
 
 # Change to local folder directory
 
@@ -282,6 +284,11 @@ for (day in unique(evk_sz_data$Day)){
   }
   
 }
+
+# Pairwise T Test For Behavioral Seizure to Epileptic
+
+print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
 
 # -----------------------------------------------------------------------------
 

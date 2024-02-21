@@ -4,6 +4,8 @@ clear all; close all; clc;
 directory = 'E:\';
 % Freely Moving Or Not
 freely_moving = 1;
+% Manual Seizure Verification
+seizure_input = 1;
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
 
@@ -265,10 +267,10 @@ max_trial = input(displays_text_12);
 
 % Loads 'To Fix' File For Manual Seizure Duration Fix (~15% of Trials)
 
-if to_fix
+if to_fix & seizure_input ~= 1
 to_fix_chart = readmatrix(strcat(directory,"To Fix.csv"));
 else
-to_fix_chart = [-1 -1 -1];
+to_fix_chart = [-1 -1 -1 -1 -1 -1];
 end
 
 % -------------------------------------------------------------------------
@@ -283,12 +285,22 @@ merged_sz_parameters = [];
 for folder_num = 1:length(subFolders)
     
     path_extract = strcat(directory,subFolders(folder_num).name,'\');
-    [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders, max_trial);
+    if seizure_input ~= 1
+    [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders, max_trial,seizure_input);
+    else
+    [seizure_duration,min_thresh,output_array,sz_parameters,to_fix_chart] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders, max_trial,seizure_input);    
+    end
     merged_output_array = [merged_output_array, output_array];
     merged_sz_parameters = [merged_sz_parameters; sz_parameters];
     seizure_duration_list(folder_num) = {seizure_duration};
     min_thresh_list(folder_num) = min_thresh;
 
+end
+
+% Writes Seizure List
+
+if seizure_input
+    writematrix(to_fix_chart(2:end,:), strcat(directory,"To Fix.csv"))
 end
 
 % Perform Plots

@@ -1,4 +1,4 @@
-function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders, max_trial)
+function [seizure_duration,min_thresh,output_array,sz_parameters,to_fix_chart] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders, max_trial,seizure_input)
 
 % Uses a pre-defined seizure model to identify seizure length.
 % Concactenates features
@@ -29,6 +29,8 @@ function [seizure_duration,min_thresh,output_array,sz_parameters] = predict_seiz
 % 4) sz_parameters - seizure parameters
 %
 % 5) Subfolders - if size 1 - 1 animal, load raw
+%
+% 6) to_fix_chart - Adds manually identified to_fix_location
 
 % -------------------------------------------------------------------------
 
@@ -172,6 +174,10 @@ for sz_cnt = 1:size(sz_parameters,1)
         mkdir(path_extract,'Figures\Seizure Duration')
         end
         
+        if seizure_input == 1
+            to_plot = 1;
+        end
+
         if to_plot
         
         fig1 = figure(1);
@@ -198,6 +204,67 @@ for sz_cnt = 1:size(sz_parameters,1)
         ylim([-1,channel])
         xline(sz_end*winDisp,'-r',{'Termination',strcat(num2str(seizure_duration(sz_cnt))," sec")},'LineWidth',2);
         xlabel('Time (sec)')
+
+        % Titling
+        if sz_parameters(sz_cnt,5) == 0
+        title('No Seizure')
+        else
+        title('Seizure')
+        end
+
+        % Allows For Manual Override, Adding to to_fix_chart
+
+        if seizure_input
+            
+            % Sets Line at t_before. Right Of Line = Manual Override. Left
+            % of Line = No Change
+            c1 = xline(t_before,'-b', {"Click Left - Acceptable | Click Right - Manual Seizure Threshold"},'LineWidth',2);
+            % Left Of T_before/2 = Zoom Out X Limit
+            c2 = xline(t_before/2,'-b', {"Click Left - Zoom Out | Click Right - Acceptable"},'LineWidth',2);
+            
+            % Gets First Input
+            [x,y] = ginput(1);
+            
+            % Number Of Zoom Outs For X Limit
+            num_zoom = 1;
+
+            while x < t_before/2
+                xlim([0, sz_end * winDisp + 15 * num_zoom + 1])
+                num_zoom = num_zoom + 1;
+                [x,y] = ginput(1);
+            end
+
+            delete(c2)
+            delete(c1)
+
+            % Calculates Duration Using Manual Selection Processes
+            if x > t_before
+
+                if sz_parameters(sz_cnt,12) > 0
+                    real_stim_time = sz_parameters(sz_cnt,12);
+                else
+                    real_stim_time = 0;
+                end
+
+                % Rounds to Window Size
+                t_duration = round((x - t_before - real_stim_time) * 4)/4;
+
+                % Fix For Below Zero
+                if t_duration < 0
+                    t_duration = 0;
+                end
+
+                if t_duration == seizure_duration(sz_cnt)
+                else
+                to_fix_chart = [to_fix_chart;...
+                    sz_parameters(sz_cnt,1),sz_parameters(sz_cnt,2),t_duration,...
+                    double(t_duration > seizure_duration(sz_cnt)), double(t_duration < seizure_duration(sz_cnt)),...
+                    double(abs(t_duration - seizure_duration(sz_cnt)) < 5)];
+                end
+
+            end
+
+        end
         
         % If In To-Fix Chart, Draw To Fix Line & Change Seizure Duration
         if ismember([sz_parameters(sz_cnt,1),sz_parameters(sz_cnt,2)],to_fix_chart(:,1:2),'rows')
@@ -215,14 +282,7 @@ for sz_cnt = 1:size(sz_parameters,1)
             xline(sz_end_new*winDisp,'-g',{'Manual Fixed',strcat(num2str(seizure_duration(sz_cnt))," sec")},'LineWidth',2);
             
         end
-        
-        % Titling
-        if sz_parameters(sz_cnt,5) == 0
-        title('No Seizure')
-        else
-        title('Seizure')
-        end
-        
+               
         % Saves Figure
         saveas(fig1,fullfile(strcat(path_extract,"Figures\Seizure Duration\Trial ",num2str(sz_parameters(sz_cnt,2)),".png")),'png');
         
