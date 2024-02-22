@@ -341,6 +341,10 @@ end
 
 clear animal_info
 
+%% Spontaneous Seizure Support Vector Machine Plotting
+
+spont_svm_characterization(merged_output_array,merged_sz_parameters,directory);
+
 %% Evoked Seizures Processing - Plots By Category
 
 [final_feature_output, subdiv_index, merged_sz_duration, coeff,score] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,not(freely_moving));
