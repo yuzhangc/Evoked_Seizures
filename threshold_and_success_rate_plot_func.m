@@ -1,4 +1,4 @@
-function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list)
+function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list,freely_moving)
 
 % Makes a few basic plots about evocation threshold in epileptic vs naive
 % animals and successful evocation ratios
@@ -25,7 +25,11 @@ function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list,sei
 % -------------------------------------------------------------------------
 
 % Step 1: Reads Animal Master Spreadsheet
-animal_info = readmatrix(strcat(directory,"Animal Master.csv"));
+if not(freely_moving)
+animal_info = readmatrix(strcat(directory,'Animal Master Head Fixed.csv'));
+else
+animal_info = readmatrix(strcat(directory,'Animal Master.csv'));
+end
 
 % Step 2: Extract threshold power and duration from min_thresh_list.
 

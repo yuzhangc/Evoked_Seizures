@@ -5,7 +5,7 @@ directory = 'E:\';
 % Freely Moving Or Not
 freely_moving = 1;
 % Manual Seizure Verification
-seizure_input = 1;
+seizure_input = 0;
 % Generate subfolder list
 complete_list = dir(directory); dirFlags = [complete_list.isdir]; subFolders = complete_list(dirFlags);
 
@@ -299,8 +299,10 @@ end
 
 % Writes Seizure List
 
-if seizure_input
+if seizure_input && not(exist(strcat(directory,"To Fix.csv")))
     writematrix(to_fix_chart(2:end,:), strcat(directory,"To Fix.csv"))
+elseif seizure_input
+    writematrix(to_fix_chart(2:end,:), strcat(directory,"To Fix 2 Be Concactenated.csv"))
 end
 
 % Perform Plots
@@ -308,13 +310,17 @@ end
 % The number of animals in 'Animal Master.csv' has to equal the number of
 % animals that were processed.
 
-threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list)
+threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list,freely_moving)
 
 clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
 
 %% Output Data To R
 
+if not(freely_moving)
+animal_info = readtable(strcat(directory,'Animal Master Head Fixed.csv'));
+else
 animal_info = readtable(strcat(directory,'Animal Master.csv'));
+end
 
 % Special Case For Drug Trials. Only Export Above Threshold Ones W Pairing
 drug = 0;
@@ -337,7 +343,7 @@ clear animal_info
 
 %% Evoked Seizures Processing - Plots By Category
 
-[final_feature_output, subdiv_index, merged_sz_duration, coeff,score] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,1);
+[final_feature_output, subdiv_index, merged_sz_duration, coeff,score] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,not(freely_moving));
 
 % Within Animal Example
 

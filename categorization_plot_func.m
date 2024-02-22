@@ -26,9 +26,9 @@ anova_excluded_indices = [];
 % Loads Animal Information
 
 if headfixed == 1
-animal_info = readmatrix(strcat(directory,'Animal Master.csv'));
+animal_info = readmatrix(strcat(directory,'Animal Master Head Fixed.csv'));
 else
-animal_info = readmatrix(strcat(directory,'Animal Master Freely Moving.csv'));
+animal_info = readmatrix(strcat(directory,'Animal Master.csv'));
 end
 
 % Extract Features Information and Names From Last Folder in Directory
@@ -61,6 +61,7 @@ displays_text = ['\nWhich Plot to Plot?:', ...
     '\n(4) - Comparison of Levetiracetam and Phenytoin with Control (DO IN R)',...
     '\n(5) - Additional Stimulation Or Not (473 nm AFTER Onset ONLY)',...
     '\n(6) - Evoked Vs Spontaneous',...
+    '\n(7) - Behavioral Seizures vs Electrical Afterdischarges (Racine 0/No Change)',...
     '\nEnter a number: '];
 
 main_division = input(displays_text);
@@ -101,7 +102,7 @@ excl_short = 1;
 end
 
 if excl_short == 1
-    short_duration = input('\nHow many seconds is considered a short/non-evoked event? Type in a number (e.g. 15 for head fixed, 10 for freely moving): ');
+    short_duration = input('\nHow many seconds is considered a short/non-evoked event? Type in a number (e.g. 15): ');
 else
     short_duration = -1;
 end
@@ -177,18 +178,38 @@ excl_naiv = 0;
 
 end
 
+displays_text_16 = ['\nIf only one animal should be analyzed, please enter animal number. Else, enter 0', ...
+'\nEnter a number: '];
+
+single_animal = input(displays_text_16);
+
+if not(headfixed)
+
+displays_text_14 = ['\nWhich Day (Relative to Stim Start = 1) Should Analysis Begin At?', ...
+'\nEnter a number: '];
+
+day_st = input(displays_text_14);
+
+displays_text_15 = ['\nWhich Day (Relative to Stim Start = 1) Should Analysis End At?', ...
+'\nEnter a number: '];
+
+day_end = input(displays_text_15);
+
+end
+
+
 displays_text_11 = ['\nFor PCA Plot, Enter How Many Seconds You Want to Plot (0 is no plot).', ...
 '\nEnter a number: '];
 
 pca_dur = input(displays_text_11);
 
 displays_text_12 = ['\nDo you want to limit the analysis to certain trials?', ...
-'\nEnter a maximum trial number (e.g. 20). Enter 100 for all: '];
+'\nEnter a maximum trial number (e.g. 20). Enter 200 for all: '];
 
 max_trial = input(displays_text_12);
 
 displays_text_13 = ['\nDo you want to limit the analysis to certain groupings of trials?', ...
-'\nEnter number of animals for each group (e.g. 5). Enter 100 for all: '];
+'\nEnter number of animals for each group (e.g. 5). Enter 200 for all: '];
 
 max_num = input(displays_text_13);
 
@@ -361,6 +382,26 @@ switch main_division
         subdiv_index{2} = find(merged_sz_parameters(:,8) ~= -1);
         
         duration_labels = {'Spontaneous', 'Evoked'};
+
+    case 7 % Racine Scale / Behavioral Vs Evoked But Not Behavioral
+
+        if (headfixed)
+            disp ('NO BEHAVIORAL SEIZURES FOR HEAD FIXED ANIMALS')
+            subdiv_index{1} = [];
+            duration_labels = {'NULL'};
+        else
+
+        % BIG Behavioral
+        subdiv_index{1} = find(merged_sz_parameters(:,21) >= 3 & merged_sz_parameters(:,5) == 1);
+
+        % Small Behavioral
+        subdiv_index{2} = find(merged_sz_parameters(:,21) > 0 & merged_sz_parameters(:,21) < 3 & merged_sz_parameters(:,5) == 1);
+
+        % Electrical Only
+        subdiv_index{3} = find(merged_sz_parameters(:,21) == 0 & merged_sz_parameters(:,5) == 1);
+
+        duration_labels = {'Racine 3+', 'Racine 1/2', 'No Change'};
+        end
         
 end
 
@@ -533,6 +574,21 @@ end
 
 % -------------------------------------------------------------------------
 
+% Step 7C: Exclude Days Not In Index
+
+if not(headfixed)
+
+    excluded_indices = find(merged_sz_parameters(:,20) < day_st | merged_sz_parameters(:,20) > day_end);
+    for cnt = 1:length(subdiv_index)
+        subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
+    end
+    anova_excluded_indices = union(anova_excluded_indices, excluded_indices);
+    clear excluded_indices
+
+end
+
+% -------------------------------------------------------------------------
+
 % Step 8A: Exclude Diazepam (and Other Drugs)
 
 if excl_diaz
@@ -553,6 +609,18 @@ end
 excluded_indices = find(merged_sz_parameters(:,2) > max_trial);
 for cnt = 1:length(subdiv_index)
     subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
+end
+
+% -------------------------------------------------------------------------
+
+% Step 8C: Single Animal Condition
+
+if not(single_animal)
+else
+    excluded_indices = find(merged_sz_parameters(:,1) ~= single_animal);
+    for cnt = 1:length(subdiv_index)
+        subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
+    end
 end
 
 % -------------------------------------------------------------------------
