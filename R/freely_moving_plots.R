@@ -153,10 +153,12 @@ for (animal in unique(trial_info$Animal)){
        
        behavioral_success <- length(which(drug_free_trials$`Racine` > 0 & drug_free_trials$`Seizure Or Not` == 1))/
          electrographic_sz_cnt * 100
+       behavioral_scale <- mean(drug_free_trials[which(drug_free_trials$`Racine` > 0 & drug_free_trials$`Seizure Or Not` == 1),]$Racine)
        
        } else {
          
        behavioral_success <- 0
+       behavioral_scale <- 0
          
        }
 
@@ -164,6 +166,7 @@ for (animal in unique(trial_info$Animal)){
       
       electrographic_success <- NaN
       behavioral_success <- NaN
+      behavioral_scale <- NaN
       
     }
     
@@ -221,11 +224,12 @@ for (animal in unique(trial_info$Animal)){
     
     # Incorporate Into Dataframe
     
-    temp_data <- data.frame(animal,day,drug_free_total,electrographic_success,behavioral_success, true_behavioral_success,
+    temp_data <- data.frame(animal,day,drug_free_total,electrographic_success,behavioral_success, true_behavioral_success, behavioral_scale,
             lev_total,lev_elec_success,lev_behav_success,diaz_total, diaz_elec_success, diaz_behav_success,
             trial_info$Epileptic[which(trial_info$Animal == animal)][1])
     names(temp_data) <- c("Animal","Day","Drug Free Evocations","Success Rate (E) - Drug Free","Behavioral Manifestation of Electrographic Seizures - Drug Free", 
-                          "Behavioral Manifestation of All Seizures - Drug Free","Levetiracetam Evocations","Success Rate (E) - Levetiracetam",
+                          "Behavioral Manifestation of All Seizures - Drug Free","Behavioral Scale of Electrographic Seizures - Drug Free",
+                          "Levetiracetam Evocations","Success Rate (E) - Levetiracetam",
                           "Behavioral Manifestation of All Seizures - Levetiracetam", "Diazepam Evocations",
                           "Success Rate (E) - Diazepam","Behavioral Manifestation of All Seizures - Diazepam", "Epileptic")        
     
@@ -285,10 +289,32 @@ for (day in unique(evk_sz_data$Day)){
   
 }
 
+evk_scale_sz_plots <- data.frame()
+
+for (day in unique(evk_sz_data$Day)){
+  
+  # Evocation Segregation
+  
+  unique_scale_counts <- unique(evk_sz_data$`Behavioral Scale of Electrographic Seizures - Drug Free`[which(evk_sz_data$Day == day)])
+  
+  for(scale_val in unique_scale_counts){
+    
+    counts_ep = length(which(evk_sz_data$Day == day & evk_sz_data$`Behavioral Scale of Electrographic Seizures - Drug Free` == scale_val & evk_sz_data$Epileptic == 1))
+    counts_nv = length(which(evk_sz_data$Day == day & evk_sz_data$`Behavioral Scale of Electrographic Seizures - Drug Free` == scale_val & evk_sz_data$Epileptic == 0))
+    evk_scale_sz_plots <- rbind(evk_scale_sz_plots, data.frame(day,scale_val,counts_ep,counts_nv))
+    
+  }
+  
+}
+
+
 # Pairwise T Test For Behavioral Seizure to Epileptic
 
 print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
 print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 3),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))
 
 # -----------------------------------------------------------------------------
 
@@ -321,7 +347,23 @@ evoked_sz_rate_beh +
   # Conditional Mean: Naive
   geom_smooth(data = evk_sz_data[which(evk_sz_data$Epileptic == 0),], aes(x = `Day`, y = `Behavioral Manifestation of Electrographic Seizures - Drug Free`), fill = "royalblue2", colour="royalblue1") +
   # Axes Labels
-  xlab("Day Since Evocation Start") + ylab("Behavioral Evocation Success Rate") +
+  xlab("Day Since Evocation Start") + ylab("Behavioral Manifestation Rate of Electrographic Seizures") +
+  # Legends
+  scale_colour_manual(name="Legend", labels = c("Epileptic", "Naive") , values = c("red1","royalblue1")) +
+  scale_size(name = "Counts")
+
+evoked_sz_scale_beh <- ggplot()
+evoked_sz_scale_beh +
+  # Points: Epileptic Data With Size Dictating How Many Values @ Each Point
+  geom_point(data = evk_scale_sz_plots[which(evk_scale_sz_plots$counts_ep > 0),], aes(x = day, y = scale_val, size = counts_ep, colour = "red1")) +
+  # Points: Naive Data With Size Dictating How Many Values @ Each Point
+  geom_point(data = evk_scale_sz_plots[which(evk_scale_sz_plots$counts_nv > 0),], aes(x = day, y = scale_val, size = counts_nv, colour = "royalblue1")) +
+  # Conditional Mean: Epileptic
+  geom_smooth(data = evk_sz_data[which(evk_sz_data$Epileptic == 1),], aes(x = `Day`, y = `Behavioral Scale of Electrographic Seizures - Drug Free`), fill = "red2", colour="red1") +
+  # Conditional Mean: Naive
+  geom_smooth(data = evk_sz_data[which(evk_sz_data$Epileptic == 0),], aes(x = `Day`, y = `Behavioral Scale of Electrographic Seizures - Drug Free`), fill = "royalblue2", colour="royalblue1") +
+  # Axes Labels
+  xlab("Day Since Evocation Start") + ylab("Racine Scale of Electrographic Seizures") +
   # Legends
   scale_colour_manual(name="Legend", labels = c("Epileptic", "Naive") , values = c("red1","royalblue1")) +
   scale_size(name = "Counts")
