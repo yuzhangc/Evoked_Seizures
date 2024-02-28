@@ -343,7 +343,15 @@ clear animal_info
 
 %% Spontaneous Seizure Support Vector Machine Plotting
 
-spont_svm_characterization(merged_output_array,merged_sz_parameters,directory);
+% Appends Baseline Signals
+
+path_extract = strcat(directory,"EEG_END_BASELINE_FOR_SVM_ALL_ANIMALS",'\');
+[~,~,output_array_base,sz_param_base] = predict_seizure_duration(path_extract,sz_model,0,to_fix_chart,0,subFolders,2000,0); 
+
+svm_merged_output_array = [merged_output_array, output_array_base];
+svm_merged_sz_parameters = [merged_sz_parameters; sz_param_base];
+
+spont_svm_characterization_v2(svm_merged_output_array,svm_merged_sz_parameters,directory);
 
 %% Evoked Seizures Processing - Plots By Category
 
