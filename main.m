@@ -312,7 +312,7 @@ end
 
 threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list,freely_moving)
 
-clear min_thresh seizure_duration to_fix_chart output_array sz_parameters
+clear min_thresh seizure_duration output_array sz_parameters
 
 %% Output Data To R
 
@@ -351,7 +351,7 @@ path_extract = strcat(directory,"EEG_END_BASELINE_FOR_SVM_ALL_ANIMALS",'\');
 svm_merged_output_array = [merged_output_array, output_array_base];
 svm_merged_sz_parameters = [merged_sz_parameters; sz_param_base];
 
-spont_svm_characterization_v2(svm_merged_output_array,svm_merged_sz_parameters,directory);
+spont_svm_characterization_v2(svm_merged_output_array,svm_merged_sz_parameters);
 
 %% Evoked Seizures Processing - Plots By Category
 

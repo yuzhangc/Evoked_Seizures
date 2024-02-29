@@ -1,4 +1,4 @@
-function [svm_values] = spont_svm_characterization_v2(merged_output_array,merged_sz_parameters,directory)
+function [svm_values] = spont_svm_characterization_v2(merged_output_array,merged_sz_parameters)
 
 % Use Support Vector Machine to Separate Successful Evocations From Failed
 % (Control or Ahem, Random Baseline). Map Spontaneous Seizures Onto Them
@@ -6,6 +6,13 @@ function [svm_values] = spont_svm_characterization_v2(merged_output_array,merged
 % Input Variables
 % merged_output_array - merged feature list
 % merged_sz_parameters - complete seizure information list
+
+displays_text = ['\nDo you want to do electrographical or behavioral segregation of seizures?', ...
+    '\n(1) - Electrographical', ...
+    '\n(0) - Behavioral', ...
+    '\nEnter a number: '];
+
+electrographic = input(displays_text);
 
 % Loops Through Animals and Extracts Seizures
 
@@ -17,6 +24,8 @@ for animal = 1:length(animal_list)
 
 % Step 1: Categorize Events
     
+if electrographic == 1
+
 % Successful Evocations Are Seizures (5), Evoked With Blue Light (8), Has
 % No Second Stimulus (14), and Has no Drugs (16, 17, 18)
 
@@ -28,6 +37,18 @@ idx_succ_evok = find(merged_sz_parameters(:,1) == animal_list(animal) & merged_s
 
 idx_failed_evok = find(merged_sz_parameters(:,1) == animal_list(animal) & merged_sz_parameters(:,5) == 0 & (merged_sz_parameters(:,8) == 473 | merged_sz_parameters(:,8) == 488) ...
     & merged_sz_parameters(:,14) == -1 & merged_sz_parameters(:,16) == 0 & merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) == 0) ;
+
+else
+
+% Change 5 to 21 for Behavioral
+
+idx_succ_evok = find(merged_sz_parameters(:,1) == animal_list(animal) & merged_sz_parameters(:,21) >= 1 & (merged_sz_parameters(:,8) == 473 | merged_sz_parameters(:,8) == 488) ...
+    & merged_sz_parameters(:,14) == -1 & merged_sz_parameters(:,16) == 0 & merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) == 0) ;
+
+idx_failed_evok = find(merged_sz_parameters(:,1) == animal_list(animal) & merged_sz_parameters(:,21) == 0 & (merged_sz_parameters(:,8) == 473 | merged_sz_parameters(:,8) == 488) ...
+    & merged_sz_parameters(:,14) == -1 & merged_sz_parameters(:,16) == 0 & merged_sz_parameters(:,17) == 0 & merged_sz_parameters(:,18) == 0) ;
+
+end
 
 % Spontaneous Indices Are Seizures (5), Not Evoked (8)
 
