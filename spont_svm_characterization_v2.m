@@ -133,17 +133,17 @@ if not(isempty(idx_spont))
     % PCA Colors
     
     % 0 - Baseline - Dark Green
-    % 1 - Spontaneous - Dark Orange
+    % 1 - Spontaneous - Purple
     % 2 - Failed to Evoke - Gray
-    % 3 - Successfully Evoked - Dark Red
+    % 3 - Successfully Evoked - Dark Orange
     
     colors_for_pca = [];
     true_colors_for_pca = [];
     
     color_list = [0, 102, 51;
-        255, 128, 0;
+        102, 0, 102;
         96, 96, 96;
-        204, 0, 0];
+        255, 128, 0];
     color_list = color_list./255;
     
     % Assigns Colors Based on Predicted and True Values
