@@ -58,4 +58,10 @@ for animal in animal_list:
         training_vector_y = [];
         testing_vector_x = [];
         
-        print("Hello")
+        for trial in range(len(idx_spont[0])):
+            temp_output_array = merged_output_array[0][idx_spont[0][trial]];
+            temp_output_array = reshape(temp_output_array,[1,size(temp_output_array,1) *size(temp_output_array,2)]);
+            training_vector_x(trial,:) = temp_output_array;
+            training_vector_y(trial,:) = 1;
+
+        
