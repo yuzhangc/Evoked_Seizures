@@ -351,7 +351,26 @@ path_extract = strcat(directory,"EEG_END_BASELINE_FOR_SVM_ALL_ANIMALS",'\');
 svm_merged_output_array = [merged_output_array, output_array_base];
 svm_merged_sz_parameters = [merged_sz_parameters; sz_param_base];
 
-spont_svm_characterization_v2(svm_merged_output_array,svm_merged_sz_parameters);
+svm_values = spont_svm_characterization_v2(svm_merged_output_array,svm_merged_sz_parameters);
+
+% Extracts Predictions and Ground Truth
+
+output_values = svm_values(:,1);
+true_output_values = svm_values(:,2);
+
+% Find Indices For Truth
+idx_evk = find(true_output_values == 3);
+idx_failed = find(true_output_values == 2);
+
+% True Positive
+evk_accuracy = sum(output_values(idx_evk,:) == true_output_values(idx_evk,:)) / length(idx_evk) * 100
+
+% True Negative
+failed_accuracy = sum(output_values(idx_failed,:) == true_output_values(idx_failed,:)) / length(idx_failed) * 100
+
+% Type I and Type II Errors
+false_positive = sum(output_values(idx_failed,:) == 3) / length(idx_failed) * 100
+false_negative = sum(output_values(idx_evk,:) == 2) / length(idx_evk) * 100
 
 %% Evoked Seizures Processing - Plots By Category
 

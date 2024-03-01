@@ -88,7 +88,7 @@ seizure = 62;
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 
 % Spontaneous Vs Evoked Plots
-seizure = 6; time_idx = [12, 22; 24, 34; 46, 56]; filtered = 1; plot_duration = 65;
+seizure = 35; time_idx = [12, 22; 24, 34; 46, 56]; filtered = 1; plot_duration = 65;
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 seizure = 3; time_idx = [6, 16; 18, 28; 42, 52]; 
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
@@ -96,7 +96,7 @@ plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 %% Seizure Duration Calculations
 
 % This particular seizure model was trained on 2023.06.26 (Animal 100)
-% Seizure 16 - YZOPTOEEG  2023-07-06 13H53M_Cage1_053116.rhd
+% Seizure 49 - YZOPTOEEG  2023-07-06 13H53M_Cage1_053116.rhd
 % Training Function - fitcknn(X,Y) where X is merged temp_output_array and
 % Y is kmeans(X,3)
 

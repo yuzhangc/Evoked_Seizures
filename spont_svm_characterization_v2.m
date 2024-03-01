@@ -7,7 +7,7 @@ function [svm_values] = spont_svm_characterization_v2(merged_output_array,merged
 % merged_output_array - merged feature list
 % merged_sz_parameters - complete seizure information list
 
-displays_text = ['\nDo you want to do electrographical or behavioral segregation of seizures?', ...
+displays_text = ['\nDo you want to do electrographic or behavioral segregation of seizures?', ...
     '\n(1) - Electrographical', ...
     '\n(0) - Behavioral', ...
     '\nEnter a number: '];
@@ -17,6 +17,11 @@ electrographic = input(displays_text);
 % Loops Through Animals and Extracts Seizures
 
 animal_list = unique(merged_sz_parameters(:,1));
+% Epileptic Only animal_list = [100:107,111,112]
+
+% Col 1 - Output , Col 2 - Truth
+
+svm_values = [];
 
 for animal = 1:length(animal_list)
 
@@ -129,6 +134,8 @@ if not(isempty(idx_spont))
     output_values = [training_vector_y ; testing_vector_y];
     true_output_values = [training_vector_y; 3 * ones(length(idx_succ_evok),1);...
         2 * ones(length(idx_failed_evok),1);];
+
+    svm_values = [svm_values;output_values, true_output_values];
     
     % PCA Colors
     
@@ -166,7 +173,7 @@ if not(isempty(idx_spont))
 
     idx_evk = find(true_output_values == 3);
     idx_failed = find(true_output_values == 2);
-    
+
     % True Positive
     evk_accuracy = sum(output_values(idx_evk,:) == true_output_values(idx_evk,:)) / length(idx_evk) * 100;
     

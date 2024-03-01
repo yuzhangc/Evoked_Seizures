@@ -21,9 +21,9 @@ trial_info$Phenytoin <- as.logical(trial_info$Phenytoin)
 # Step 2: Generate Days List For Animals
 
 animal_exp_days <- data.frame(
-  Animal = c(100:110),
-  Start_Day = c(-9,-9,-6,-5,-5,-9,-9,-9,-5,-5,-5),
-  End_Day = c(16,16,6,11,11,15,15,15,12,12,12)
+  Animal = c(100:112),
+  Start_Day = c(-9,-9,-6,-5,-5,-9,-9,-9,-5,-5,-5,-6,-6),
+  End_Day = c(16,16,6,11,11,15,15,15,12,12,12,9,9)
 )
 
 # -----------------------------------------------------------------------------
@@ -312,9 +312,14 @@ for (day in unique(evk_sz_data$Day)){
 
 print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
 print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 3),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
 print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))
 print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))
 print(evk_sz_data[which(evk_sz_data$Day == 3),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Success Rate (E) - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Success Rate (E) - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 3),] %>% pairwise_t_test(`Success Rate (E) - Drug Free`~ Epileptic))
+
 
 # -----------------------------------------------------------------------------
 
@@ -384,7 +389,15 @@ lev_elec = c()
 no_drug_behav_l = c()
 lev_behav = c()
 
-for (animal in unique(evk_sz_data$Animal)) {
+# All Animals
+
+animal_list = unique(evk_sz_data$Animal)
+
+# Epileptic Only
+
+animal_list = c(100, 101, 102, 103, 104, 105, 106, 107,111,112)
+
+for (animal in animal_list) {
 
   # Extracts Drug Trial Days
   
