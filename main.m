@@ -101,24 +101,54 @@ end
 
 %% Plots Individual Seizures
 
-% Naive Evocation
+% % Naive Evocation
+% 
+% folder_num = find({subFolders.name} == "20230221_25_NA_PV_ENP");
+% 
+% seizure = 21; time_idx = [9, 19; 26, 36; 46, 56]; filtered = 1; plot_duration = 55;
+% path_extract = strcat(directory,subFolders(folder_num).name,'\');
+% plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 
-folder_num = find({subFolders.name} == "20230221_25_NA_PV_ENP");
-
-seizure = 21; time_idx = [9, 19; 26, 36; 46, 56]; filtered = 1; plot_duration = 55;
-path_extract = strcat(directory,subFolders(folder_num).name,'\');
-plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+if freely_moving == 0
 
 % Epileptic Pairs
 
-folder_num = find({subFolders.name} == "20221101_10_KA_THY");
+folder_num = find({subFolders.name} == "20230211_23_KA_THY");
 
-seizure = 14; time_idx = [16, 26; 28, 38; 40, 50]; filtered = 1; plot_duration = 55;
+seizure = 35; time_idx = [8, 18; 24, 34; 36, 46]; filtered = 1; plot_duration = 50;
 path_extract = strcat(directory,subFolders(folder_num).name,'\');
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 
-seizure = 24; time_idx = [16, 26; 28, 38; 47, 57];
+seizure = 36;
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
+seizure = 47;
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
+else
+
+% Naive Plots
+
+folder_num = find({subFolders.name} == "EEG_14_2024_01_24_110_NA_THY");
+path_extract = strcat(directory,subFolders(folder_num).name,'\');
+
+seizure = 1; time_idx = [8, 18; 22, 32; 34, 44]; filtered = 1; plot_duration = 55;
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+seizure = 22;
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
+% Spontaneous Vs Evoked Plots
+
+folder_num = find({subFolders.name} == "EEG_01_2023_06_26_100_KA_THY_SST_CHR");
+path_extract = strcat(directory,subFolders(folder_num).name,'\');
+
+seizure = 35; time_idx = [12, 22; 24, 34; 46, 56]; filtered = 1; plot_duration = 65;
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+seizure = 21; time_idx = [6, 16; 18, 28; 42, 52]; 
+plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+
+end
+
 
 %% Seizure Duration Calculations and Thresholding
 

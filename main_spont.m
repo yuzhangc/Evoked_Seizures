@@ -78,19 +78,24 @@ end
 
 %% Plots Individual Seizures
 
-folder_num = find({subFolders.name} == "EEG_01_2023_06_26_100_KA_THY_SST_CHR");
+% Naive Plots
 
-% Diazepam Plots
-seizure = 60; time_idx = [8, 18; 25, 35; 55, 65]; filtered = 1; plot_duration = 65;
+folder_num = find({subFolders.name} == "EEG_14_2024_01_24_110_NA_THY");
 path_extract = strcat(directory,subFolders(folder_num).name,'\');
+
+seizure = 1; time_idx = [8, 18; 22, 32; 34, 44]; filtered = 1; plot_duration = 55;
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
-seizure = 62;
+seizure = 22;
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 
 % Spontaneous Vs Evoked Plots
+
+folder_num = find({subFolders.name} == "EEG_01_2023_06_26_100_KA_THY_SST_CHR");
+path_extract = strcat(directory,subFolders(folder_num).name,'\');
+
 seizure = 35; time_idx = [12, 22; 24, 34; 46, 56]; filtered = 1; plot_duration = 65;
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
-seizure = 3; time_idx = [6, 16; 18, 28; 42, 52]; 
+seizure = 21; time_idx = [6, 16; 18, 28; 42, 52]; 
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 
 %% Seizure Duration Calculations
