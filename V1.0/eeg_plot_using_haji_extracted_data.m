@@ -3,8 +3,8 @@ close all
 % Time Around 60 seconds to plot for closeup
 t_int = 60;
 x = 20;
-start_frame = 2000 * 58.16;
-color_txt = 'c';
+start_frame = 2000 * 60.22;
+color_txt = 'b';
 
 figure
 
