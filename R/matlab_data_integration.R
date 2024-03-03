@@ -11,8 +11,8 @@ directory <- "G:/Clone of ORG_YZ 20231006/"
 # Generate subfolder list
 
 complete_list <- list.dirs(directory,recursive=FALSE) 
-real_folder_st <- match(paste(directory,"00000000 DO NOT PROCESS",sep = ""),complete_list)
-real_folder_end <- match(paste(directory,"99999999 END",sep = ""),complete_list)
+real_folder_st <- match(paste(directory,"99999999 END",sep = ""),complete_list)
+real_folder_end <- match(paste(directory,"EEG_END",sep = ""),complete_list)
 subFolders <- complete_list[(real_folder_st + 1):(real_folder_end - 1)]
 
 # ---------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ csv_file_list <- list.files(path = subFolders[folder_num], pattern = "Extracted_
            full.names = FALSE, ignore.case = FALSE)
 
 # Target Channel
-target_ch <- 1
+target_ch <- 3
 
 # Reads CSV into Dataframe
 
@@ -141,13 +141,13 @@ sing_data = all_data[single_stim_indices,]
 
 # Step 4: Perform LME Models On Epileptic Vs Naive
 
-summary(lmer(Ch.1.Area ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Skew ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Line.Length ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.1.Hz.to.30Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.30.Hz.to.300Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
-summary(lmer(Ch.1.AEntropy ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.3.Area ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.3.Skew ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.3.Line.Length ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.3.Band.Power.1.Hz.to.30Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.3.Band.Power.30.Hz.to.300Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.3.Band.Power.300.Hz.to.1000Hz ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
+summary(lmer(Ch.3.AEntropy ~ Epileptic * Time.Point + (1|Animal), data = sing_data))
 
 # Summaries For Measures Other Than 'Epileptic'. For 'Epileptic', See PowerPoint.
 
@@ -172,14 +172,14 @@ summary(lmer(Ch.1.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_da
 
 # Step 6: Perform Comparisons on Spontaneous Vs Evoked (FREELY MOVING ONLY - Single Animal Fixed Effect Model)
 
-summary(lm(Ch.4.Band.Power.1.Hz.to.30Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
-summary(lm(Ch.4.Band.Power.30.Hz.to.300Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
-summary(lm(Ch.4.Band.Power.300.Hz.to.1000Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
-summary(lm(Ch.4.Line.Length ~ Spont * Time.Point, data = spont_vs_evoked_data))
-summary(lm(Ch.4.Area ~ Spont * Time.Point, data = spont_vs_evoked_data))
-summary(lm(Ch.4.Skew ~ Spont * Time.Point, data = spont_vs_evoked_data))
-summary(lm(Ch.4.AEntropy ~ Spont * Time.Point, data = spont_vs_evoked_data))
-summary(lm(Ch.4.PLHG ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.3.Band.Power.1.Hz.to.30Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.3.Band.Power.30.Hz.to.300Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.3.Band.Power.300.Hz.to.1000Hz ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.3.Line.Length ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.3.Area ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.3.Skew ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.3.AEntropy ~ Spont * Time.Point, data = spont_vs_evoked_data))
+summary(lm(Ch.3.PLHG ~ Spont * Time.Point, data = spont_vs_evoked_data))
 # What Does It All Mean?
 
 # The function is Outcome Measure ~ Predictor + Random Effect.
