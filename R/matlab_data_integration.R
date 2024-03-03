@@ -8,11 +8,22 @@ library(dplyr)
 
 directory <- "E:/"
 
+# Freely Moving or Head Fixed
+
+freely_moving <- 1
+
 # Generate subfolder list
 
 complete_list <- list.dirs(directory,recursive=FALSE) 
-real_folder_st <- match(paste(directory,"99999999 END",sep = ""),complete_list)
-real_folder_end <- match(paste(directory,"EEG_END",sep = ""),complete_list)
+
+if (freely_moving) {
+  real_folder_st <- match(paste(directory,"99999999 END",sep = ""),complete_list)
+  real_folder_end <- match(paste(directory,"EEG_END",sep = ""),complete_list)
+} else {
+  real_folder_st <- match(paste(directory,"00000000 DO NOT PROCESS",sep = ""),complete_list)
+  real_folder_end <- match(paste(directory,"99999999 END",sep = ""),complete_list)
+}
+
 subFolders <- complete_list[(real_folder_st + 1):(real_folder_end - 1)]
 
 # ---------------------------------------------------------------------------------------------------
