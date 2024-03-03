@@ -10,6 +10,12 @@ function [seizure_duration,min_thresh,output_array,sz_parameters,to_fix_chart] =
 % countdown_sec - how many seconds before not counted as seizure
 % to_fix_chart - table with seizures durations that should be manually fixed
 % to_plot - show plots or not
+% subFolders - list of folders to process - used to determine # animals and
+% if one animal case should be activated
+% max_trial - max trials to include - option to limit to certain
+% experimental durations
+% seizure_input - option for manual selection of seizure termination by
+% clicking on graph
 % 
 % Output Variables
 % 1) seizure_duration - calculated seizure_duration

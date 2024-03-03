@@ -19,12 +19,16 @@ function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list,sei
 % diaz_success - success rate for evocation with diazepam
 % 
 % 3) seizure_duration_list - list of predicted seizure durations
+%
+% 4) freely_moving - Freely Moving or Head Fixed. Determines Animal Master
+% List
 
 % No Output Variables. Outputs Four Figures
 
 % -------------------------------------------------------------------------
 
 % Step 1: Reads Animal Master Spreadsheet
+
 if not(freely_moving)
 animal_info = readmatrix(strcat(directory,'Animal Master Head Fixed.csv'));
 else

@@ -6,7 +6,7 @@ library(dplyr)
 
 # Change to local folder directory
 
-directory <- "G:/Clone of ORG_YZ 20231006/"
+directory <- "E:/"
 
 # Generate subfolder list
 
@@ -74,21 +74,21 @@ all_data <- rbind(all_data,feature_data)
 
 # Step 3: Filters Data Frame
 
-# Remove Short Events - INPUT 15 SEC FOR HEAD FIXED AND 10 FOR FREELY MOVING
+# Remove Short Events - INPUT 15 SEC
 
 min_time <- readline(prompt="Do you want to exclude short events?\nIf so, type in the second duration of events to exclude.\nAny events smaller than the duration will be excluded: ")
 15
 kept_indices <- which(all_data$Evoked.Activity.Duration >= as.numeric(min_time))
 all_data <- all_data[kept_indices,]
 
-# Remove Early Recordings - INPUT 12 (ANIMAL #)
+# Remove Early Recordings Due to Signal Issues - INPUT 12 (ANIMAL #). Does Not Affect Freely Moving Data
 
 min_anim <- readline(prompt="Do you want to exclude early animals?\nIf so, type in the smallest animal to exclude.\nAny events smaller than or equal to it will be excluded. \nCommon Ones: 12 = 2022/11/07, 22 = 2023/01/16: ")
 12
 kept_indices <- which(all_data$Animal >= as.integer(min_anim))
 all_data <- all_data[kept_indices,]
 
-# Removes Diazepam Levetiracetam and Phenytoin Recordings
+# Removes Diazepam Levetiracetam and Phenytoin Recordings. No Phenytoin in Freely Moving Animals
 
 drugged_indices <- which(all_data$Levetiracetam == 1 | all_data$Phenytoin == 1 | all_data$Diazepam == 1)
 kept_indices <- which(all_data$Levetiracetam == 0 & all_data$Phenytoin == 0 & all_data$Diazepam == 0)
@@ -96,23 +96,25 @@ all_data <- all_data[kept_indices,]
 
 # ------------------------------------------------------------
 
+# Optional For Use in Bootstrapping
+
 # Remove Recordings Above Certain Hours - INPUT 20 (5 HOURS)
 
-max_time <- readline(prompt="What is maximum trial number to include?\nIf so, type in the smallest animal to exclude.\nAny events smaller than or equal to it will be excluded. \nCommon Ones: 12 = 2022/11/07, 22 = 2023/01/16: ")
-20
-kept_indices <- which(all_data$Trial.Number <= as.integer(min_anim))
-all_data <- all_data[kept_indices,]
+# max_time <- readline(prompt="What is maximum trial number to include?\nIf so, type in the smallest animal to exclude.\nAny events smaller than or equal to it will be excluded. \nCommon Ones: 12 = 2022/11/07, 22 = 2023/01/16: ")
+# 20
+# kept_indices <- which(all_data$Trial.Number <= as.integer(min_anim))
+# all_data <- all_data[kept_indices,]
 
 # Permutations of Animals - This is to test if smaller clusters of animals have same significance as in larger clusters.
 
-class_1 <- unique(all_data$Animal [which(all_data$Epileptic == TRUE)])
-class_2 <- unique(all_data$Animal [which(all_data$Epileptic == FALSE)])
+# class_1 <- unique(all_data$Animal [which(all_data$Epileptic == TRUE)])
+# class_2 <- unique(all_data$Animal [which(all_data$Epileptic == FALSE)])
 
-if (length(class_1) > 5) class_1 <- class_1[sample(length(class_1),5)]
-if (length(class_2) > 5) class_2 <- class_2[sample(length(class_2),5)]
+# if (length(class_1) > 5) class_1 <- class_1[sample(length(class_1),5)]
+# if (length(class_2) > 5) class_2 <- class_2[sample(length(class_2),5)]
 
-kept_indices = which (all_data$Animal %in% c(class_1, class_2));
-all_data <- all_data[kept_indices,]
+# kept_indices = which (all_data$Animal %in% c(class_1, class_2));
+# all_data <- all_data[kept_indices,]
 
 # ------------------------------------------------------------
 

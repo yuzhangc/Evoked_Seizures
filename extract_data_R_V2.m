@@ -11,6 +11,7 @@ function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_i
 % path_extract - Directory to Load Features From
 % seizure_duration_list - Calculated Seizure Durations (For Thirds
 % Splitting)
+% feature_list (also output) - Features To Export
 % folder_num - Used for Taking Correct Seizure Durations
 % raw_or_normalized - 1 for normalized, 0 for raw
 
@@ -20,6 +21,7 @@ function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_i
 % Output Variables
 % sz_parameters - Seizure Parameters For Animal
 % final_divided - Features Divided By Thirds By Animal
+% feature_list (also input) - Features To Export - Modified in Function If Empty
 
 % -------------------------------------------------------------------------
 

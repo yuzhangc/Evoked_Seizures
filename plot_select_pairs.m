@@ -7,6 +7,7 @@ function plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filte
 % seizure - pair in format [folder, trial]
 % time_idx - array in format [start, end; start, end...]
 % plot_duration - duration to plot
+% filtered - filtered or raw traces
 
 % Loads Data
 

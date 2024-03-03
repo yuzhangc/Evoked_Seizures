@@ -7,6 +7,9 @@ function [svm_values] = spont_svm_characterization_v2(merged_output_array,merged
 % merged_output_array - merged feature list
 % merged_sz_parameters - complete seizure information list
 
+% Output Variables
+% svm_values - Col 1: SVM Prediction, Col 2: Ground Truth for all files
+
 displays_text = ['\nDo you want to do electrographic or behavioral segregation of seizures?', ...
     '\n(1) - Electrographical', ...
     '\n(0) - Behavioral', ...

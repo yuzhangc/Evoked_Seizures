@@ -21,6 +21,10 @@ function [features,norm_features] = calculate_features(path_extract,filter_sz,fe
 % 11 - Mean Absolute Deviation - https://www.mathworks.com/help/stats/mad.html
 % 12/end - Band Power by bp_filters pairs
 
+% winLen - Windows Length 
+% winDisp - Windows Displacement
+% bp_filters - Set of Bandpower Filters
+
 % Output Variables
 % features - calculated features
 % norm_featured - normalized_features
@@ -370,7 +374,7 @@ for sz_cnt = 1:length(output_data)
         
     end
     
-    % First Plot is Raw Channel. Choose Wire For Most
+    % First Plot is Raw Channel. Choose Wire (Evoked) or Cortex (Freely Moving) For Most
     plot1 = subplot(length(feature_list) + adjustment_val,1,1);
     if size(output_data{sz_cnt}) > 2
         channel = 3;
