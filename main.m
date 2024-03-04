@@ -272,3 +272,6 @@ false_negative = sum(output_values(idx_evk,:) == 2) / length(idx_evk) * 100
 %% Evoked Seizures Processing - Plots By Category
 
 [final_feature_output, subdiv_index, merged_sz_duration, coeff,score] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,not(freely_moving));
+
+% Size For Figure 3C/4C Output
+set(gcf, 'Position', [469 445 636 521])

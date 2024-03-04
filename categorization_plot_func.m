@@ -874,7 +874,11 @@ end
 % Sets Up Standard Deviation Amounts For Errorbar Plot And How Many Rows To
 % Divide Features Into
 
-question = strcat("\nHow many standard error of the mean (SEM) to plot for errorbars?",...
+question = strcat("\nShould the plot uses standard deviation (1) or standard error of the mean (0)?",...
+    "\nEnter a number: ");
+std_or_sem = input(question);
+
+question = strcat("\nHow many SEM/STD to plot for errorbars? Input negative number for box plot",...
     "\nEnter a number: ");
 std_cnt = input(question);
 
@@ -890,7 +894,7 @@ offset = input(question);
 
 % Line For NOT Boxplots
 
-if std_cnt ~= 0
+if std_cnt >= 0
 question = strcat("\nShould there be a line connecting the two points? ",...
     '\n(1) - Yes', ...
     '\n(0) - No', ...
@@ -976,13 +980,13 @@ for ch = 1:4
                         indv_data(row_cnt,:),0.5,"MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:));
                 end
                 
-            elseif std_cnt ~= 0
+            elseif std_cnt >= 0
                 plot_info = strcat(lineornot,positioning(class_split)); % : for dotted line     
             end
             
             % Plots Group Data
             
-            if std_cnt == 0
+            if std_cnt < 0
             
             boxplot(indv_data,'Positions',xaxis,'Widths',0.5/(size(final_feature_output,2) + 2),'Colors',Colorset_plot(class_split,:),'Symbol','') % No Outlier Symbols
             
@@ -997,8 +1001,15 @@ for ch = 1:4
             end
             
             else 
+   
+            % Correction For Standard Error of the Mean (SEM)
+            if std_or_sem
+                correction_val = 1;
+            else
+                correction_val = sqrt(size(indv_data,1));
+            end
 
-            errorbar(xaxis,nanmean(indv_data),std_cnt.*nanstd(indv_data)./sqrt(size(indv_data,1)),plot_info,...
+            errorbar(xaxis,nanmean(indv_data),std_cnt.*nanstd(indv_data)./correction_val,plot_info,...
                  "MarkerEdgeColor",Colorset_plot(class_split,:),"MarkerFaceColor",Colorset_plot(class_split,:),...
                  'Color',Colorset_plot(class_split,:),'LineWidth',2)
             end
