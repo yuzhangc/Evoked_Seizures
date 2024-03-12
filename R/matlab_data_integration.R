@@ -14,15 +14,15 @@ freely_moving <- 1
 
 # Critical Variables For Filtering
 
-# Minimum and Maximum Day For Processing, Inclusive. Set - 90 and + 90 to include all.
+# Minimum and Maximum Day For Processing, Inclusive. Set - 90 and + 90 to include all - spont vs evoked.
 # Set 1 - 3 for Early Naive/Epileptic and 4 and 90 for Late Naive/Epileptic Comparisons
 
-min_day <- 1
-max_day <- 3
+min_day <- -90
+max_day <- 90
 
-# Minimum Racine Scale. Enter 0 for All.
+# Minimum Racine Scale. Enter 0 for All (Naive/Epileptic). Use 3 for Spont vs Evoked.
 
-min_rac <- 0
+min_rac <- 3
 
 # Generate subfolder list
 

@@ -275,3 +275,9 @@ set(gcf, 'Position', [469 445 636 521])
 
 % Size For Figure 4C Output
 set(gcf, 'Position', [207 516 1025 362])
+
+% Size For Thesis Powerpoint
+set(gcf, 'Position',  [501.5 586 1153 292])
+
+% Size of Thresholding 
+set(gcf, 'Position',  [680 652.5  263.5  225.5])
