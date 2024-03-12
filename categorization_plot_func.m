@@ -163,6 +163,19 @@ incl_spont = 1;
 
 end
 
+if main_division ~= 7
+    
+displays_text_17 = ['\nWhat is the minimum (inclusive) Racine scale events to process?', ...
+'\nEnter a number from 0 to 5: '];
+
+min_rac = input(displays_text_17);
+
+else
+    
+min_rac = 0;
+
+end
+
 if main_division ~= 1 && naive_ep == 1
 
 displays_text_8 = ['\nDo you want to exclude NAIVE recordings?', ...
@@ -579,6 +592,21 @@ end
 if not(headfixed)
 
     excluded_indices = find(merged_sz_parameters(:,20) < day_st | merged_sz_parameters(:,20) > day_end);
+    for cnt = 1:length(subdiv_index)
+        subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
+    end
+    anova_excluded_indices = union(anova_excluded_indices, excluded_indices);
+    clear excluded_indices
+
+end
+
+% -------------------------------------------------------------------------
+
+% Step 7D: Exclude Racine Scale Trials Below
+
+if min_rac
+
+    excluded_indices = find(merged_sz_parameters(:,21) < min_rac);
     for cnt = 1:length(subdiv_index)
         subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
     end

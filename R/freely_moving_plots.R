@@ -9,7 +9,7 @@ library(rstatix)
 
 # Change to local folder directory
 
-directory <- "E:/"
+directory <- "G:/Clone of ORG YZ 20240303/"
 
 # Read Trial Master Spreadsheet
 
@@ -21,9 +21,9 @@ trial_info$Phenytoin <- as.logical(trial_info$Phenytoin)
 # Step 2: Generate Days List For Animals
 
 animal_exp_days <- data.frame(
-  Animal = c(100:112),
-  Start_Day = c(-9,-9,-6,-5,-5,-9,-9,-9,-5,-5,-5,-6,-6),
-  End_Day = c(16,16,6,11,11,15,15,15,12,12,12,16,16)
+  Animal = c(100:116),
+  Start_Day = c(-9,-9,-6,-5,-5,-9,-9,-9,-5,-5,-5,-6,-6,-6,-6,-6,-6),
+  End_Day = c(16,16,6,11,11,15,15,15,12,12,12,16,16,4,4,4,4)
 )
 
 # -----------------------------------------------------------------------------
@@ -153,7 +153,7 @@ for (animal in unique(trial_info$Animal)){
        
        behavioral_success <- length(which(drug_free_trials$`Racine` > 0 & drug_free_trials$`Seizure Or Not` == 1))/
          electrographic_sz_cnt * 100
-       behavioral_scale <- mean(drug_free_trials[which(drug_free_trials$`Racine` > 0 & drug_free_trials$`Seizure Or Not` == 1),]$Racine)
+       behavioral_scale <- mean(drug_free_trials[which(drug_free_trials$`Racine` >= 0 & drug_free_trials$`Seizure Or Not` == 1),]$Racine)
        
        } else {
          
@@ -310,9 +310,9 @@ for (day in unique(evk_sz_data$Day)){
 
 # Pairwise T Test For Behavioral Seizure to Epileptic
 
-print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
-print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
-print(evk_sz_data[which(evk_sz_data$Day == 3),] %>% pairwise_t_test(`Behavioral Manifestation of All Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Behavioral Manifestation of Electrographic Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Behavioral Manifestation of Electrographic Seizures - Drug Free`~ Epileptic))
+print(evk_sz_data[which(evk_sz_data$Day == 3),] %>% pairwise_t_test(`Behavioral Manifestation of Electrographic Seizures - Drug Free`~ Epileptic))
 print(evk_sz_data[which(evk_sz_data$Day == 1),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))
 print(evk_sz_data[which(evk_sz_data$Day == 2),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))
 print(evk_sz_data[which(evk_sz_data$Day == 3),] %>% pairwise_t_test(`Behavioral Scale of Electrographic Seizures - Drug Free`~ Epileptic))

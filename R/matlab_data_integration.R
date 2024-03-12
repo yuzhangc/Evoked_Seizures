@@ -6,11 +6,23 @@ library(dplyr)
 
 # Change to local folder directory
 
-directory <- "E:/"
+directory <- "G:/Clone of ORG YZ 20240303/"
 
 # Freely Moving or Head Fixed
 
 freely_moving <- 1
+
+# Critical Variables For Filtering
+
+# Minimum and Maximum Day For Processing, Inclusive. Set - 90 and + 90 to include all.
+# Set 1 - 3 for Early Naive/Epileptic and 4 and 90 for Late Naive/Epileptic Comparisons
+
+min_day <- 1
+max_day <- 3
+
+# Minimum Racine Scale. Enter 0 for All.
+
+min_rac <- 0
 
 # Generate subfolder list
 
@@ -84,6 +96,16 @@ all_data <- rbind(all_data,feature_data)
 # ---------------------------------------------------------------------------------------------------
 
 # Step 3: Filters Data Frame
+
+# Evocation Day Filtering
+
+kept_indices <- which(all_data$Evocation.Day >= min_day & all_data$Evocation.Day <= max_day)
+all_data <- all_data[kept_indices,]
+
+# Racine Scale Filtering
+
+kept_indices <- which(all_data$Seizure.Scale >= min_rac)
+all_data <- all_data[kept_indices,]
 
 # Remove Short Events - INPUT 15 SEC
 

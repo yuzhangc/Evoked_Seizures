@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'E:\';
+directory = 'G:\Clone of ORG YZ 20240303\';
 % Freely Moving Or Not
 freely_moving = 1;
 % Manual Seizure Length Determination
@@ -38,17 +38,12 @@ feat_calc = 1;
 to_plot = 0; plot_duration = 95;
 % Fixes Certain Duration Calculations
 to_fix = 1;
-% Wavelets
-wavelets = 0;
 
 % Global Variables
 % Target sampling rate
 target_fs = 2000;
 % Feature window size (s). Window displacement (s). Spectrogram frequency limit. 
 winLen = 0.5; winDisp = 0.25; overlap_per = winDisp/winLen*100; freq_limits = [1 300];
-if wavelets > 0
-winLen = 2; % For Wavelets
-end
 % Spectrogram plot colorbar limits
 colorbarlim_evoked = [-30,-0];
 % Feature List - 1:12 include all features. Refer to calculate_features for
@@ -148,6 +143,8 @@ end
 % Seizure 49 - YZOPTOEEG  2023-07-06 13H53M_Cage1_053116.rhd
 % Training Function - fitcknn(X,Y) where X is merged temp_output_array and
 % Y is kmeans(X,3)
+
+% subFolders = subFolders([1:8,12,13]) for Epileptic Only
 
 if not(freely_moving)
     load('seizure_model.mat')
@@ -249,7 +246,7 @@ svm_merged_output_array = [merged_output_array, output_array_base];
 svm_merged_sz_parameters = [merged_sz_parameters; sz_param_base];
 
 svm_values = spont_svm_characterization_v2(svm_merged_output_array,svm_merged_sz_parameters);
-
+    
 % Extracts Predictions and Ground Truth
 
 output_values = svm_values(:,1);
@@ -273,5 +270,8 @@ false_negative = sum(output_values(idx_evk,:) == 2) / length(idx_evk) * 100
 
 [final_feature_output, subdiv_index, merged_sz_duration, coeff,score] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,not(freely_moving));
 
-% Size For Figure 3C/4C Output
+% Size For Figure 3C Output
 set(gcf, 'Position', [469 445 636 521])
+
+% Size For Figure 4C Output
+set(gcf, 'Position', [207 516 1025 362])
