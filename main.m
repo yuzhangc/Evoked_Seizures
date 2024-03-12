@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'G:\Clone of ORG YZ 20240303\';
+directory = 'D:\';
 % Freely Moving Or Not
 freely_moving = 1;
 % Manual Seizure Length Determination
@@ -171,6 +171,12 @@ end
 
 % Merged sz_parameters and output_array
 
+if not(freely_moving)
+animal_info = readtable(strcat(directory,'Animal Master Head Fixed.csv'));
+else
+animal_info = readtable(strcat(directory,'Animal Master.csv'));
+end
+
 merged_output_array = [];
 merged_sz_parameters = [];
 
@@ -191,6 +197,25 @@ for folder_num = 1:length(subFolders)
 
 end
 
+if not(freely_moving)
+animal_info = readtable(strcat(directory,'Animal Master Head Fixed.csv'));
+else
+animal_info = readtable(strcat(directory,'Animal Master.csv'));
+end
+
+% Threshold Comparisons
+
+pw = [min_thresh_list.power];
+pw (pw == -1 ) = NaN;
+dur = [min_thresh_list.duration];
+dur (dur == -1) = NaN;
+ep = table2array(animal_info(:,5));
+
+% Wilcoxon Rank Sum Test
+
+ranksum(pw(ep == 1), pw(ep == 0))
+ranksum(dur(ep == 1), dur(ep == 0))
+
 % Writes To Be Fixed Seizure List
 
 if seizure_input && not(exist(strcat(directory,"To Fix.csv")))
@@ -206,7 +231,7 @@ end
 
 threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list,freely_moving)
 
-clear min_thresh seizure_duration output_array sz_parameters
+clear min_thresh seizure_duration output_array sz_parameters animal_info
 
 %% Output Data To R
 

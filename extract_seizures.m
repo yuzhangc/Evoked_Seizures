@@ -88,7 +88,7 @@ for count = 1:length(filelist)
     stim_start = stim_start_all(count) - t_before * fs;
     
     % Step 4: Extracts relevant sections
-    output_data{count} = amplifier_data(stim_start:stim_start + t_before * fs + t_after * fs - 1,:);
+    output_data{count} = amplifier_data(stim_start:stim_start + t_before * fs + t_after * fs - 1,:); % [3,4,1,2] For Animal 116 - Channels Flipped
 
     % Step 5: Generates Confirmatory Plot
     fig1 = figure(1); hold on;
