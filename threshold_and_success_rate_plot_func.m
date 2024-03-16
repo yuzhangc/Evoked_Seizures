@@ -282,6 +282,14 @@ scatter(xaxis2, avg_above_thresh_naive, 'filled',"MarkerFaceColor", [0 0.4470 0.
 
 % Errorbar
 
+disp("Epileptic Mean and STD - Duration of Events")
+mean(avg_above_thresh_epileptic)
+std(avg_above_thresh_epileptic)
+
+disp("Naive Mean and STD - Duration of Events")
+mean(avg_above_thresh_naive)
+std(avg_above_thresh_naive)
+
 x_errorbar = [1,3];
 errorbar(x_errorbar,[mean(avg_above_thresh_epileptic),mean(avg_above_thresh_naive)],...
     [std(avg_above_thresh_epileptic),std(avg_above_thresh_naive)],'ko','LineWidth',2);

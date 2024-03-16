@@ -6,7 +6,7 @@ library(dplyr)
 
 # Change to local folder directory
 
-directory <- "G:/Clone of ORG YZ 20240303/"
+directory <- "E:/"
 
 # Freely Moving or Head Fixed
 
@@ -157,6 +157,10 @@ single_stim_indices <- which(is.na(all_data$Laser.2...Color) & (all_data$Laser.1
 double_blue_stim_indices <- which(all_data$Laser.2...Color == 473 & all_data$Delay > 0 & all_data$Laser.2...Frequency > 0)
 spont_indices <-  which(is.na(all_data$Laser.1...Color))
 
+# Spontaneous Only
+
+spont_data <- all_data[spont_indices,]
+
 # Spontaneous vs Evoked Only Contains Epileptic Animals
 
 spont_vs_evoked_data = all_data[c(single_stim_indices,spont_indices),]
@@ -214,3 +218,32 @@ summary(lm(Ch.3.Area ~ Spont * Time.Point, data = spont_vs_evoked_data))
 summary(lm(Ch.3.Skew ~ Spont * Time.Point, data = spont_vs_evoked_data))
 summary(lm(Ch.3.AEntropy ~ Spont * Time.Point, data = spont_vs_evoked_data))
 summary(lm(Ch.3.PLHG ~ Spont * Time.Point, data = spont_vs_evoked_data))
+
+# ---------------------------------------------------------------------------------------------------
+
+# Step 7: Spontaneous Only Characterization
+
+summary(lmer(Ch.3.Area ~ Time.Point + (1|Animal), data = spont_data))
+summary(lmer(Ch.3.Skew ~ Time.Point + (1|Animal), data = spont_data))
+summary(lmer(Ch.3.Line.Length ~ Time.Point + (1|Animal), data = spont_data))
+summary(lmer(Ch.3.Band.Power.1.Hz.to.30Hz ~ Time.Point + (1|Animal), data = spont_data))
+summary(lmer(Ch.3.Band.Power.30.Hz.to.300Hz ~ Time.Point + (1|Animal), data = spont_data))
+summary(lmer(Ch.3.Band.Power.300.Hz.to.1000Hz ~ Time.Point + (1|Animal), data = spont_data))
+summary(lmer(Ch.3.AEntropy ~ Time.Point + (1|Animal), data = spont_data))
+summary(lmer(Ch.3.PLHG ~ Time.Point + (1|Animal), data = spont_data))
+
+# Change Order of Factors so Compare Second Third to First Third
+
+spont_data$Time.Point <- factor(spont_data$Time.Point, levels = c("Seizure - First Third", "Before Stimulation", 
+  "During Stimulation", "Seizure - Second Third", "Seizure - Final Third", "Post Seizure"))
+
+# Change Order of Factors so Compare Second Third to Final Third
+
+spont_data$Time.Point <- factor(spont_data$Time.Point, levels = c("Seizure - Second Third", "Before Stimulation", 
+  "During Stimulation", "Seizure - First Third", "Seizure - Final Third", "Post Seizure"))
+
+# Change Order of Factors so Compare First Third to Pre Stim
+
+spont_data$Time.Point <- factor(spont_data$Time.Point, levels = c("Before Stimulation", "During Stimulation",
+  "Seizure - First Third", "Seizure - Second Third", "Seizure - Final Third", "Post Seizure"))
+

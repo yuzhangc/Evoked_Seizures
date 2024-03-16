@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'D:\';
+directory = 'E:\';
 % Freely Moving Or Not
 freely_moving = 1;
 % Manual Seizure Length Determination
@@ -213,8 +213,18 @@ ep = table2array(animal_info(:,5));
 
 % Wilcoxon Rank Sum Test
 
-ranksum(pw(ep == 1), pw(ep == 0))
-ranksum(dur(ep == 1), dur(ep == 0))
+pow_ep_vs_nv = ranksum(pw(ep == 1), pw(ep == 0))
+dur_ep_vs_nv = ranksum(dur(ep == 1), dur(ep == 0))
+
+ep_pow_mean = mean(pw(ep == 1))
+ep_pow_sd = std(pw(ep == 1))
+
+ep_dur_mean = mean(dur(ep == 1))
+ep_dur_sd = std(dur(ep == 1))
+
+min_thresh_success = [min_thresh_list.avg_success];
+mean_success = mean(min_thresh_success(ep == 1))
+sd_success = std(min_thresh_success(ep == 1))
 
 % Writes To Be Fixed Seizure List
 
@@ -230,6 +240,12 @@ end
 % animals that were processed.
 
 threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list,freely_moving)
+
+% Overall Accuracy Within 5 Secs. Must Perform With All Animals!
+
+num_within_5sec = sum(to_fix_chart((to_fix_chart(:,1) > 99),6));
+animal_in_to_fix = size(to_fix_chart((to_fix_chart(:,1) > 99),6),1);
+accuracy_within_5sec = 1 - (animal_in_to_fix - num_within_5sec)/size(merged_sz_parameters,1)
 
 clear min_thresh seizure_duration output_array sz_parameters animal_info
 

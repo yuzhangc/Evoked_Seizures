@@ -9,7 +9,7 @@ library(rstatix)
 
 # Change to local folder directory
 
-directory <- "G:/Clone of ORG YZ 20240303/"
+directory <- "E:/"
 
 # Read Trial Master Spreadsheet
 
@@ -110,6 +110,15 @@ spont_sz_vs_day +
   # Legends
   scale_colour_manual(name="Legend", labels = c("Epileptic", "Naive") , values = c("red1","royalblue1")) +
   scale_size(name = "Counts")
+
+# Spontaneous Seizure Mean Before and After Stim
+
+mean(day_vs_an[which(day_vs_an$Epileptic == 1 & day_vs_an$Day < 0),]$`Spontaneous Seizures`)
+sd(day_vs_an[which(day_vs_an$Epileptic == 1 & day_vs_an$Day < 0),]$`Spontaneous Seizures`)
+mean(day_vs_an[which(day_vs_an$Epileptic == 1 & day_vs_an$Day > 0),]$`Spontaneous Seizures`)
+sd(day_vs_an[which(day_vs_an$Epileptic == 1 & day_vs_an$Day > 0),]$`Spontaneous Seizures`)
+
+wilcox.test(day_vs_an[which(day_vs_an$Epileptic == 1 & day_vs_an$Day > 0),]$`Spontaneous Seizures`,day_vs_an[which(day_vs_an$Epileptic == 1 & day_vs_an$Day < 0),]$`Spontaneous Seizures`)
 
 # -----------------------------------------------------------------------------
 
