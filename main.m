@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'E:\';
+directory = 'G:\Clone of ORG YZ 20240303\';
 % Freely Moving Or Not
 freely_moving = 1;
 % Manual Seizure Length Determination
@@ -197,12 +197,6 @@ for folder_num = 1:length(subFolders)
 
 end
 
-if not(freely_moving)
-animal_info = readtable(strcat(directory,'Animal Master Head Fixed.csv'));
-else
-animal_info = readtable(strcat(directory,'Animal Master.csv'));
-end
-
 % Threshold Comparisons
 
 pw = [min_thresh_list.power];
@@ -215,6 +209,9 @@ ep = table2array(animal_info(:,5));
 
 pow_ep_vs_nv = ranksum(pw(ep == 1), pw(ep == 0))
 dur_ep_vs_nv = ranksum(dur(ep == 1), dur(ep == 0))
+succ_ep_vs_nv = ranksum(min_thresh_success(ep == 1), min_thresh_success(ep == 0))
+
+% Epileptic Calculations
 
 ep_pow_mean = mean(pw(ep == 1))
 ep_pow_sd = std(pw(ep == 1))
@@ -223,8 +220,19 @@ ep_dur_mean = mean(dur(ep == 1))
 ep_dur_sd = std(dur(ep == 1))
 
 min_thresh_success = [min_thresh_list.avg_success];
-mean_success = mean(min_thresh_success(ep == 1))
-sd_success = std(min_thresh_success(ep == 1))
+ep_mean_success = mean(min_thresh_success(ep == 1))
+ep_sd_success = std(min_thresh_success(ep == 1))
+
+% Naive Calculations
+
+nv_pow_mean = nanmean(pw(ep == 0))
+nv_pow_sd = nanstd(pw(ep == 0))
+
+nv_dur_mean = nanmean(dur(ep == 0))
+nv_dur_sd = nanstd(dur(ep == 0))
+
+nv_mean_success = mean(min_thresh_success(ep == 0))
+nv_sd_success = std(min_thresh_success(ep == 0))
 
 % Writes To Be Fixed Seizure List
 
