@@ -209,7 +209,6 @@ ep = table2array(animal_info(:,5));
 
 pow_ep_vs_nv = ranksum(pw(ep == 1), pw(ep == 0))
 dur_ep_vs_nv = ranksum(dur(ep == 1), dur(ep == 0))
-succ_ep_vs_nv = ranksum(min_thresh_success(ep == 1), min_thresh_success(ep == 0))
 
 % Epileptic Calculations
 
@@ -222,6 +221,10 @@ ep_dur_sd = std(dur(ep == 1))
 min_thresh_success = [min_thresh_list.avg_success];
 ep_mean_success = mean(min_thresh_success(ep == 1))
 ep_sd_success = std(min_thresh_success(ep == 1))
+
+% Wilcoxon Rank Sum Test
+
+succ_ep_vs_nv = ranksum(min_thresh_success(ep == 1), min_thresh_success(ep == 0))
 
 % Naive Calculations
 
