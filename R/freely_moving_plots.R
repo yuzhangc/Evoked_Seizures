@@ -9,7 +9,7 @@ library(rstatix)
 
 # Change to local folder directory
 
-directory <- "G:/Clone of ORG YZ 20240303/"
+directory <- "D:/"
 
 # Read Trial Master Spreadsheet
 

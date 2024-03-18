@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'G:\Clone of ORG YZ 20240303\';
+directory = 'D:\';
 % Freely Moving Or Not
 freely_moving = 1;
 % Manual Seizure Length Determination
@@ -257,6 +257,18 @@ threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_
 num_within_5sec = sum(to_fix_chart((to_fix_chart(:,1) > 99),6));
 animal_in_to_fix = size(to_fix_chart((to_fix_chart(:,1) > 99),6),1);
 accuracy_within_5sec = 1 - (animal_in_to_fix - num_within_5sec)/size(merged_sz_parameters,1)
+
+% Epileptic Only Accuracy
+
+total = sum(merged_sz_parameters (:,1) == 111) + sum(merged_sz_parameters (:,1) == 112) + sum(merged_sz_parameters (:,1) <= 107 & merged_sz_parameters (:,1) >= 100);
+fixed = sum(to_fix_chart(:,1) == 111 & to_fix_chart(:,6) == 0) + sum(to_fix_chart(:,1) == 112 & to_fix_chart(:,6) == 0) + sum(to_fix_chart(:,1) >= 100 & to_fix_chart(:,1) <= 107 & to_fix_chart(:,6) == 0);
+accuracy_within_5sec_ep = 1 - fixed/total
+
+% Naive Only Accuracy
+
+total = sum(merged_sz_parameters (:,1) >= 113 & merged_sz_parameters (:,1) <= 116) + sum(merged_sz_parameters (:,1) <= 110 & merged_sz_parameters (:,1) >= 108);
+fixed = sum(to_fix_chart(:,1) >= 113 & to_fix_chart(:,1) <= 116 & to_fix_chart(:,6) == 0) + sum(to_fix_chart(:,1) >= 108 & to_fix_chart(:,1) <= 110 & to_fix_chart(:,6) == 0);
+accuracy_within_5sec_nv = 1 - fixed/total
 
 clear min_thresh seizure_duration output_array sz_parameters animal_info
 

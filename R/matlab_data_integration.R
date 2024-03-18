@@ -6,7 +6,7 @@ library(dplyr)
 
 # Change to local folder directory
 
-directory <- "G:/Clone of ORG YZ 20240303/"
+directory <- "D:/"
 
 # Freely Moving or Head Fixed
 
@@ -17,12 +17,12 @@ freely_moving <- 1
 # Minimum and Maximum Day For Processing, Inclusive. Set - 90 and + 90 to include all - spont vs evoked.
 # Set 1 - 4 for Early Naive/Epileptic and 5 and 90 for Late Naive/Epileptic Comparisons
 
-min_day <- 1
-max_day <- 4
+min_day <- -90
+max_day <- 90
 
 # Minimum Racine Scale. Enter 0 for All (Naive/Epileptic). Use 3 for Spont vs Evoked.
 
-min_rac <- 0
+min_rac <- 3
 
 # Generate subfolder list
 
@@ -155,10 +155,10 @@ all_data <- all_data[kept_indices,]
 
 single_stim_indices <- which(is.na(all_data$Laser.2...Color) & (all_data$Laser.1...Color == 473 | all_data$Laser.1...Color == 488))
 double_blue_stim_indices <- which(all_data$Laser.2...Color == 473 & all_data$Delay > 0 & all_data$Laser.2...Frequency > 0)
-spont_indices <-  which(is.na(all_data$Laser.1...Color))
 
-# Spontaneous Only
+# Spontaneous Only (Epileptic)
 
+spont_indices <-  which(is.na(all_data$Laser.1...Color) & all_data$Epileptic == TRUE)
 spont_data <- all_data[spont_indices,]
 
 # Spontaneous vs Evoked Only Contains Epileptic Animals
