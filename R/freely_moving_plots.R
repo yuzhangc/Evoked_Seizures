@@ -9,7 +9,7 @@ library(rstatix)
 
 # Change to local folder directory
 
-directory <- "E:/"
+directory <- "G:/Clone of ORG YZ 20240303/"
 
 # Read Trial Master Spreadsheet
 
@@ -23,7 +23,7 @@ trial_info$Phenytoin <- as.logical(trial_info$Phenytoin)
 animal_exp_days <- data.frame(
   Animal = c(100:116),
   Start_Day = c(-9,-9,-6,-5,-5,-9,-9,-9,-5,-5,-5,-6,-6,-6,-6,-6,-6),
-  End_Day = c(16,16,6,11,11,15,15,15,12,12,12,16,16,4,4,4,4)
+  End_Day = c(16,16,6,11,11,15,15,15,12,12,12,16,16,10,10,10,10)
 )
 
 # -----------------------------------------------------------------------------
