@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 % Change to local folder directory
-directory = 'D:\';
+directory = 'E:\';
 % Freely Moving Or Not
 freely_moving = 1;
 % Manual Seizure Length Determination

@@ -9,7 +9,7 @@ library(rstatix)
 
 # Change to local folder directory
 
-directory <- "D:/"
+directory <- "E:/"
 
 # Read Trial Master Spreadsheet
 
@@ -508,6 +508,10 @@ conditions <- c(rep("Control",length(no_drug_elec_d)),rep("Diazepam",length(diaz
 
 drug_test_plot <- data.frame(compiled_names,compiled_success, conditions)
 names(drug_test_plot) <- c("Condition","Success Rate","Control Or Not")
+
+# Summary Data
+
+by(drug_test_plot,drug_test_plot$Condition, summary)
 
 drug_comparison <- ggplot()
 drug_comparison +

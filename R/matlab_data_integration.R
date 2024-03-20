@@ -247,3 +247,35 @@ spont_data$Time.Point <- factor(spont_data$Time.Point, levels = c("Seizure - Sec
 spont_data$Time.Point <- factor(spont_data$Time.Point, levels = c("Before Stimulation", "During Stimulation",
   "Seizure - First Third", "Seizure - Second Third", "Seizure - Final Third", "Post Seizure"))
 
+# ---------------------------------------------------------------------------------------------------
+
+# Step 8: Epileptic Only Characterization
+
+# Specific to Epileptic
+
+kept_indices <- which(sing_data$Weeks.Post.KA > -1)
+sing_data_ep <- sing_data[kept_indices,]
+
+summary(lmer(Ch.3.Area ~ Time.Point + (1|Animal), data = sing_data_ep))
+summary(lmer(Ch.3.Skew ~ Time.Point + (1|Animal), data = sing_data_ep))
+summary(lmer(Ch.3.Line.Length ~ Time.Point + (1|Animal), data = sing_data_ep))
+summary(lmer(Ch.3.Band.Power.1.Hz.to.30Hz ~ Time.Point + (1|Animal), data = sing_data_ep))
+summary(lmer(Ch.3.Band.Power.30.Hz.to.300Hz ~ Time.Point + (1|Animal), data = sing_data_ep))
+summary(lmer(Ch.3.Band.Power.300.Hz.to.1000Hz ~ Time.Point + (1|Animal), data = sing_data_ep))
+summary(lmer(Ch.3.AEntropy ~ Time.Point + (1|Animal), data = sing_data_ep))
+summary(lmer(Ch.3.PLHG ~ Time.Point + (1|Animal), data = sing_data_ep))
+
+# Change Order of Factors so Compare Second Third to First Third
+
+sing_data_ep$Time.Point <- factor(sing_data_ep$Time.Point, levels = c("Seizure - First Third", "Before Stimulation", 
+                                                                  "During Stimulation", "Seizure - Second Third", "Seizure - Final Third", "Post Seizure"))
+
+# Change Order of Factors so Compare Second Third to Final Third
+
+sing_data_ep$Time.Point <- factor(sing_data_ep$Time.Point, levels = c("Seizure - Second Third", "Before Stimulation", 
+                                                                  "During Stimulation", "Seizure - First Third", "Seizure - Final Third", "Post Seizure"))
+
+# Change Order of Factors so Compare First Third to Pre Stim
+
+sing_data_ep$Time.Point <- factor(sing_data_ep$Time.Point, levels = c("Before Stimulation", "During Stimulation",
+                                                                  "Seizure - First Third", "Seizure - Second Third", "Seizure - Final Third", "Post Seizure"))
