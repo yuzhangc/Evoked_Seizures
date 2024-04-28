@@ -1,7 +1,7 @@
 # Step 0: Key Variables
 
 # Compare to Previous Day Vs Same Day (Useful For Drug Evocation)
-comp_to_prev_day = TRUE;
+comp_to_prev_day = FALSE;
 
 # Step 1: Import Libraries and Master Spreadsheet
 
