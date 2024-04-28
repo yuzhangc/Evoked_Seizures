@@ -1,3 +1,8 @@
+# Step 0: Key Variables
+
+# Compare to Previous Day Vs Same Day (Useful For Drug Evocation)
+comp_to_prev_day = TRUE;
+
 # Step 1: Import Libraries and Master Spreadsheet
 
 library(readxl)
@@ -421,6 +426,10 @@ for (animal in animal_list) {
       
       # Appends Control Trial Info
       
+      # Lowers Drug Day By 1 For Control If Prev Day
+      
+      if (comp_to_prev_day) {day <- day - 1;}
+      
       if (is.null(no_drug_elec_d)) {
         
         no_drug_elec_d[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`
@@ -432,6 +441,10 @@ for (animal in animal_list) {
         no_drug_behav_d <- append(no_drug_behav_d, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Drug Free`)
         
       }
+      
+      # Undoes Drug Day Lowering
+      
+      if (comp_to_prev_day) {day <- day + 1;}
       
       # Appends Diazepam Trial Info
       
@@ -461,6 +474,10 @@ for (animal in animal_list) {
       
       # Appends Control Trial Info
       
+      # Lowers Drug Day By 1 For Control If Prev Day
+      
+      if (comp_to_prev_day) {day <- day - 1;}
+      
       if (is.null(no_drug_elec_l)) {
         
         no_drug_elec_l[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`
@@ -472,6 +489,10 @@ for (animal in animal_list) {
         no_drug_behav_l <- append(no_drug_behav_l, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Behavioral Manifestation of All Seizures - Drug Free`)
         
       }
+      
+      # Undoes Drug Day Lowering
+      
+      if (comp_to_prev_day) {day <- day + 1;}
       
       # Appends Levetiracetam Trial Info
       
