@@ -409,7 +409,11 @@ animal_list = unique(evk_sz_data$Animal)
 
 # Epileptic Only
 
-animal_list = c(100, 101, 102, 103, 104, 105, 106, 107,111,112)
+animal_list = c(100, 101, 102, 103, 104, 105, 106, 107, 111, 112)
+
+# Naive Only
+
+animal_list = c(108, 109, 110, 113, 114, 115, 116)
 
 for (animal in animal_list) {
 
