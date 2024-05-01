@@ -14,7 +14,7 @@ library(rstatix)
 
 # Change to local folder directory
 
-directory <- "E:/"
+directory <- "D:/"
 
 # Read Trial Master Spreadsheet
 
@@ -30,6 +30,20 @@ animal_exp_days <- data.frame(
   Start_Day = c(-9,-9,-6,-5,-5,-9,-9,-9,-5,-5,-5,-6,-6,-6,-6,-6,-6),
   End_Day = c(16,16,6,11,11,15,15,15,12,12,12,16,16,10,10,10,10)
 )
+
+# Animals For Drug Plot Only
+
+# All Animals
+
+animal_list = unique(evk_sz_data$Animal)
+
+# Epileptic Only
+
+animal_list = c(100, 101, 102, 103, 104, 105, 106, 107, 111, 112)
+
+# Naive Only
+
+animal_list = c(108, 109, 110, 113, 114, 115, 116)
 
 # -----------------------------------------------------------------------------
 
@@ -160,6 +174,7 @@ for (animal in unique(trial_info$Animal)){
        electrographic_sz_cnt <- sum(drug_free_trials$`Seizure Or Not`)
        true_behavioral_success <- length(which(drug_free_trials$`Racine` > 0))/drug_free_total * 100
        electrographic_success <- electrographic_sz_cnt/drug_free_total * 100
+       racine_drug_free <- mean(drug_free_trials$`Racine`)
        
        # Percentage Electrographic Seizures That Are Also Behavioral
        
@@ -181,6 +196,7 @@ for (animal in unique(trial_info$Animal)){
       electrographic_success <- NaN
       behavioral_success <- NaN
       behavioral_scale <- NaN
+      racine_drug_free <- NaN
       
     }
     
@@ -191,6 +207,7 @@ for (animal in unique(trial_info$Animal)){
       lev_trials <- specific_trials[which(specific_trials$Levetiracetam > 0),]
       lev_elec_sz_cnt <- sum(lev_trials$`Seizure Or Not`)
       lev_elec_success <- lev_elec_sz_cnt/lev_total * 100
+      racine_lev <- mean(lev_trials$`Racine`)
       
       if (lev_elec_sz_cnt > 0) {
         
@@ -207,6 +224,7 @@ for (animal in unique(trial_info$Animal)){
       
       lev_elec_success <- NaN
       lev_behav_success <- NaN
+      racine_lev <- NaN
       
     }
     
@@ -217,6 +235,7 @@ for (animal in unique(trial_info$Animal)){
       diaz_trials <- specific_trials[which(specific_trials$Diazepam > 0),]
       diaz_elec_sz_cnt <- sum(diaz_trials$`Seizure Or Not`)
       diaz_elec_success <- sum(diaz_trials$`Seizure Or Not`)/diaz_total * 100
+      racine_diaz <- mean(diaz_trials$`Racine`)
       
       if (diaz_elec_sz_cnt > 0) {
       
@@ -233,19 +252,20 @@ for (animal in unique(trial_info$Animal)){
       
       diaz_elec_success <- NaN
       diaz_behav_success <- NaN
+      racine_diaz <- NaN
       
     }
     
     # Incorporate Into Dataframe
     
     temp_data <- data.frame(animal,day,drug_free_total,electrographic_success,behavioral_success, true_behavioral_success, behavioral_scale,
-            lev_total,lev_elec_success,lev_behav_success,diaz_total, diaz_elec_success, diaz_behav_success,
+            racine_drug_free, lev_total,lev_elec_success,lev_behav_success,racine_lev,diaz_total, diaz_elec_success, diaz_behav_success, racine_diaz,
             trial_info$Epileptic[which(trial_info$Animal == animal)][1])
     names(temp_data) <- c("Animal","Day","Drug Free Evocations","Success Rate (E) - Drug Free","Behavioral Manifestation of Electrographic Seizures - Drug Free", 
-                          "Behavioral Manifestation of All Seizures - Drug Free","Behavioral Scale of Electrographic Seizures - Drug Free",
+                          "Behavioral Manifestation of All Seizures - Drug Free","Behavioral Scale of Electrographic Seizures - Drug Free", "Racine - Drug Free All",
                           "Levetiracetam Evocations","Success Rate (E) - Levetiracetam",
-                          "Behavioral Manifestation of All Seizures - Levetiracetam", "Diazepam Evocations",
-                          "Success Rate (E) - Diazepam","Behavioral Manifestation of All Seizures - Diazepam", "Epileptic")        
+                          "Behavioral Manifestation of All Seizures - Levetiracetam", "Racine - Levetiracetam", "Diazepam Evocations",
+                          "Success Rate (E) - Diazepam","Behavioral Manifestation of All Seizures - Diazepam", "Racine - Diazepam", "Epileptic")        
     
     evk_sz_data <- rbind(evk_sz_data, temp_data)
     
@@ -253,7 +273,7 @@ for (animal in unique(trial_info$Animal)){
     
     rm(specific_trials, diaz_trials, lev_trials, drug_free_trials, temp_data,diaz_behav_success,diaz_elec_success,
        lev_behav_success,lev_elec_success,diaz_elec_sz_cnt,lev_elec_sz_cnt,electrographic_sz_cnt,behavioral_success,
-       drug_free_total, lev_total, diaz_total,true_behavioral_success)
+       drug_free_total, lev_total, diaz_total,true_behavioral_success, racine_drug_free, racine_diaz, racine_lev)
     
     }
 
@@ -403,18 +423,6 @@ lev_elec = c()
 no_drug_behav_l = c()
 lev_behav = c()
 
-# All Animals
-
-animal_list = unique(evk_sz_data$Animal)
-
-# Epileptic Only
-
-animal_list = c(100, 101, 102, 103, 104, 105, 106, 107, 111, 112)
-
-# Naive Only
-
-animal_list = c(108, 109, 110, 113, 114, 115, 116)
-
 for (animal in animal_list) {
 
   # Extracts Drug Trial Days
@@ -549,3 +557,147 @@ drug_comparison +
 rm(lev_behav,lev_elec,no_drug_behav_d,no_drug_behav_l,no_drug_elec_d,no_drug_elec_l,diaz_behav,diaz_elec,
    diaz_drug_days,lev_drug_days,success_rate_behavior,success_rate_electrographic,electrographic_success, animal,
    counts_ep, counts_nv, day, unique_elec_counts, compiled_names, compiled_success, conditions)
+
+# -----------------------------------------------------------------------------
+
+# Step 10: Repeat Step 9, Except With Duration and Racine Scale
+
+# Sets Up Variables
+
+no_drug_elec_d = c()
+diaz_elec = c()
+no_drug_behav_d = c()
+diaz_behav = c()
+no_drug_elec_l = c()
+lev_elec = c()
+no_drug_behav_l = c()
+lev_behav = c()
+
+for (animal in animal_list) {
+  
+  # Extracts Drug Trial Days
+  
+  diaz_drug_days <- unique(evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$`Diazepam Evocations` > 0),]$Day)
+  lev_drug_days <- unique(evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$`Levetiracetam Evocations` > 0),]$Day)
+  
+  if (length(diaz_drug_days) > 0) {
+    
+    # Extract Success Rate For Non-Drug and Drug Trials on Drug Day
+    
+    for (day in unique(diaz_drug_days)) {
+      
+      # Appends Control Trial Info
+      
+      # Lowers Drug Day By 1 For Control If Prev Day
+      
+      if (comp_to_prev_day) {day <- day - 1;}
+      
+      if (is.null(no_drug_elec_d)) {
+        
+        no_drug_elec_d[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`
+        no_drug_behav_d[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Racine - Drug Free All`
+        
+      } else {
+        
+        no_drug_elec_d <- append(no_drug_elec_d, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`)
+        no_drug_behav_d <- append(no_drug_behav_d, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Racine - Drug Free All`)
+        
+      }
+      
+      # Undoes Drug Day Lowering
+      
+      if (comp_to_prev_day) {day <- day + 1;}
+      
+      # Appends Diazepam Trial Info
+      
+      if (is.null(diaz_elec)) {
+        
+        diaz_elec[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Diazepam`
+        diaz_behav[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Racine - Diazepam`
+        
+      } else {
+        
+        diaz_elec <- append(diaz_elec, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Diazepam`)
+        diaz_behav <- append(diaz_behav,evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Racine - Diazepam`)
+        
+      }
+      
+    }
+    
+  }
+  
+  # Levetiracetam
+  
+  if (length(lev_drug_days) > 0) {
+    
+    # Extract Success Rate For Non-Drug and Drug Trials on Drug Day
+    
+    for (day in unique(lev_drug_days)) {
+      
+      # Appends Control Trial Info
+      
+      # Lowers Drug Day By 1 For Control If Prev Day
+      
+      if (comp_to_prev_day) {day <- day - 1;}
+      
+      if (is.null(no_drug_elec_l)) {
+        
+        no_drug_elec_l[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`
+        no_drug_behav_l[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Racine - Drug Free All`
+        
+      } else {
+        
+        no_drug_elec_l <- append(no_drug_elec_l, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Drug Free`)
+        no_drug_behav_l <- append(no_drug_behav_l, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Racine - Drug Free All`)
+        
+      }
+      
+      # Undoes Drug Day Lowering
+      
+      if (comp_to_prev_day) {day <- day + 1;}
+      
+      # Appends Levetiracetam Trial Info
+      
+      if (is.null(lev_elec)) {
+        
+        lev_elec[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Levetiracetam`
+        lev_behav[1] <- evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Racine - Levetiracetam`
+        
+      } else {
+        
+        lev_elec <- append(lev_elec, evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Success Rate (E) - Levetiracetam`)
+        lev_behav <- append(lev_behav,evk_sz_data[which(evk_sz_data$Animal == animal & evk_sz_data$Day == day),]$`Racine - Levetiracetam`)
+        
+      }
+      
+    }
+    
+  }
+  
+}
+
+# Compile Into Dataframe
+
+compiled_success_rac <- c(no_drug_behav_d , diaz_behav,no_drug_behav_l, lev_behav)
+compiled_names_rac <- c(rep("WT-D",length(no_drug_behav_d)),rep("DZ",length(diaz_behav)),
+                    rep("WT-L",length(no_drug_behav_l)),rep("LV",length(lev_behav)))
+conditions <- c(rep("Control",length(no_drug_behav_d)),rep("Diazepam",length(diaz_behav)),
+                rep("Control",length(no_drug_behav_l)),rep("Levetiracetam",length(lev_behav)))
+
+drug_test_plot_rac <- data.frame(compiled_names_rac,compiled_success_rac, conditions)
+names(drug_test_plot_rac) <- c("Condition","Mean Racine Scale","Control Or Not")
+
+# Summary Data
+
+by(drug_test_plot_rac,drug_test_plot_rac$Condition, summary)
+
+drug_comparison <- ggplot()
+drug_comparison +
+  # Box Plot For Data
+  ggboxplot(drug_test_plot_rac,x = "Condition",y = "Mean Racine Scale",add = "dotplot",  palette = c("black", "forestgreen", "purple2"),
+            color = "Control Or Not")
+
+# Clear Workspace
+
+rm(lev_behav,lev_elec,no_drug_behav_d,no_drug_behav_l,no_drug_elec_d,no_drug_elec_l,diaz_behav,diaz_elec,
+   diaz_drug_days,lev_drug_days, animal, day, compiled_names, compiled_success, conditions)
