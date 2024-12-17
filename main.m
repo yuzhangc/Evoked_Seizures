@@ -198,14 +198,31 @@ for folder_num = 1:length(subFolders)
     % PCA Calculation
     pca_spont = 1; % Spontaneous Vs Evoked
     pca_day = 1; % Day of Evocation
-    pca_output_array = [];
     tgt_duration = 15; % Minimum Second of Seizure to Be Included in PCA
-    min_rac = 3;
+    min_rac = 3; % Minimum Racine Scale
+    t_before = 5; % T Before Used in Extract Seizure
+
+    plot_indiv = 0; % Plot Individuals
+
+    % Main Outputs
+    pca_lengths = [];
+    pca_output_array = [];
 
     for sz = 1:length(output_array)
-        indv_length = size(output_array{sz},1); % Length of Individual Seizures
+
+        % Lengths
+        if sz_parameters(sz,12) ~= -1
+        sz_start = (t_before + sz_parameters(sz,12))/winDisp;
+        else
+        sz_start = (t_before)/winDisp;
+        end
+        sz_end = sz_start + seizure_duration(sz)/winDisp;
+
         if seizure_duration(sz) >= tgt_duration & min_rac <= sz_parameters(sz,21)
-        pca_output_array = [pca_output_array,output_array{sz}']; % Concactenates PCA Arrays
+        pca_output_array = [pca_output_array,output_array{sz}(sz_start:sz_end,:)']; % Concactenates PCA Arrays
+        pca_lengths = [pca_lengths;sz_end-sz_start+1]; % Concactenate Custom Lengths
+        else
+        pca_lengths = [pca_lengths;0]; % For No Addition
         end
     end
 
@@ -252,15 +269,39 @@ for folder_num = 1:length(subFolders)
         end
         
         if seizure_duration(sz) >= tgt_duration & min_rac <= sz_parameters(sz,21)
-        colors_center = [colors_center;repmat(temp_colors,size(output_array{sz},1),1)];
-        colors_outline = [colors_outline;repmat(temp_edge,size(output_array{sz},1),1)];
+        colors_center = [colors_center;repmat(temp_colors,pca_lengths(sz),1)];
+        colors_outline = [colors_outline;repmat(temp_edge,pca_lengths(sz),1)];
         end
 
     end        
 
     figure;
+
+    if not(plot_indiv)
+
+    % Plot Combined / All Seizures 
     scatter3(score(:,1),score(:,2),score(:,3),5, colors_center,'filled')
-    title(strcat("Epileptic: ",num2str(animal_info{folder_num,5})))
+    title(strcat("Animal: ", num2str(sz_parameters(sz,1)), " | Epileptic: ",num2str(animal_info{folder_num,5})))
+
+    else
+
+    % Plot Individual Seizures
+    indiv_options = find(pca_lengths > 0);
+    randnum = rand(1);
+    while round(randnum * length(indiv_options)) == 0
+        randnum = rand(1);
+    end
+    selected = indiv_options(round(randnum * length(indiv_options)));
+
+    colormap(gray)
+    pca_indices = sum(pca_lengths(1:selected-1)) + 1:sum(pca_lengths(1:selected-1)) + pca_lengths(selected);
+    scatter3(score(pca_indices,1),score(pca_indices,2),score(pca_indices,3),25, linspace(1,10,length(pca_indices)),'filled')
+    hold on
+    plot3(score(pca_indices,1),score(pca_indices,2),score(pca_indices,3),'-k')
+    hold off
+    title(strcat("Animal: ", num2str(sz_parameters(selected,1)), " | Epileptic: ",num2str(animal_info{folder_num,5}), " | Seizure: ", num2str(sz_parameters(selected,2))))
+
+    end
 end
 
 % Threshold Comparisons
