@@ -199,14 +199,10 @@ for folder_num = 1:length(subFolders)
     pca_spont = 1; % Spontaneous Vs Evoked
     pca_day = 1; % Day of Evocation
     pca_output_array = [];
-    tgt_duration = 15; % Minimum Second of Seizure to Be Included in PCA
-    min_rac = 3;
 
     for sz = 1:length(output_array)
         indv_length = size(output_array{sz},1); % Length of Individual Seizures
-        if seizure_duration(sz) >= tgt_duration & min_rac <= sz_parameters(sz,21)
         pca_output_array = [pca_output_array,output_array{sz}']; % Concactenates PCA Arrays
-        end
     end
 
     % Perform PCA (The Inversion Converts it to Obs VS Feature Format)
@@ -228,7 +224,7 @@ for folder_num = 1:length(subFolders)
     for sz = 1:length(output_array)
 
         if pca_spont == 1
-            if sz_parameters(sz,8) == -1
+            if sz_parameters(sz,10) == -1
                 temp_colors = Colorset_plot(4,:);
             else
                 temp_colors = Colorset_plot(5,:);
@@ -239,28 +235,17 @@ for folder_num = 1:length(subFolders)
 
         if pca_day == 1
             if sz_parameters(sz,20) < 0
-                temp_edge = [0.5, 0.5, 0.5];
+                temp_colors = [0.5, 0.5, 0.5];
             elseif sz_parameters(sz,20) > 0
-                temp_edge = Colorset_edge(sz_parameters(sz,20),:);
+                temp_colors = Colorset_edge(sz_parameters(sz,20),:);
             end
         else
-            if sz_parameters(sz,20) < 0
-                temp_edge = [0.5, 0.5, 0.5];
-            elseif sz_parameters(sz,20) > 0
-                temp_edge = [1,0,0];
-            end
-        end
-        
-        if seizure_duration(sz) >= tgt_duration & min_rac <= sz_parameters(sz,21)
-        colors_center = [colors_center;repmat(temp_colors,size(output_array{sz},1),1)];
-        colors_outline = [colors_outline;repmat(temp_edge,size(output_array{sz},1),1)];
-        end
+            
 
+        colors_center = [colors_center;repmat(temp_colors,size(output_array{sz},1),1)];
     end        
 
-    figure;
-    scatter3(score(:,1),score(:,2),score(:,3),5, colors_center,'filled')
-    title(strcat("Epileptic: ",num2str(animal_info{folder_num,5})))
+    scatter(score(:,1),score(:,2),5,['MarkerFaceColor', colors_center)]
 end
 
 % Threshold Comparisons
