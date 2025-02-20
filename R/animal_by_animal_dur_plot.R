@@ -95,6 +95,8 @@ ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(posit
 
 ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() + 
   geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100)
+ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() + 
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)
 
 # Step 5: Do Same Day Proportions for Drug Evocation Per Animal
 
@@ -160,6 +162,10 @@ ggplot(count_lev, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill
 
 ggplot(total_diaz, aes(x=Animal, y=Duration)) + geom_violin() + 
   geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100)
+ggplot(total_diaz, aes(x=Animal, y=Duration)) + geom_violin() + 
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)
 
 ggplot(total_lev, aes(x=Animal, y=Duration)) + geom_violin() + 
   geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100)
+ggplot(total_lev, aes(x=Animal, y=Duration)) + geom_violin() + 
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)
