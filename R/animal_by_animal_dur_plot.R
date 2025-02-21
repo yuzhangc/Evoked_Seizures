@@ -30,7 +30,7 @@ trial_info_filt <- trial_info[kept_indices,]
 
 # Step 3: Generate Dataframe For Duration and Success Rate Plots Per Animal
 
-total_rac_data <- data.frame (Animal = character(), Condition = character(), Counts = integer())
+total_rac_data <- data.frame (Animal = character(), Condition = character(), Condition_Merge = character(), Counts = integer())
 volc_dur_data <- data.frame (Animal = character(), Duration = double(), Condition = character())
 
 for (animal in unique(trial_info_filt$Animal)){
@@ -78,10 +78,11 @@ for (animal in unique(trial_info_filt$Animal)){
   
   animalnum <- c(rep(as.character(animal),7))
   condition <- c("Failed", "Rac. 0", "Rac. 1", "Rac. 2", "Rac. 3","Rac. 4","Rac. 5")
+  condition_merged <- c("Failed", "Rac. 0 - 2", "Rac. 0 - 2", "Rac. 0 - 2", "Rac. 3 - 5","Rac. 3 - 5","Rac. 3 - 5")
   
   # Merge into Dataframe
   
-  evoc_anim_data <- data.frame(Animal = animalnum, Condition = condition, Counts = temp_output)
+  evoc_anim_data <- data.frame(Animal = animalnum, Condition = condition, Condition_Merge = condition_merged, Counts = temp_output)
   total_rac_data <- rbind(total_rac_data, evoc_anim_data)
   anim_dur_data <- data.frame(Animal = animal_dur, Duration = time_dur, Racine = rac_dur)
   volc_dur_data <- rbind(volc_dur_data, anim_dur_data)
@@ -93,6 +94,9 @@ for (animal in unique(trial_info_filt$Animal)){
 ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(position="stack", stat="identity") + ylim(0,50)
 ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(position="fill", stat="identity") 
 
+ggplot(total_rac_data, aes(fill=Condition_Merge, y=Counts, x=Animal)) + geom_bar(position="stack", stat="identity") + ylim(0,50)
+ggplot(total_rac_data, aes(fill=Condition_Merge, y=Counts, x=Animal)) + geom_bar(position="fill", stat="identity") 
+
 ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() + 
   geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100)
 ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() + 
@@ -100,8 +104,8 @@ ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() +
 
 # Step 5: Do Same Day Proportions for Drug Evocation Per Animal
 
-total_diaz <- data.frame (Animal = character(), Racine = character(), Duration = double())
-total_lev <- data.frame (Animal = character(), Racine = character(), Duration = double())
+total_diaz <- data.frame (Animal = character(), Racine = character(), Duration = double(), Condition = character())
+total_lev <- data.frame (Animal = character(), Racine = character(), Duration = double(), Condition = character())
 
 for (animal in unique(trial_info_filt$Animal)){
 
@@ -117,12 +121,14 @@ for (animal in unique(trial_info_filt$Animal)){
     free_time_dur <- diaz_free$Duration
     free_animal <- c(rep(as.character(animal),length(free_time_dur)))
     free_rac <- as.character(diaz_free$Racine)
+    free_condition <- ifelse(diaz_free$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
     
     dz_time_dur <- diaz_trials$Duration
     dz_animal <- c(rep(paste(as.character(animal),"DZ"),length(dz_time_dur)))
     dz_rac <- as.character(diaz_trials$Racine)
+    dz_condition <- ifelse(diaz_trials$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
     
-    temp_data <- data.frame(Animal = c(free_animal, dz_animal), Racine = c(free_rac, dz_rac), Duration = c(free_time_dur, dz_time_dur))
+    temp_data <- data.frame(Animal = c(free_animal, dz_animal), Racine = c(free_rac, dz_rac), Duration = c(free_time_dur, dz_time_dur), Condition = c(free_condition, dz_condition))
     total_diaz <- rbind(total_diaz, temp_data)
   }
   
@@ -138,12 +144,14 @@ for (animal in unique(trial_info_filt$Animal)){
     free_time_dur <- lev_free$Duration
     free_animal <- c(rep(as.character(animal),length(free_time_dur)))
     free_rac <- as.character(lev_free$Racine)
+    free_condition <- ifelse(lev_free$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
     
     lv_time_dur <- lev_trials$Duration
     lv_animal <- c(rep(paste(as.character(animal),"LEV"),length(lv_time_dur)))
     lv_rac <- as.character(lev_trials$Racine)
+    lv_condition <- ifelse(lev_trials$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
     
-    temp_data <- data.frame(Animal = c(free_animal, lv_animal), Racine = c(free_rac, lv_rac), Duration = c(free_time_dur, lv_time_dur))
+    temp_data <- data.frame(Animal = c(free_animal, lv_animal), Racine = c(free_rac, lv_rac), Duration = c(free_time_dur, lv_time_dur), Condition = c(free_condition, lv_condition))
     total_lev <- rbind(total_lev, temp_data)
   }
 }
@@ -151,14 +159,22 @@ for (animal in unique(trial_info_filt$Animal)){
 # Step 6: Generate Plots of Evocation Outcomes (Racine & Duration) Per Animal W Drug
 
 count_dz <- total_diaz %>% group_by(Animal, Racine) %>% summarise(Count = n(), .groups = "drop")
+count_cond_dz <- total_diaz %>% group_by(Animal, Condition) %>% summarise(Count = n(), .groups = "drop")
 
-ggplot(count_dz, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + ylim(0,10)
+ggplot(count_dz, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity")
 ggplot(count_dz, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") 
 
-count_lev <- total_lev %>% group_by(Animal, Racine) %>% summarise(Count = n(), .groups = "drop")
+ggplot(count_cond_dz, aes(fill=Condition,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity")
+ggplot(count_cond_dz, aes(fill=Condition, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") 
 
-ggplot(count_lev, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + ylim(0,10)
+count_lev <- total_lev %>% group_by(Animal, Racine) %>% summarise(Count = n(), .groups = "drop")
+count_cond_lev <- total_lev %>% group_by(Animal, Condition) %>% summarise(Count = n(), .groups = "drop")
+
+ggplot(count_lev, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity")
 ggplot(count_lev, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") 
+
+ggplot(count_cond_lev, aes(fill=Condition,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity")
+ggplot(count_cond_lev, aes(fill=Condition, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") 
 
 ggplot(total_diaz, aes(x=Animal, y=Duration)) + geom_violin() + 
   geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100)
