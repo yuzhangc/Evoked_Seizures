@@ -11,10 +11,11 @@ library(ggpubr)
 library(tidyverse)
 library(rstatix)
 library(dplyr)
+library(RColorBrewer)
 
 # Change to local folder directory
 
-directory <- "E:/"
+directory <- "D:/"
 
 # Read Trial Master Spreadsheet
 
@@ -91,14 +92,14 @@ for (animal in unique(trial_info_filt$Animal)){
 
 # Step 4: Generate Plots of Evocation Outcomes (Racine & Duration) Per Animal
 
-ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(position="stack", stat="identity") + ylim(0,50)
-ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(position="fill", stat="identity") 
+ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(position="stack", stat="identity") + ylim(0,50) + scale_fill_brewer(palette = "YlOrRd")
+ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
 
-ggplot(total_rac_data, aes(fill=Condition_Merge, y=Counts, x=Animal)) + geom_bar(position="stack", stat="identity") + ylim(0,50)
-ggplot(total_rac_data, aes(fill=Condition_Merge, y=Counts, x=Animal)) + geom_bar(position="fill", stat="identity") 
+ggplot(total_rac_data, aes(fill=Condition_Merge, y=Counts, x=Animal)) + geom_bar(position="stack", stat="identity") + ylim(0,50) + scale_fill_brewer(palette = "YlOrRd")
+ggplot(total_rac_data, aes(fill=Condition_Merge, y=Counts, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
 
 ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100)
+  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100) + scale_color_brewer(palette = "YlOrRd")
 ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() + 
   geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)
 
@@ -117,16 +118,22 @@ for (animal in unique(trial_info_filt$Animal)){
     trial_info_sub <- trial_info_filt[kept_indices,]
     diaz_free <- trial_info_sub[which(trial_info_sub$Diazepam == 0),]
     diaz_trials <- trial_info_sub[which(trial_info_sub$Diazepam == 1),]
+    diaz_fail <- which(diaz_trials$`Seizure Or Not` == 0)
+    free_fail <- which(diaz_free$`Seizure Or Not` == 0)
     
     free_time_dur <- diaz_free$Duration
     free_animal <- c(rep(as.character(animal),length(free_time_dur)))
-    free_rac <- as.character(diaz_free$Racine)
+    free_rac <- as.character(paste("Rac. ", diaz_free$Racine))
+    free_rac[free_fail] <- "Failed"
     free_condition <- ifelse(diaz_free$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
+    free_condition[free_fail] <- "Failed"
     
     dz_time_dur <- diaz_trials$Duration
     dz_animal <- c(rep(paste(as.character(animal),"DZ"),length(dz_time_dur)))
-    dz_rac <- as.character(diaz_trials$Racine)
+    dz_rac <- as.character(paste("Rac. ", diaz_trials$Racine))
+    dz_rac[diaz_fail] <- "Failed"
     dz_condition <- ifelse(diaz_trials$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
+    dz_condition[diaz_fail] <- "Failed"
     
     temp_data <- data.frame(Animal = c(free_animal, dz_animal), Racine = c(free_rac, dz_rac), Duration = c(free_time_dur, dz_time_dur), Condition = c(free_condition, dz_condition))
     total_diaz <- rbind(total_diaz, temp_data)
@@ -140,16 +147,22 @@ for (animal in unique(trial_info_filt$Animal)){
     trial_info_sub <- trial_info_filt[kept_indices,]
     lev_free <- trial_info_sub[which(trial_info_sub$Levetiracetam == 0),]
     lev_trials <- trial_info_sub[which(trial_info_sub$Levetiracetam == 1),]
+    lev_fail <- which(lev_trials$`Seizure Or Not` == 0)
+    free_fail <- which(lev_free$`Seizure Or Not` == 0)
     
     free_time_dur <- lev_free$Duration
     free_animal <- c(rep(as.character(animal),length(free_time_dur)))
-    free_rac <- as.character(lev_free$Racine)
+    free_rac <- as.character(paste("Rac. ", lev_free$Racine))
+    free_rac[free_fail] <- "Failed"
     free_condition <- ifelse(lev_free$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
+    free_condition[free_fail] <- "Failed"
     
     lv_time_dur <- lev_trials$Duration
     lv_animal <- c(rep(paste(as.character(animal),"LEV"),length(lv_time_dur)))
-    lv_rac <- as.character(lev_trials$Racine)
+    lv_rac <- as.character(paste("Rac. ", lev_trials$Racine))
+    lv_rac[lev_fail] <- "Failed"
     lv_condition <- ifelse(lev_trials$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
+    lv_condition[lev_fail] <- "Failed"
     
     temp_data <- data.frame(Animal = c(free_animal, lv_animal), Racine = c(free_rac, lv_rac), Duration = c(free_time_dur, lv_time_dur), Condition = c(free_condition, lv_condition))
     total_lev <- rbind(total_lev, temp_data)
@@ -161,27 +174,27 @@ for (animal in unique(trial_info_filt$Animal)){
 count_dz <- total_diaz %>% group_by(Animal, Racine) %>% summarise(Count = n(), .groups = "drop")
 count_cond_dz <- total_diaz %>% group_by(Animal, Condition) %>% summarise(Count = n(), .groups = "drop")
 
-ggplot(count_dz, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity")
-ggplot(count_dz, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") 
+ggplot(count_dz, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
+ggplot(count_dz, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
 
-ggplot(count_cond_dz, aes(fill=Condition,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity")
-ggplot(count_cond_dz, aes(fill=Condition, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") 
+ggplot(count_cond_dz, aes(fill=Condition,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
+ggplot(count_cond_dz, aes(fill=Condition, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
 
 count_lev <- total_lev %>% group_by(Animal, Racine) %>% summarise(Count = n(), .groups = "drop")
 count_cond_lev <- total_lev %>% group_by(Animal, Condition) %>% summarise(Count = n(), .groups = "drop")
 
-ggplot(count_lev, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity")
-ggplot(count_lev, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") 
+ggplot(count_lev, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
+ggplot(count_lev, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity")  + scale_fill_brewer(palette = "YlOrRd")
 
-ggplot(count_cond_lev, aes(fill=Condition,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity")
-ggplot(count_cond_lev, aes(fill=Condition, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") 
+ggplot(count_cond_lev, aes(fill=Condition,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
+ggplot(count_cond_lev, aes(fill=Condition, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
 
 ggplot(total_diaz, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100)
+  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100) + scale_color_brewer(palette = "YlOrRd")
 ggplot(total_diaz, aes(x=Animal, y=Duration)) + geom_violin() + 
   geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)
 
 ggplot(total_lev, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100)
+  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100) + scale_color_brewer(palette = "YlOrRd")
 ggplot(total_lev, aes(x=Animal, y=Duration)) + geom_violin() + 
   geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)
