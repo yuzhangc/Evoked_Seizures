@@ -15,7 +15,7 @@ library(RColorBrewer)
 
 # Change to local folder directory
 
-directory <- "D:/"
+directory <- "E:/"
 
 # Read Trial Master Spreadsheet
 
@@ -129,7 +129,7 @@ for (animal in unique(trial_info_filt$Animal)){
     free_condition[free_fail] <- "Failed"
     
     dz_time_dur <- diaz_trials$Duration
-    dz_animal <- c(rep(paste(as.character(animal),"DZ"),length(dz_time_dur)))
+    dz_animal <- c(rep(paste("DZ",as.character(animal)),length(dz_time_dur)))
     dz_rac <- as.character(paste("Rac. ", diaz_trials$Racine))
     dz_rac[diaz_fail] <- "Failed"
     dz_condition <- ifelse(diaz_trials$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
@@ -158,7 +158,7 @@ for (animal in unique(trial_info_filt$Animal)){
     free_condition[free_fail] <- "Failed"
     
     lv_time_dur <- lev_trials$Duration
-    lv_animal <- c(rep(paste(as.character(animal),"LEV"),length(lv_time_dur)))
+    lv_animal <- c(rep(paste("LEV",as.character(animal)),length(lv_time_dur)))
     lv_rac <- as.character(paste("Rac. ", lev_trials$Racine))
     lv_rac[lev_fail] <- "Failed"
     lv_condition <- ifelse(lev_trials$Racine <= 2, "Racine 0 - 2", "Racine 3 - 5")
