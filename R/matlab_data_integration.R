@@ -210,14 +210,14 @@ summary(lmer(Ch.3.Skew ~ Sing * Time.Point + (1|Animal), data = sing_vs_db_ep_da
 
 # Step 6: Perform Comparisons on Spontaneous Vs Evoked (FREELY MOVING & EPILEPTIC ONLY)
 
-summary(lm(Ch.3.Band.Power.1.Hz.to.30Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lm(Ch.3.Band.Power.30.Hz.to.300Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lm(Ch.3.Band.Power.300.Hz.to.1000Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lm(Ch.3.Line.Length ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lm(Ch.3.Area ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lm(Ch.3.Skew ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lm(Ch.3.AEntropy ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
-summary(lm(Ch.3.PLHG ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.3.Band.Power.1.Hz.to.30Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.3.Band.Power.30.Hz.to.300Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.3.Band.Power.300.Hz.to.1000Hz ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.3.Line.Length ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.3.Area ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.3.Skew ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.3.AEntropy ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
+summary(lmer(Ch.3.PLHG ~ Spont * Time.Point + (1|Animal), data = spont_vs_evoked_data))
 
 # ---------------------------------------------------------------------------------------------------
 
