@@ -1,10 +1,14 @@
-function [final_divided,sz_parameters,feature_list] = extract_data_R_V2(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim,raw_or_normalized)
+function [final_divided,sz_parameters,feature_list] = extract_data_R(animal_info,path_extract,seizure_duration_list,feature_list,folder_num,drug,second_stim,raw_or_normalized)
+
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
 
 % Uses Seizure Duration to Splice Feature Data into Before, During Stim,
 % and Thirds. Exports the Means Along With Spliced Seizure Parameters For
 % Processing in R.
 
-% V2 Makes New Column With Categorical Value 'Position'
+% It also makes New Column With Categorical Value 'Position'
 
 % Input Variables
 % animal_info - Animal Information Spreadhseet

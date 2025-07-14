@@ -1,5 +1,9 @@
 function [seizure_duration,min_thresh,output_array,sz_parameters,to_fix_chart] = predict_seizure_duration(path_extract,sz_model,countdown_sec,to_fix_chart,to_plot,subFolders, max_trial,seizure_input)
 
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
+
 % Uses a pre-defined seizure model to identify seizure length.
 % Concactenates features
 

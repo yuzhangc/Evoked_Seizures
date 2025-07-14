@@ -1,6 +1,10 @@
 function featval = moving_window_feature_calculation  (input_data, fs, winLen, winDisp, featFn, varargs)
 
-% Calculate features along a moving window with certain displacement.
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
+
+% Function Purpose Calculate features along a moving window with certain displacement.
 
 % Input Variables
 % input_data - EEG data

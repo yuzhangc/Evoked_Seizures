@@ -1,6 +1,10 @@
 function [output_val] = windowed_coherence(input_data, fs, winLen, winDisp)
 
-% Calculate average coherence across all frequency space
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
+
+% Function Purpose: Calculate average coherence across all frequency space
 
 % Input Variables
 % input_data - data for calculation.

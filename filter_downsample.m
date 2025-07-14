@@ -1,25 +1,23 @@
-function [output_data] = filter_downsample(path_extract,downsamp_sz,target_fs,plot_duration)
+function [output_data] = filter_downsample(path_extract,fs,plot_duration)
 
-% Filters then downsamples data. Filters need to happen first to prevent
-% peak shifts. After downsampling, z scores data (to baseline) and then
-% plot 'check' figures. Checked with Folder 35.
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
 
-% Input Variables
+% Function Purpose: Filter Raw EEG Data.
+
+% Input Variables:
 % path_extract - path for seizures.
-% downsamp_sz - variable for downsampling
-% target_fs - original sampling rate OR target sampling rate for
-% downsampling
+% fs - sampling rate
 % plot_duration - duration to plot
 
-% Output Variables
+% Output Variables:
 % output_data = output of function
 
 % -------------------------------------------------------------------------
 
-% Step 1: Import Seizure Parameters and Determine Recording Type.
-% Type 3 - Oldest Acutely Evoked Recordings. 1 second baseline. Neuronexus
-% Type 2 - New Acutely Evoked Recordings. Neuronexus
-% Type 1 - EEG Recordings.
+% Step 1: Import Seizure Parameters & Load Extracted Raw (Standardized)
+% Data
 
 disp("Working on: " + path_extract)
 mkdir(path_extract,'Figures\Filtered')
@@ -27,17 +25,10 @@ mkdir(path_extract,'Figures\Filtered')
 load(strcat(path_extract,"Standardized Seizure Data.mat"))
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 
-if sz_parameters(1,1) <= 4
-    type = 3; stim_channel = 2; t_before = 1; fs = 20000; second_channel = 1;
-elseif sz_parameters(1,1) < 100
-    type = 2; stim_channel = 1; fs = 20000; second_channel = 2;
-else
-    type = 1; fs = 2000;
-end
-
 % -------------------------------------------------------------------------
 
 % Step 2: Create 60 Hz notch filters (up to Nyquist frequency). Notch Filter Data
+
 max_filter = 10;
 for filter_cnt = 1:max_filter
     wo = filter_cnt * 60/(fs/2); bw = wo/35; [b,a] = iirnotch(wo,bw);
@@ -49,34 +40,8 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 3: Downsamples data to target_fs
-if target_fs ~= fs && target_fs < fs && downsamp_sz
-    for sz_cnt = 1:length(output_data)
-    output_data{sz_cnt} = downsample(output_data{sz_cnt}, round(fs/target_fs));
-    end
-    fs = target_fs;
-end
-
-disp("Downsampling Complete")
-
-% -------------------------------------------------------------------------
-
-% Step 4: Evoked: Z score normalization, using t_before to determine baseline
-% length for evoked seizures only.
-% Spontaneous: 4 Hz Highpass Filter
-
-if type ~= 1
-    
-for sz_cnt = 1:length(output_data)
-    baseline_mean = mean(output_data{sz_cnt}(1:fs*t_before,:));
-    baseline_std = std(output_data{sz_cnt}(1:fs*t_before,:));
-    output_data{sz_cnt} = (output_data{sz_cnt}-baseline_mean)./baseline_std;
-end
-
-disp("Z-scoring Complete")
-
-else
-    
+% Step 3: 4 Hz Highpass Filter
+   
 % Design 6th order Butterworth Highpass Filter To Retain Signals Above 4 Hz
 [b,a] = butter(6 ,4/(fs/2) ,'high');
 for sz_cnt = 1:length(output_data)
@@ -84,15 +49,13 @@ for sz_cnt = 1:length(output_data)
     disp("High Pass Progress: Seizure #" + num2str(sz_cnt) + " Out Of " + num2str(length(output_data)) + " Complete")
 end
     
-disp("High Pass Filtering Complete. Z Scoring Skipped.")
-
-end
+disp("High Pass Filtering Complete.")
 
 % -------------------------------------------------------------------------
 
 for sz_cnt = 1:length(output_data)
     
-% Step 5: Plots filtered data and saves figures
+% Step 4: Plots filtered data and saves figures
 fig1 = figure(1); hold on;
 fig1.WindowState = 'maximized';
 % Channel 1 is on TOP. Channel 4 is on Bottom.

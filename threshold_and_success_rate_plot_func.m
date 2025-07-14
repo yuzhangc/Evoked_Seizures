@@ -1,5 +1,9 @@
 function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list,freely_moving)
 
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
+
 % Makes a few basic plots about evocation threshold in epileptic vs naive
 % animals and successful evocation ratios
 
@@ -76,7 +80,7 @@ legend('Epileptic', 'Naive')
 
 % -------------------------------------------------------------------------
 
-% Step 5: Plot 2 - Distribution of Threshold Power
+% Step 5: Figure A2 B - Distribution of Threshold Power
 
 % This is a distribution of seizure threshold power, organized into
 % epileptic (blue) and naive (yellow) histograms with equal spacing
@@ -100,7 +104,7 @@ xlim([0,25])
 
 % -------------------------------------------------------------------------
 
-% Step 6: Plot 3 - Distribution of Threshold Duration
+% Step 6: Figure A2 C - Distribution of Threshold Duration
 
 % This is a distribution of seizure threshold power, organized into
 % epileptic (blue) and naive (yellow) histograms with equal spacing
@@ -122,7 +126,7 @@ ylabel('Count')
 
 % -------------------------------------------------------------------------
 
-% Step 7: Plot 4 - Average Success Rate
+% Step 7: Figure A2 D - Average Success Rate
 
 % This plot contains epileptic data on the left and naive data on the right,
 % using blue for epileptic, red for naive, and yellow for all trials
@@ -226,7 +230,7 @@ ylabel('Success Rate (%)')
 
 % -------------------------------------------------------------------------
 
-% Step 8: Plot 5 - Average Above Threshold Duration
+% Step 8: Figure A2 E - Average Above Threshold Duration
 
 % Sets up output variables
 

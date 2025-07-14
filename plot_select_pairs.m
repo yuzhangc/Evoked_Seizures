@@ -1,5 +1,9 @@
 function plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered)
 
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
+
 % Plots select pairs of seizures with magnification.
 
 % Input Variables

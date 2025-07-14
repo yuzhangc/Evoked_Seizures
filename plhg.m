@@ -1,7 +1,10 @@
 function [output_val] = plhg(input_data, fs)
 
-% Calculate selected features on data. Note feature 10 is specific to 4
-% channel recordings.
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
+
+% Calculate Phase locked High Gamma.
 
 % Input Variables
 % input_data - data for calculation.

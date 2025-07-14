@@ -1,11 +1,16 @@
 function [features,norm_features] = calculate_features(path_extract,filter_sz,feature_list, winLen, winDisp, bp_filters)
 
-% Calculate selected features on data. Note feature 10 is specific to 4
-% channel recordings.
+% On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+% Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+% DOI: https://doi.org/10.7554/eLife.101859
+
+% Function Purpose: Calculate selected features on data. Note feature 10 is
+% specific to 4 channel recordings.
 
 % Input Variables
 % path_extract - path for seizures.
 % filter_sz - whether to calculate features for filtered or unfiltered data
+% filter_sz was set to only filtered data in paper.
 % feature_list - list of features below
 
 % 1 - Line Length
@@ -31,7 +36,7 @@ function [features,norm_features] = calculate_features(path_extract,filter_sz,fe
 
 % -------------------------------------------------------------------------
 
-% Import Seizure Data.
+% Import Seizure Data and Parameters
 
 disp("Working on: " + path_extract)
 if filter_sz
@@ -374,13 +379,8 @@ for sz_cnt = 1:length(output_data)
         
     end
     
-    % First Plot is Raw Channel. Choose Wire (Evoked) or Cortex (Freely Moving) For Most
-    plot1 = subplot(length(feature_list) + adjustment_val,1,1);
-    if size(output_data{sz_cnt}) > 2
-        channel = 3;
-    else
-        channel = 1;
-    end
+    % First Plot is Raw Channel. Choose Cortex (Freely Moving)
+    plot1 = subplot(length(feature_list) + adjustment_val,1,1); channel = 3;
     plot(1/fs:1/fs:t_before + t_after, output_data{sz_cnt}(:,channel)./ max(output_data{sz_cnt}(:,channel))...
             * 0.5 + size(output_data{sz_cnt},2) - channel,'k');
     xlim([0.25 60]);
