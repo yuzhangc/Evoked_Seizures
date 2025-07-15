@@ -46,15 +46,6 @@ end
 
 sz_parameters = readmatrix(strcat(path_extract,'Trials Spreadsheet.csv'));
 
-% Make Adjustments - Adds in Phenytoin & Levetiracetam Columnns
-
-if sz_parameters(1,1) <= 37 && size(sz_parameters,2) == 16
-
-    sz_parameters(:,end + 1) = 0;
-    sz_parameters(:,end + 1) = 0;
-
-end
-
 % -------------------------------------------------------------------------
 
 % Step 2: Create 4 Cell Arrays (Per Channel) And Populate Animal Information
@@ -67,11 +58,7 @@ num_seizures = size(sz_parameters,1);
 
 col1 = num2cell(sz_parameters(:,1));
 
-if sz_parameters(1,1) >= 100
-    act_number = sz_parameters(1,1) - 99;
-else
-    act_number = sz_parameters(1,1);
-end
+act_number = sz_parameters(1,1) - 99;
 
 % Column 2 - Epileptic Or Not
 
@@ -145,10 +132,6 @@ col18 = num2cell(seizure_duration_list{folder_num});
 
 col19 = num2cell(sz_parameters(:,2));
 
-% For Freely Moving Animals Only
-
-if sz_parameters(1,1) > 99
-
 % Column 20 - Evocation Day
 
 col20 = num2cell(sz_parameters(:,20));
@@ -162,18 +145,6 @@ beginning_data = table(col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11,
     "Weeks Post KA","Successful Evocation","Laser 1 - Color","Laser 1 - Power","Laser 1 - Duration",...
     "Laser 2 - Color", "Laser 2 - Power", "Laser 2 - Duration","Delay","Laser 2 - Frequency",...
     "Diazepam","Levetiracetam","Phenytoin","Evoked Activity Duration","Trial Number","Evocation Day","Seizure Scale"]);
-
-else
-
-% Create Tables For Common Data
-
-beginning_data = table(col1,col2,col3,col4,col5,col6,col7,col8,col9,col10,col11,col12,...
-    col13,col14,col15,col16,col17,col18,col19,'VariableNames',["Animal","Epileptic","Gender","Age",...
-    "Weeks Post KA","Successful Evocation","Laser 1 - Color","Laser 1 - Power","Laser 1 - Duration",...
-    "Laser 2 - Color", "Laser 2 - Power", "Laser 2 - Duration","Delay","Laser 2 - Frequency",...
-    "Diazepam","Levetiracetam","Phenytoin","Evoked Activity Duration","Trial Number"]);
-
-end
 
 % -------------------------------------------------------------------------
 
@@ -274,9 +245,8 @@ feature_names = fieldnames(norm_features);
 if isempty(feature_list)
 
 for feature_number = 1:length(feature_names)
-    displays_text = strcat("\nDo You Want to Output Feature ",strrep(feature_names(feature_number),"_"," "),"?",...
-        "\n(1) Yes (0) No: ");
-    yesorno = input(displays_text);
+    displays_text = strcat("\nOutputting Feature ",feature_names(feature_number),"...");
+    yesorno = 1;
 
     if yesorno
         feature_list = [feature_list,feature_number];

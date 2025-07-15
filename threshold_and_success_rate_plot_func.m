@@ -62,25 +62,7 @@ und_thresh_naive = find (indx_to_plot' == 0 & animal_info(:,5) == 0);
 
 % -------------------------------------------------------------------------
 
-% Step 4: Plot 1 - Threshold Power vs Threshold Duration
-
-% This scatterplot plots threshold power against threshold duration (when
-% both exists)
-
-figure;
-
-hold on
-scatter(list_of_power(indx_to_plot_epileptic),list_of_duration(indx_to_plot_epileptic),'filled',"MarkerFaceColor", [1 0 0]);
-scatter(list_of_power(indx_to_plot_naive),list_of_duration(indx_to_plot_naive),'filled',"MarkerFaceColor", [0 0 1]);
-hold off
-
-xlabel('Threshold Power (mW)')
-ylabel('Threshold Duration (sec)')
-legend('Epileptic', 'Naive')
-
-% -------------------------------------------------------------------------
-
-% Step 5: Figure A2 B - Distribution of Threshold Power
+% Step 4: Figure A2 B - Distribution of Threshold Power
 
 % This is a distribution of seizure threshold power, organized into
 % epileptic (blue) and naive (yellow) histograms with equal spacing
@@ -102,9 +84,11 @@ ylabel('Count')
 % learning to use the fiber.
 xlim([0,25])
 
+set(gcf, 'Position',  [680 652.5  263.5  225.5])
+
 % -------------------------------------------------------------------------
 
-% Step 6: Figure A2 C - Distribution of Threshold Duration
+% Step 5: Figure A2 C - Distribution of Threshold Duration
 
 % This is a distribution of seizure threshold power, organized into
 % epileptic (blue) and naive (yellow) histograms with equal spacing
@@ -124,9 +108,11 @@ legend ('Epileptic','Naive')
 xlabel('Threshold Duration (sec)')
 ylabel('Count')
 
+set(gcf, 'Position',  [680 652.5  263.5  225.5])
+
 % -------------------------------------------------------------------------
 
-% Step 7: Figure A2 D - Average Success Rate
+% Step 6: Figure A2 D - Average Success Rate
 
 % This plot contains epileptic data on the left and naive data on the right,
 % using blue for epileptic, red for naive, and yellow for all trials
@@ -228,9 +214,11 @@ xticklabels({'Epileptic','Naive'})
 xline(2,'--k');
 ylabel('Success Rate (%)')
 
+set(gcf, 'Position',  [680 652.5  263.5  225.5])
+
 % -------------------------------------------------------------------------
 
-% Step 8: Figure A2 E - Average Above Threshold Duration
+% Step 7: Figure A2 E - Average Above Threshold Duration
 
 % Sets up output variables
 
@@ -310,5 +298,6 @@ xticklabels({'Epileptic','Naive'})
 xline(2,'--k');
 ylabel('Average Duration (sec)')
 
+set(gcf, 'Position',  [680 652.5  263.5  225.5])
 
 end

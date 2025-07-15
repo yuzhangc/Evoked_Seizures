@@ -27,7 +27,7 @@ real_folder_end = find(ismember({subFolders.name},'EEG_999_END'));
 subFolders = subFolders(real_folder_st + 1:real_folder_end - 1);
 clear complete_list dirFlags real_folder_st real_folder_end;
 
-%% Parameters -------------------------------------------------------------
+%% Parameters ----------------------------------------------------------------
 
 % Booleans
 % First Run? 0 - No; 1 - Yes
@@ -59,16 +59,16 @@ if first_run
     end
 end
 
-%% Feature Calculation
+%% Feature Calculation -------------------------------------------------------
 
-if feat_calc
+if feat_calc && first_run
     for folder_num = 1:length(subFolders)
         path_extract = strcat(directory,subFolders(folder_num).name,'\');
         calculate_features(path_extract,1,feature_list,winLen, winDisp, bp_filters);
     end
 end
 
-%% Figure 3 A B & 4 A B - Plots of Individual Seizures
+%% Figure 3 A B & 4 A B - Plots of Individual Seizures -----------------------
 
 % Figure 3 A & B - Epileptic Induction Plots
 
@@ -95,12 +95,12 @@ path_extract = strcat(directory,subFolders(folder_num).name,'\');
 seizure = 1; time_idx = [8, 18; 22, 32; 34, 44]; filtered = 1; plot_duration = 55;
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 
-% Figure 4B
+% Figure 4 B
 
 seizure = 22; time_idx = [8, 18; 22, 32; 34, 44]; filtered = 1; plot_duration = 55;
 plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
 
-%% Seizure Duration Calculations and Thresholding - Figure A2 B C D E
+%% Seizure Duration Calculations and Thresholding - Figure A2 B C D E --------
 
 % Loads Seizure Model
 
@@ -205,7 +205,7 @@ accuracy_within_5sec_nv = 1 - fixed/total
 
 clear min_thresh seizure_duration output_array sz_parameters animal_info
 
-%% Output Data To R
+%% Output Data To R ----------------------------------------------------------
 
 animal_info = readtable(strcat(directory,'Animal Master.csv'));
 
@@ -228,7 +228,7 @@ end
 
 clear animal_info
 
-%% Spontaneous Seizure Support Vector Machine Plotting
+%% Spontaneous Seizure Support Vector Machine Plotting - Figure 3 D ----------
 
 % Appends Baseline Signals
 
@@ -259,18 +259,21 @@ failed_accuracy = sum(output_values(idx_failed,:) == true_output_values(idx_fail
 false_positive = sum(output_values(idx_failed,:) == 3) / length(idx_failed) * 100
 false_negative = sum(output_values(idx_evk,:) == 2) / length(idx_evk) * 100
 
-%% Evoked Seizures Processing - Plots By Category
+% Note: Above Values were for both epileptic and naive. Extracting only
+% values of accuracy from epileptic animals (from the outputted figures)
+% gives the values reported in Figure 3 E
 
-[final_feature_output, subdiv_index, merged_sz_duration, coeff,score] = categorization_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,0);
+%% Evoked Seizures Processing - Figures 3 C and 4 D --------------------------
 
-% Size For Figure 3C Output
+% Figure 3 C
+
+[final_feature_output, subdiv_index, merged_sz_duration] = spont_evok_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders);
+
 set(gcf, 'Position', [469 445 636 521])
 
-% Size For Figure 4C Output
+% Figure 4 D
+[final_feature_output, subdiv_index, merged_sz_duration] = naiv_ep_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,1,4);
 set(gcf, 'Position', [207 516 1025 362])
 
-% Size For Thesis Powerpoint
-set(gcf, 'Position',  [501.5 586 1153 292])
-
-% Size of Thresholding 
-set(gcf, 'Position',  [680 652.5  263.5  225.5])
+[final_feature_output, subdiv_index, merged_sz_duration] = naiv_ep_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,5,200);
+set(gcf, 'Position', [207 516 1025 362])
