@@ -1,4 +1,4 @@
-function [] = threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list,freely_moving)
+function [] = threshold_and_success_rate_plot_func_figA2(directory,min_thresh_list,seizure_duration_list,freely_moving)
 
 % On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
 % Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano

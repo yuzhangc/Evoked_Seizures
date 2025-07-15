@@ -1,3 +1,7 @@
+# On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
+# Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
+# DOI: https://doi.org/10.7554/eLife.101859
+
 # Step 0: Epileptic (1) or Naive (0)
 
 ep_or_nv = 1;
@@ -13,9 +17,9 @@ library(rstatix)
 library(dplyr)
 library(RColorBrewer)
 
-# Change to local folder directory
+# KEY: Change to local folder directory
 
-directory <- "E:/"
+directory <- "E:/eLife Export/"
 
 # Read Trial Master Spreadsheet
 
@@ -90,20 +94,7 @@ for (animal in unique(trial_info_filt$Animal)){
   
 }
 
-# Step 4: Generate Plots of Evocation Outcomes (Racine & Duration) Per Animal
-
-ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(position="stack", stat="identity") + ylim(0,50) + scale_fill_brewer(palette = "YlOrRd")
-ggplot(total_rac_data, aes(fill=Condition, y=Counts, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
-
-ggplot(total_rac_data, aes(fill=Condition_Merge, y=Counts, x=Animal)) + geom_bar(position="stack", stat="identity") + ylim(0,50) + scale_fill_brewer(palette = "YlOrRd")
-ggplot(total_rac_data, aes(fill=Condition_Merge, y=Counts, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
-
-ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100) + scale_color_brewer(palette = "YlOrRd")
-ggplot(volc_dur_data, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)
-
-# Step 5: Do Same Day Proportions for Drug Evocation Per Animal
+# Step 4: Do Same Day Proportions for Drug Evocation Per Animal
 
 total_diaz <- data.frame (Animal = character(), Racine = character(), Duration = double(), Condition = character())
 total_lev <- data.frame (Animal = character(), Racine = character(), Duration = double(), Condition = character())
@@ -169,32 +160,16 @@ for (animal in unique(trial_info_filt$Animal)){
   }
 }
 
-# Step 6: Generate Plots of Evocation Outcomes (Racine & Duration) Per Animal W Drug
+# Step 5: Generate Plots of Evocation Outcomes (Racine & Duration) Per Animal W Drug
 
 count_dz <- total_diaz %>% group_by(Animal, Racine) %>% summarise(Count = n(), .groups = "drop")
 count_cond_dz <- total_diaz %>% group_by(Animal, Condition) %>% summarise(Count = n(), .groups = "drop")
 
-ggplot(count_dz, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
-ggplot(count_dz, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
-
-ggplot(count_cond_dz, aes(fill=Condition,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
+# Figure A 9 A
 ggplot(count_cond_dz, aes(fill=Condition, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
 
 count_lev <- total_lev %>% group_by(Animal, Racine) %>% summarise(Count = n(), .groups = "drop")
 count_cond_lev <- total_lev %>% group_by(Animal, Condition) %>% summarise(Count = n(), .groups = "drop")
 
-ggplot(count_lev, aes(fill=Racine,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
-ggplot(count_lev, aes(fill=Racine, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity")  + scale_fill_brewer(palette = "YlOrRd")
-
-ggplot(count_cond_lev, aes(fill=Condition,x=Animal,y=Count)) + geom_bar(position="stack", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
+# Figure A 9 B
 ggplot(count_cond_lev, aes(fill=Condition, y=Count, x=Animal)) + geom_bar(position="fill", stat="identity") + scale_fill_brewer(palette = "YlOrRd")
-
-ggplot(total_diaz, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100) + scale_color_brewer(palette = "YlOrRd")
-ggplot(total_diaz, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)
-
-ggplot(total_lev, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_point(aes(x=Animal,y=Duration, fill=Racine, color=Racine),position=position_jitter(width=0.1, height=0.1)) + ylim(0,100) + scale_color_brewer(palette = "YlOrRd")
-ggplot(total_lev, aes(x=Animal, y=Duration)) + geom_violin() + 
-  geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5) + ylim(0,100)

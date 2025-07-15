@@ -1,4 +1,4 @@
-function [svm_values] = spont_svm_characterization_v2(merged_output_array,merged_sz_parameters)
+function [svm_values] = spont_svm_characterization_fig3D(merged_output_array,merged_sz_parameters)
 
 % On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
 % Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano

@@ -78,12 +78,12 @@ path_extract = strcat(directory,subFolders(folder_num).name,'\');
 % Figure 3 A
 
 seizure = 21; time_idx = [6, 16; 18, 28; 42, 52]; filtered = 1; plot_duration = 65;
-plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+plot_select_pairs_fig3A3B4A4B(path_extract, seizure, time_idx, plot_duration, filtered);
 
 % Figure 3 B
 
 seizure = 35; time_idx = [12, 22; 24, 34; 46, 56]; filtered = 1; plot_duration = 65;
-plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+plot_select_pairs_fig3A3B4A4B(path_extract, seizure, time_idx, plot_duration, filtered);
 
 % Figure 4 A & B Naive Induction Plots
 
@@ -93,12 +93,12 @@ path_extract = strcat(directory,subFolders(folder_num).name,'\');
 % Figure 4 A
 
 seizure = 1; time_idx = [8, 18; 22, 32; 34, 44]; filtered = 1; plot_duration = 55;
-plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+plot_select_pairs_fig3A3B4A4B(path_extract, seizure, time_idx, plot_duration, filtered);
 
 % Figure 4 B
 
 seizure = 22; time_idx = [8, 18; 22, 32; 34, 44]; filtered = 1; plot_duration = 55;
-plot_select_pairs(path_extract, seizure, time_idx, plot_duration, filtered);
+plot_select_pairs_fig3A3B4A4B(path_extract, seizure, time_idx, plot_duration, filtered);
 
 %% Seizure Duration Calculations and Thresholding - Figure A2 B C D E --------
 
@@ -183,7 +183,7 @@ nv_sd_success = std(min_thresh_success(ep == 0))
 % The number of animals in 'Animal Master.csv' has to equal the number of
 % animals that were processed.
 
-threshold_and_success_rate_plot_func(directory,min_thresh_list,seizure_duration_list,1)
+threshold_and_success_rate_plot_func_figA2(directory,min_thresh_list,seizure_duration_list,1)
 
 % Overall Accuracy Within 5 Secs. Must Perform With All Animals!
 
@@ -238,7 +238,7 @@ path_extract = strcat(directory,"EEG_END_BASELINE_FOR_SVM_ALL_ANIMALS",'\');
 svm_merged_output_array = [merged_output_array, output_array_base];
 svm_merged_sz_parameters = [merged_sz_parameters; sz_param_base];
 
-svm_values = spont_svm_characterization_v2(svm_merged_output_array,svm_merged_sz_parameters);
+svm_values = spont_svm_characterization_fig3D(svm_merged_output_array,svm_merged_sz_parameters);
     
 % Extracts Predictions and Ground Truth
 
@@ -267,13 +267,13 @@ false_negative = sum(output_values(idx_evk,:) == 2) / length(idx_evk) * 100
 
 % Figure 3 C
 
-[final_feature_output, subdiv_index, merged_sz_duration] = spont_evok_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders);
+[final_feature_output, subdiv_index, merged_sz_duration] = spont_evok_plot_func_fig3C(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders);
 
 set(gcf, 'Position', [469 445 636 521])
 
 % Figure 4 D
-[final_feature_output, subdiv_index, merged_sz_duration] = naiv_ep_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,1,4);
+[final_feature_output, subdiv_index, merged_sz_duration] = naiv_ep_plot_func_fig4D(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,1,4);
 set(gcf, 'Position', [207 516 1025 362])
 
-[final_feature_output, subdiv_index, merged_sz_duration] = naiv_ep_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,5,200);
+[final_feature_output, subdiv_index, merged_sz_duration] = naiv_ep_plot_func_fig4D(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,5,200);
 set(gcf, 'Position', [207 516 1025 362])

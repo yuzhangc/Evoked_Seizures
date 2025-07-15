@@ -1,4 +1,4 @@
-function [final_feature_output, subdiv_index, merged_sz_duration] = spont_evok_plot_func(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders)
+function [final_feature_output, subdiv_index, merged_sz_duration] = naiv_ep_plot_func_fig4D(merged_output_array,merged_sz_parameters,seizure_duration_list,directory,subFolders,day_st,day_end)
 
 % On-Demand Seizures Facilitate Rapid Screening of Therapeutics for Epilepsy
 % Authors: Yuzhang Chen, Brian Litt, Flavia Vitale, Hajime Takano
@@ -12,6 +12,7 @@ function [final_feature_output, subdiv_index, merged_sz_duration] = spont_evok_p
 % merged_sz_parameters - complete seizure information list
 % seizure_duration_list - list of seizure duration, organized by folder
 % directory - directory to extract feature info from
+% day_st and day_end - start and end dates for early/late
 
 % Output Variables
 % final_feature_output - features segregated by class, channels, then
@@ -35,18 +36,16 @@ feature_names = fieldnames(norm_features);
 % -------------------------------------------------------------------------
 
 % Step 1: Identify Inclusion/Exclusion Criteria
-% Generates 8 variables
+% Generates 7 variables
 % 1) main_division - main plot
 % 2) ind_data - plot individual dots or not
 % 3) naive_ep - splits naive or epileptic
-% 4) min_rac - exclude Racine below 3
-% 5) excl_addl - exclude any with additional stimulation afterwards
-% 6) excl_short - exclude events shorter than short_duration (15 sec)
-% 7) excl_diaz - exclude diazepam trials
-% 8) excl_naiv - exclude naive animals
+% 4) excl_addl - exclude any with additional stimulation afterwards
+% 5) excl_short - exclude events shorter than short_duration (15 sec)
+% 6) excl_diaz - exclude diazepam trials
+% 7) excl_naiv - exclude naive animals
 
-% Spontaneous Vs Evoked Plot
-main_division = 6;
+main_division = 1;
 
 % Plot Individual Data
 ind_data = 1;
@@ -54,10 +53,7 @@ ind_data = 1;
 % Split Naive and Epileptic Data
 naive_ep = 1;
 
-% Minimum Racine
-min_rac = 3;
-
-% Exclude Additional Stim
+% Exclude those W Additional Stim After Evoke
 excl_addl = 1;
 
 % Exclude Shorter Than 15 Sec
@@ -67,8 +63,8 @@ short_duration = 15;
 % Exclude Drug Trials
 excl_diaz = 1;
 
-% Naive Animals Excluded
-excl_naiv = 1;
+% Keep Naive Animals
+excl_naiv = 0;
 
 % -------------------------------------------------------------------------
 
@@ -96,19 +92,46 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 3: Set Up Indices Based on Main Division Groups        
+% Step 3: Set Up Indices Based on Main Division Groups
 
-% Spontaneous
-subdiv_index{1} = find(merged_sz_parameters(:,8) == -1 & merged_sz_parameters(:,5) == 1);
+% Prepare Output Variables
 
-% Evoked
-subdiv_index{2} = find(merged_sz_parameters(:,8) ~= -1);
+ep_trials = [];
+naive_trials = [];
 
-duration_labels = {'Spontaneous', 'Evoked'};
+% Uses Animal Info To Identify ID Of Epileptic and Naive Mice
+ep = animal_info(find(animal_info(:,5) == 1),1);
+naive = animal_info(find(animal_info(:,5) == 0),1);
+
+% Sorts Trials into Naive or Epileptic
+for cnt = 1:length(merged_sz_parameters)
+    if ismember(merged_sz_parameters(cnt,1),ep)
+        ep_trials = [ep_trials;cnt];
+    elseif ismember(merged_sz_parameters(cnt,1),naive)
+        naive_trials = [naive_trials;cnt];
+    end
+end
+
+% Final Output - 1 is Epileptic, 2 is Naive
+subdiv_index{1} = ep_trials;
+subdiv_index{2} = naive_trials;
+anova_col_val(ep_trials) = 1; anova_col_val(naive_trials) = 0;
+
+duration_labels = {'Epileptic', 'Naive'};
 
 % -------------------------------------------------------------------------
 
-% Step 4: Refine Indices Based on Epileptic Or Naive
+% Step 4: Refine Based on Spontaneous or Evoked. Remove if not include
+% spontaneous
+
+excluded_indices = find(merged_sz_parameters(:,8) == -1);
+for cnt = 1:length(subdiv_index)
+    subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
+end
+
+% -------------------------------------------------------------------------
+
+% Step 5: Refine Indices Based on Epileptic Or Naive
 
 if naive_ep
     
@@ -163,7 +186,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 5: Shorten Indices Based on Seizure Duration
+% Step 6: Shorten Indices Based on Seizure Duration
 
 if excl_short 
     
@@ -177,8 +200,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 6: Exclude Trials Where Additional Stim Happened After Induction
-% Stimulus
+% Step 7: Exclude Indices With Additional Stimulation
 
 if excl_addl
     
@@ -192,21 +214,17 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 7: Exclude Racine Scale Trials Below
+% Step 8: Exclude Days Not In Index
 
-if min_rac
-
-    excluded_indices = find(merged_sz_parameters(:,21) < min_rac);
-    for cnt = 1:length(subdiv_index)
-        subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
-    end
-    clear excluded_indices
-
+excluded_indices = find(merged_sz_parameters(:,20) < day_st | merged_sz_parameters(:,20) > day_end);
+for cnt = 1:length(subdiv_index)
+    subdiv_index{cnt} = setdiff(subdiv_index{cnt}, excluded_indices);
 end
+clear excluded_indices
 
 % -------------------------------------------------------------------------
 
-% Step 8: Exclude Diazepam (and Other Drugs)
+% Step 9: Exclude Diazepam (and Other Drugs)
 
 if excl_diaz
     
@@ -220,7 +238,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 9: Uses Seizure Duration to Calculate Thirds of Merged Features
+% Step 10: Uses Seizure Duration to Calculate Thirds of Merged Features
 
 % Loop Through Different Divisions
 for cnt = 1:length(subdiv_index)
@@ -400,7 +418,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 10: Determine Which Features to Plot
+% Step 11: Determine Which Features to Plot
 
 features_to_plot = [];
 
@@ -451,7 +469,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 11: Make Divided Plots
+% Step 12: Make Divided Plots
 
 % Structure of Final Feature Output is divide by 1) class 2) channel 3)
 % feature.
@@ -461,20 +479,18 @@ end
 
 % First Split Plots by Channel
 
-% Sets Up Mean Only
+% Sets Up Standard Deviation Amounts For Errorbar Plot And How Many Rows To
+% Divide Features Into
 
 std_or_sem = 0;
 std_cnt = 0;
 
-% 1 Row Was Used For Paper & Class Was Offset
+% Plot in 1 Row w/ Offset
 rows_subplot = 1;
 offset = 1;
 
-% No Line Connecting Plots
-
 lineornot = "";
 
-% 3rd Channel
 ch = 3;
     
 figure;
@@ -616,7 +632,7 @@ end
 
 % -------------------------------------------------------------------------
 
-% Step 12: Outputs Number of Unique Animals Per Class
+% Step 13: Outputs Number of Unique Animals Per Class
 
 for class_split = 1:length(subdiv_index)
 % Following Line Is Used to Display Animals In Each Class
